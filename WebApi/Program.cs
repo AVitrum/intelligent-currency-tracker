@@ -1,5 +1,6 @@
 using Application;
 using Infrastructure;
+using WebApi.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure(builder.Configuration);
+    .AddInfrastructure(builder.Configuration).AddExceptionHandler<CustomExceptionHandler>();
 
 var app = builder.Build();
 
