@@ -1,4 +1,6 @@
 using Application.Common.Interfaces;
+using Application.Common.Models;
+using AutoMapper;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +10,12 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public class BookController : ControllerBase
 {
+    private readonly IMapper _mapper;
     private readonly IBookRepository _bookRepository;
 
-    public BookController(IBookRepository bookRepository)
+    public BookController(IBookRepository bookRepository, IMapper mapper)
     {
+        _mapper = mapper;
         _bookRepository = bookRepository;
     }
     
@@ -23,9 +27,11 @@ public class BookController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> AddBook(Book book)
+    public async Task<IActionResult> AddBook(CreateBookModel model)
     {
+        var book = _mapper.Map<Book>(model);
+        
         await _bookRepository.AddAsync(book);
-        return Ok();
+        return Ok("Book added successfully");
     }
 }
