@@ -14,16 +14,6 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         _context = context;
         _dbSet = dbSet;
     }
-    
-    public virtual async Task<T> GetByIdAsync(Guid id)
-    {
-        return await _dbSet.FindAsync(id) ?? throw new Exception("Entity not found");
-    }
-
-    public virtual async Task<IEnumerable<T>> GetAllAsync()
-    {
-        return await _dbSet.ToListAsync();
-    }
 
     public virtual async Task AddAsync(T entity)
     {
@@ -41,5 +31,15 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync();
+    }
+    
+    public virtual async Task<T> GetByIdAsync(Guid id)
+    {
+        return await _dbSet.FindAsync(id) ?? throw new Exception("Entity not found");
+    }
+
+    public virtual async Task<IEnumerable<T>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
     }
 }

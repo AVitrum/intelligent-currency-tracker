@@ -23,7 +23,8 @@ public class BookController : ControllerBase
     public async Task<IActionResult> GetBooks()
     {
         var books = await _bookRepository.GetAllAsync();
-        return Ok(books);
+        var booksModel = _mapper.Map<IEnumerable<GetBookModel>>(books);
+        return Ok(booksModel);
     }
     
     [HttpPost]

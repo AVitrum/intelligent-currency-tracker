@@ -1,6 +1,40 @@
-﻿services:
+﻿version: '3.8'
+
+services:
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    
   webapi:
-    image: webapi
+    image: cleanapi
     build:
       context: .
-      dockerfile: WebApi/Dockerfile
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+      - "8001:443"
+    environment:
+      ASPNETCORE_URLS: "https://+;http://+"
+      ASPNETCORE_HTTPS_PORTS: "8001"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_Kestrel__Certificates__Default__Password: ${KESTREL_CERTIFICATES_DEFAULT_PASSWORD}
+      ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/cleantest.pfx"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ${HOME}/.aspnet/https:/https/
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
