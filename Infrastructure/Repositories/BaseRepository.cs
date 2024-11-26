@@ -15,10 +15,10 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         _dbSet = dbSet;
     }
 
-    public virtual async Task AddAsync(T entity)
+    public virtual async Task<bool> AddAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
     public virtual async Task UpdateAsync(T entity)
