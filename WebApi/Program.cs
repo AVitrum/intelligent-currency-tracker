@@ -1,5 +1,6 @@
 using Application;
 using Infrastructure;
+using WebApi;
 using WebApi.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,10 @@ builder.Services.AddSwaggerGen();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure(builder.Configuration).AddExceptionHandler<CustomExceptionHandler>();
+    .AddInfrastructure(builder.Configuration)
+    .AddCustomAuthentication(builder.Configuration);
+
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 var app = builder.Build();
 
@@ -25,7 +29,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

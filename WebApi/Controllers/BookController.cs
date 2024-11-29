@@ -1,7 +1,3 @@
-using Application.Common.Interfaces;
-using Application.Common.Models;
-using Microsoft.AspNetCore.Mvc;
-
 namespace WebApi.Controllers;
 
 [ApiController]

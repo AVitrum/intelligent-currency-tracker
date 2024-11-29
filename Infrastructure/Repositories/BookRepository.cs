@@ -1,7 +1,4 @@
-using Application.Common.Interfaces;
-using Domain.Entities;
-using Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using Domain.Exceptions;
 
 namespace Infrastructure.Repositories;
 
@@ -17,6 +14,6 @@ public class BookRepository : BaseRepository<Book>, IBookRepository
     public override async Task<Book> GetByIdAsync(Guid id)
     {
         return await _context.Books.Include(b => b.Author).FirstOrDefaultAsync(b => b.Id == id) ??
-               throw new Exception("Book not found");
+               throw new EntityNotFoundException<Book>();
     }
 }

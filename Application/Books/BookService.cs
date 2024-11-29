@@ -22,14 +22,14 @@ public class BookService : IBookService
         var book = _mapper.Map<Book>(model);
         var result = await _bookRepository.AddAsync(book);
         
-        return result ? AddBookResult.SuccessResult() : AddBookResult.FailureResult("Failed to add book");
+        return result ? AddBookResult.SuccessResult() : AddBookResult.FailureResult(["Failed to add book"]);
     }
 
     public async Task<GetBookResult> GetBooksAsync()
     {
         var books = await _bookRepository.GetAllAsync();
         
-        if (!books.Any()) return GetBookResult.FailureResult("Failed to get books");
+        if (!books.Any()) return GetBookResult.FailureResult(["Failed to get books"]);
         
         var booksModel = _mapper.Map<IEnumerable<GetBookModel>>(books);
         return GetBookResult.SuccessResult(booksModel);

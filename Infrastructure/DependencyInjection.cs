@@ -1,7 +1,6 @@
-using Application.Common.Interfaces;
-using Infrastructure.Data;
+using Infrastructure.Identity;
 using Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,18 +11,23 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-        
-        var connectionString = isDocker ? 
-            $"Host={configuration["DB_HOST"]};Port={configuration["DB_PORT"]};Database={configuration["DB_NAME"]};Username={configuration["DB_USER"]};Password={configuration["DB_PASSWORD"]}" 
+
+        var connectionString = isDocker
+            ? $"Host={configuration["DB_HOST"]};Port={configuration["DB_PORT"]};Database={configuration["DB_NAME"]};Username={configuration["DB_USER"]};Password={configuration["DB_PASSWORD"]}"
             : configuration.GetConnectionString("DefaultConnection");
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        services.AddIdentityCore<ApplicationUser>()
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+        
+        services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IBookRepository, BookRepository>();
 
-        EnsureDatabaseCreated(services);
-
+        if (isDocker) EnsureDatabaseCreated(services);
+        
         return services;
     }
 

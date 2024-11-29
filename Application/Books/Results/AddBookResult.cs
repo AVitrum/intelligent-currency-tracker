@@ -1,16 +1,16 @@
+using Domain.Common;
+
 namespace Application.Books.Results;
 
-public class AddBookResult
+public class AddBookResult : BaseResult
 {
-    public bool Success { get; }
     public string Message { get; }
     
-    private AddBookResult(bool success, string message)
+    private AddBookResult(bool success, IEnumerable<string> errors, string message) : base(success, errors)
     {
-        Success = success;
         Message = message;
     }
-    
-    public static AddBookResult SuccessResult() => new(true, "Book added successfully");
-    public static AddBookResult FailureResult(string message) => new(false, message);
+
+    public static AddBookResult SuccessResult() => new(true, [], "Book added successfully");
+    public static AddBookResult FailureResult(IEnumerable<string> errors) => new(false, errors, string.Empty);
 }

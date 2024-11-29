@@ -1,7 +1,3 @@
-using Application.Common.Interfaces;
-using Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-
 namespace Infrastructure.Repositories;
 
 public abstract class BaseRepository<T> : IBaseRepository<T> where T : class

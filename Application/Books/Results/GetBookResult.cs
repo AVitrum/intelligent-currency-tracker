@@ -1,20 +1,17 @@
 using Application.Common.Models;
+using Domain.Common;
 
 namespace Application.Books.Results;
 
-public class GetBookResult
+public class GetBookResult : BaseResult
 {
-    public bool Success { get; }
-    public string? Message { get; }
     public IEnumerable<GetBookModel>? Books { get; }
     
-    private GetBookResult(bool success, string? message, IEnumerable<GetBookModel>? books)
+    private GetBookResult(bool success, IEnumerable<string> errors, IEnumerable<GetBookModel>? books) : base(success, errors)
     {
-        Success = success;
-        Message = message;
         Books = books;
     }
     
-    public static GetBookResult SuccessResult(IEnumerable<GetBookModel> books) => new(true, null, books);
-    public static GetBookResult FailureResult(string message) => new(false, message, null);
+    public static GetBookResult SuccessResult(IEnumerable<GetBookModel> books) => new(true, [], books);
+    public static GetBookResult FailureResult(IEnumerable<string> errors) => new(false, errors, null);
 }

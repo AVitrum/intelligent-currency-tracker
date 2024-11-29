@@ -14,7 +14,7 @@
     image: cleanapi
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: WebApi/Dockerfile
     ports:
       - "8000:80"
       - "8001:443"
