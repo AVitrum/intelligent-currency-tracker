@@ -1,10 +1,10 @@
-using Application.Books.Results;
 using Application.Common.Models;
+using Domain.Common;
 
 namespace Application.Common.Interfaces;
 
 public interface IBookService
 {
-    Task<AddBookResult> AddBookAsync(CreateBookModel model);
-    Task<GetBookResult> GetBooksAsync();
+    Task<BaseResult> AddBookAsync(CreateBookModel model);
+    Task<BaseResult> GetBooksAsync();
 }

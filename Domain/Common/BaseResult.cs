@@ -1,6 +1,6 @@
 namespace Domain.Common;
 
-public abstract class BaseResult
+public class BaseResult
 {
     public bool Success { get; init; }
     public string[] Errors { get; set; }
@@ -10,4 +10,7 @@ public abstract class BaseResult
         Success = success;
         Errors = errors.ToArray();
     }
+    
+    public static BaseResult SuccessResult() => new(true, Array.Empty<string>());
+    public static BaseResult FailureResult(IEnumerable<string> errors) => new(false, errors);
 }

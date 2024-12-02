@@ -2,6 +2,7 @@ using Application.Books.Results;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using AutoMapper;
+using Domain.Common;
 using Domain.Entities;
 
 namespace Application.Books;
@@ -17,19 +18,19 @@ public class BookService : IBookService
         _mapper = mapper;
     }
     
-    public async Task<AddBookResult> AddBookAsync(CreateBookModel model)
+    public async Task<BaseResult> AddBookAsync(CreateBookModel model)
     {
         var book = _mapper.Map<Book>(model);
         var result = await _bookRepository.AddAsync(book);
         
-        return result ? AddBookResult.SuccessResult() : AddBookResult.FailureResult(["Failed to add book"]);
+        return result ? BaseResult.SuccessResult() : BaseResult.FailureResult(["Failed to add book"]);
     }
 
-    public async Task<GetBookResult> GetBooksAsync()
+    public async Task<BaseResult> GetBooksAsync()
     {
         var books = await _bookRepository.GetAllAsync();
         
-        if (!books.Any()) return GetBookResult.FailureResult(["Failed to get books"]);
+        if (!books.Any()) return BaseResult.FailureResult(["Failed to get books"]);
         
         var booksModel = _mapper.Map<IEnumerable<GetBookModel>>(books);
         return GetBookResult.SuccessResult(booksModel);

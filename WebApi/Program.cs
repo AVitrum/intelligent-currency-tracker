@@ -10,11 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSession();
+builder.Services.AddMemoryCache();
+builder.Services.AddDistributedMemoryCache();
 
 builder.Services
+    .AddCustomAuthentication(builder.Configuration)
     .AddApplication()
-    .AddInfrastructure(builder.Configuration)
-    .AddCustomAuthentication(builder.Configuration);
+    .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
@@ -29,6 +32,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCookiePolicy();
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

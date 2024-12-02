@@ -1,4 +1,5 @@
 using Infrastructure.Identity;
+using Infrastructure.Identity.Results;
 
 namespace WebApi.Controllers;
 
@@ -19,6 +20,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register(CreateUserModel model)
     {
         var result = await _identityService.CreateUserAsync(model.UserName, model.Password);
+        
         if (result.Success) return CreatedAtAction(nameof(Register), new { model.UserName }, null);
 
         return BadRequest(result.Errors);
@@ -30,6 +32,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(CreateUserModel model)
     {
         var result = await _identityService.LoginAsync(model.UserName, model.Password);
+        
         if (result is not IdentityServiceResult identityServiceResult) return Unauthorized("Invalid login attempt");
 
         var token = identityServiceResult.Token;

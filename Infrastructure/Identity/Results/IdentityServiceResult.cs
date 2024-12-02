@@ -1,6 +1,6 @@
 using Domain.Common;
 
-namespace Infrastructure.Identity;
+namespace Infrastructure.Identity.Results;
 
 public class IdentityServiceResult : BaseResult
 {
@@ -11,7 +11,5 @@ public class IdentityServiceResult : BaseResult
         Token = token;
     }
     
-    public static IdentityServiceResult SuccessResult() => new(true, [], string.Empty);
-    public static IdentityServiceResult FailureResult(IEnumerable<string> errors) => new(false, errors, string.Empty);
     public static IdentityServiceResult ReturnTokenResult(string token) => new(true, [], token);
 }

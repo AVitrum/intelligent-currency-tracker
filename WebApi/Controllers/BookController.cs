@@ -1,9 +1,12 @@
+using Application.Books.Results;
+using Microsoft.AspNetCore.Authorization;
+
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class BookController : ControllerBase
-{   
+{
     private readonly IBookService _bookService;
     public BookController(IBookService bookService)
     {
@@ -11,16 +14,27 @@ public class BookController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddBook(CreateBookModel model)
     {
         var result = await _bookService.AddBookAsync(model);
-        return result.Success ? Ok(result) : BadRequest(result);
+        
+        if (result.Success) return Ok("Book added successfully");
+        
+        return BadRequest(result.Errors);
     }
 
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetBooks()
     {
         var result = await _bookService.GetBooksAsync();
-        return result.Success ? Ok(result) : BadRequest(result);
+        
+        if (result is not GetBookResult getBooksResult) return BadRequest("Failed to get books");
+        
+        return Ok(getBooksResult.Books);
     }
 }

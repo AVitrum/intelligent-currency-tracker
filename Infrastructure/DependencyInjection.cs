@@ -1,4 +1,5 @@
 using Infrastructure.Identity;
+using Infrastructure.Jwt;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -22,8 +23,10 @@ public static class DependencyInjection
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
-        
+
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+        services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IBookRepository, BookRepository>();
 
         if (isDocker) EnsureDatabaseCreated(services);
