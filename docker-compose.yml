@@ -11,7 +11,7 @@
       - pgdata:/var/lib/postgresql/data
     
   webapi:
-    image: cleanapi
+    image: webapi
     build:
       context: .
       dockerfile: WebApi/Dockerfile
@@ -29,6 +29,12 @@
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      JWT_KEY: ${JWT_KEY}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      
     volumes:
       - ${HOME}/.aspnet/https:/https/
     depends_on:

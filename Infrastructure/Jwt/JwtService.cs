@@ -2,25 +2,24 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Application.Common.Exceptions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Jwt;
 
 public class JwtService : IJwtService
 {
-    private readonly IConfiguration _configuration;
+    private readonly IAppSettings _appSettings;
 
-    public JwtService(IConfiguration configuration)
+    public JwtService(IAppSettings appSettings)
     {
-        _configuration = configuration;
+        _appSettings = appSettings;
     }
 
     public void GetJwtConfiguration(out string issuer, out string audience, out string key)
     {
-        issuer = GetConfigurationValue("JWT_ISSUER", "Jwt:Issuer");
-        audience = GetConfigurationValue("JWT_AUDIENCE", "Jwt:Audience");
-        key = GetConfigurationValue("JWT_KEY", "Jwt:Key");
+        issuer = _appSettings.JwtIssuer; 
+        audience = _appSettings.JwtAudience;
+        key = _appSettings.JwtKey;
     }
 
     public JwtSecurityToken GenerateToken(string issuer, string audience, string key, Claim[] claims)
@@ -33,15 +32,8 @@ public class JwtService : IJwtService
             audience: audience,
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: credentials);
+            signingCredentials: credentials) ?? throw new JwtException("Token generation failed");
         
         return token;
-    }
-
-    private string GetConfigurationValue(string dockerKey, string defaultKey)
-    {
-        return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
-            ? _configuration[dockerKey] ?? throw new JwtException($"{dockerKey} cannot be null")
-            : _configuration[defaultKey] ?? throw new JwtException($"{defaultKey} cannot be null");
     }
 }

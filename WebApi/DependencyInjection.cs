@@ -4,15 +4,10 @@ namespace WebApi;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddCustomAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)
     {
-        var isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-        var issuer = isDocker ? configuration["JWT_ISSUER"] : configuration["Jwt:Issuer"];
-        var audience = isDocker ? configuration["JWT_AUDIENCE"] : configuration["Jwt:Audience"];
-        var key = isDocker ? configuration["JWT_KEY"] : configuration["Jwt:Key"];
-        var googleClientId = isDocker ? configuration["GOOGLE_CLIENT_ID"] : configuration["Authentication:Google:ClientId"];
-        var googleClientSecret = isDocker ? configuration["GOOGLE_CLIENT_SECRET"] : configuration["Authentication:Google:ClientSecret"];
-
+        var appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
+        
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -28,20 +23,18 @@ public static class DependencyInjection
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!))
+                    ValidIssuer = appSettings.JwtIssuer,
+                    ValidAudience = appSettings.JwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.JwtKey))
                 };
             })
-            //TODO: Add custom exceptions
             .AddGoogle(options =>
             {
-                options.ClientId = googleClientId ?? throw new Exception();
-                options.ClientSecret = googleClientSecret ?? throw new Exception();
+                options.ClientId = appSettings.GoogleClientId ?? throw new Exception("Google Client ID is missing.");
+                options.ClientSecret = appSettings.GoogleClientSecret ?? throw new Exception("Google Client Secret is missing.");
                 options.SaveTokens = true;
-            });;
+            });
 
         return services;
     }
-    
 }

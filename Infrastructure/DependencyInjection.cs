@@ -2,23 +2,20 @@ using Infrastructure.Identity;
 using Infrastructure.Jwt;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-    {
-        var isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-
-        var connectionString = isDocker
-            ? $"Host={configuration["DB_HOST"]};Port={configuration["DB_PORT"]};Database={configuration["DB_NAME"]};Username={configuration["DB_USER"]};Password={configuration["DB_PASSWORD"]}"
-            : configuration.GetConnectionString("DefaultConnection");
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    { 
+        services.AddSingleton<IAppSettings, AppSettings>();
+        
+        var appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(connectionString));
+            options.UseNpgsql(appSettings.DbConnectionString));
 
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole>()
@@ -29,7 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IBookRepository, BookRepository>();
 
-        if (isDocker) EnsureDatabaseCreated(services);
+        if (appSettings.IsDocker()) EnsureDatabaseCreated(services);
         
         return services;
     }

@@ -15,9 +15,9 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services
-    .AddCustomAuthentication(builder.Configuration)
-    .AddApplication()
-    .AddInfrastructure(builder.Configuration);
+    .AddInfrastructure()
+    .AddCustomAuthentication()
+    .AddApplication();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
