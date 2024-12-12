@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IBookRepository, BookRepository>();
+        services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
 
         if (appSettings.IsDocker()) EnsureDatabaseCreated(services);
         

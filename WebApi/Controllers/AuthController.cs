@@ -1,4 +1,3 @@
-using Infrastructure.Identity;
 using Infrastructure.Identity.Results;
 
 namespace WebApi.Controllers;
