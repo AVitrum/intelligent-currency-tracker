@@ -8,6 +8,7 @@ public interface IAppSettings
     string JwtAudience { get; }
     string GoogleClientId { get; }
     string GoogleClientSecret { get; }
-    
+    string ModelUrl { get; }
+    string PrivateBankUrl { get; }
     bool IsDocker();
 }

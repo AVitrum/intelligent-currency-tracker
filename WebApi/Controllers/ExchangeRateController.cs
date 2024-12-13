@@ -14,16 +14,17 @@ public class ExchangeRateController : ControllerBase
     }
     
     [HttpGet("fetch")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> FetchExchangeRatesAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
-        if (!dto.TryGetDateRange(out var start, out var end))
-            return BadRequest("Invalid date format. Please use dd.MM.yyyy");
-        
-        var result = await _exchangeRateService.FetchExchangeRatesAsync(start, end);
+        var result = await _exchangeRateService.FetchExchangeRatesAsync(dto);
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
     [HttpPost("uploadCsv")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadCsvAsync([FromForm] CsvFileUploadDto dto)
     {
         var result = await _exchangeRateService.GetExchangeRatesFromCsvAsync(dto.File);
@@ -31,12 +32,11 @@ public class ExchangeRateController : ControllerBase
     }
     
     [HttpGet("exportCsv")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ExportCsvAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
-        if (!dto.TryGetDateRange(out var start, out var end) || dto.Currency is null)
-            return BadRequest("Invalid date format. Please use dd.MM.yyyy");
-        
-        var result = await _exchangeRateService.ExportExchangeRatesToCsvAsync(start, end, dto.Currency.Value);
+        var result = await _exchangeRateService.ExportExchangeRatesToCsvAsync(dto);
         
         if (result is ExportExchangeRatesToCsvResult exportResult)
             return File(exportResult.FileContent, "text/csv", exportResult.FileName);
@@ -44,4 +44,24 @@ public class ExchangeRateController : ControllerBase
         return BadRequest(result.Errors);
     }
     
+    [HttpPost("trainModel")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> TrainModelAsync(ExchangeRatesRangeDto dto)
+    {
+        var result = await _exchangeRateService.TrainModelAsync(dto);
+        return result.Success ? Ok() : BadRequest(result.Errors);
+    }
+    
+    [HttpGet("getRange")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetRangeAsync([FromQuery] ExchangeRatesRangeDto dto)
+    {
+        var result = await _exchangeRateService.GetRangeAsync(dto);
+
+        if (result is not GetExchangeRateRangeResult rangeResult) return BadRequest(result.Errors);
+        
+        return Ok(rangeResult.Data);
+    }
 }

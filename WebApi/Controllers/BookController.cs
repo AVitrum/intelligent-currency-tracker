@@ -1,5 +1,4 @@
 using Application.Books.Results;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers;
 
@@ -14,7 +13,6 @@ public class BookController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddBook(CreateBookModel model)

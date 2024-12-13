@@ -9,7 +9,26 @@
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    
+
+  backup:
+    image: postgres:alpine
+    environment:
+      POSTGRES_HOST: ${DB_HOST}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      - db
+    entrypoint: >
+      /bin/sh -c "
+      while true; do
+        pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER $DB_NAME > /backups/backup_$(date +%Y%m%d%H%M%S).sql;
+        sleep 3600;
+      done"
+
   webapi:
     image: webapi
     build:
@@ -34,11 +53,19 @@
       JWT_AUDIENCE: ${JWT_AUDIENCE}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      
+      MODEL_URL: ${MODEL_URL}
+      PRIVATE_BANK_URL: ${PRIVATE_BANK_URL}
     volumes:
       - ${HOME}/.aspnet/https:/https/
     depends_on:
       - db
+        
+  model:
+    build:
+      context: .
+      dockerfile: CurrencyRatePredictionModel/Dockerfile
+    ports:
+      - "8050:8050"
 
 volumes:
   pgdata:

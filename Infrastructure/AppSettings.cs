@@ -10,6 +10,8 @@ public class AppSettings : IAppSettings
     public string JwtAudience { get; private set; } = null!;
     public string GoogleClientId { get; private set; } = null!;
     public string GoogleClientSecret { get; private set; } = null!;
+    public string ModelUrl { get; private set; } = null!;
+    public string PrivateBankUrl { get; private set; } = null!;
 
     private readonly IConfiguration _configuration;
     private readonly bool _isDocker;
@@ -35,6 +37,8 @@ public class AppSettings : IAppSettings
         JwtAudience = GetConfigurationValue("JWT_AUDIENCE", "Jwt:Audience");
         GoogleClientId = GetConfigurationValue("GOOGLE_CLIENT_ID", "Authentication:Google:ClientId");
         GoogleClientSecret = GetConfigurationValue("GOOGLE_CLIENT_SECRET", "Authentication:Google:ClientSecret");
+        ModelUrl = GetConfigurationValue("MODEL_URL", "Model:URL");
+        PrivateBankUrl = GetConfigurationValue("PRIVATE_BANK_URL", "PrivateBank:URL");
     }
 
     private string GetConnectionString()
