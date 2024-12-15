@@ -53,6 +53,18 @@ public class ExchangeRateController : ControllerBase
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
+    [HttpGet("predict")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> PredictAsync([FromQuery] ExchangeRatePredictionDto dto)
+    {
+        var result = await _exchangeRateService.PredictAsync(dto);
+
+        if (result is ExchangeRatePredictionResult predictionResult) return Ok(predictionResult.Prediction);
+
+        return BadRequest(result.Errors);
+    }
+    
     [HttpGet("getRange")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -61,7 +73,7 @@ public class ExchangeRateController : ControllerBase
         var result = await _exchangeRateService.GetRangeAsync(dto);
 
         if (result is not GetExchangeRateRangeResult rangeResult) return BadRequest(result.Errors);
-        
+
         return Ok(rangeResult.Data);
     }
 }

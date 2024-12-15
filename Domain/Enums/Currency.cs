@@ -2,6 +2,7 @@ namespace Domain.Enums;
 
 public enum Currency
 {
+    ALL,
     CHF,
     DKK,
     CZK,
@@ -26,5 +27,10 @@ public enum Currency
     AZN,
     EUR,
     HUF,
-    PLN
+    PLN,
+    BYR,
+    LVL,
+    LTL,
+    SKK,
+    PLZ
 }

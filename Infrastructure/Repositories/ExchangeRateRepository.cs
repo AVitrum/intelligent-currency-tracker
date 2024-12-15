@@ -19,6 +19,12 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
 
     public async Task<IEnumerable<ExchangeRate>> GetExchangeRatesAsync(DateTime start, DateTime end, Currency currency)
     {
+        if (currency.Equals(Currency.ALL))
+            return await _context.ExchangeRates
+                .Where(rate => rate.Date >= start && rate.Date <= end)
+                .OrderBy(rate => rate.Date)
+                .ToListAsync();
+        
         return await _context.ExchangeRates
             .Where(rate => rate.Date >= start && rate.Date <= end && rate.Currency == currency)
             .OrderBy(rate => rate.Date)

@@ -1,7 +1,10 @@
-FROM python:3.12-slim
+ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION}-slim as base
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 WORKDIR /app
-COPY CurrencyRatePredictionModel/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
-COPY . .
+COPY CurrencyRatePredictionModel/requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+COPY CurrencyRatePredictionModel .
 EXPOSE 8050
-CMD ["gunicorn", "-b", "0.0.0.0:8050", "CurrencyRatePredictionModel.app:app"]
+CMD [ "python3", "app.py" ]

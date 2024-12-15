@@ -12,7 +12,7 @@ public class ExchangeRateDto
     public required decimal PurchaseRateNb { get; init; }
     public required decimal SaleRate { get; init; }
     public required decimal PurchaseRate { get; init; }
-
+    
     private class Mapping : Profile
     {
         public Mapping()

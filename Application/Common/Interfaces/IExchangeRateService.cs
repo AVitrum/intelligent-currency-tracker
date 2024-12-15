@@ -10,5 +10,6 @@ public interface IExchangeRateService
     Task<BaseResult> GetExchangeRatesFromCsvAsync(IFormFile? file);
     Task<BaseResult> ExportExchangeRatesToCsvAsync(ExchangeRatesRangeDto dto);
     Task<BaseResult> TrainModelAsync(ExchangeRatesRangeDto dto);
+    Task<BaseResult> PredictAsync(ExchangeRatePredictionDto dto);
     Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto dto);
 }

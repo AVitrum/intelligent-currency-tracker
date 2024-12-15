@@ -5,13 +5,13 @@ namespace Application.ExchangeRates.Results;
 
 public class GetExchangeRateRangeResult : BaseResult
 {
-    public IEnumerable<ExchangeRateDto> Data { get; }
+    public GetExchangeRateListDto Data { get; }
     
-    private GetExchangeRateRangeResult(bool success, IEnumerable<string> errors, IEnumerable<ExchangeRateDto> data) : base(success, errors)
+    private GetExchangeRateRangeResult(bool success, IEnumerable<string> errors, GetExchangeRateListDto data) : base(success, errors)
     {
         Data = data;
     }
 
-    public static GetExchangeRateRangeResult SuccessResult(IEnumerable<ExchangeRateDto> exchangeRates) =>
-        new(true, [], exchangeRates);
+    public static GetExchangeRateRangeResult SuccessResult(GetExchangeRateListDto data) =>
+        new(true, [], data);
 }

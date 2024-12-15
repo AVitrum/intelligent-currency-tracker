@@ -32,6 +32,7 @@ public class ExchangeRateService : IExchangeRateService
         IAppSettings appSettings)
     {
         _httpClient = httpClient;
+        _httpClient.Timeout = TimeSpan.FromMinutes(5);
         _exchangeRateRepository = exchangeRateRepository;
         _logger = logger;
         _mapper = mapper;
@@ -150,7 +151,7 @@ public class ExchangeRateService : IExchangeRateService
         if (!dto.TryGetDateRange(out var start, out var end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
 
-        var currency = dto.Currency ?? Currency.USD;
+        var currency = dto.Currency ?? Currency.ALL;
         
         try
         {
@@ -200,9 +201,9 @@ public class ExchangeRateService : IExchangeRateService
         fileContentStream.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
         content.Add(fileContentStream, "file", exportResult.FileName);
 
-        _logger.LogInformation("Sending POST request to {Url}", $"{_appSettings.ModelUrl}/train");
+        _logger.LogInformation("Sending POST request to {Url}", $"{_appSettings.ModelUrl}/train-model");
 
-        var response = await _httpClient.PostAsync($"{_appSettings.ModelUrl}/train", content);
+        var response = await _httpClient.PostAsync($"{_appSettings.ModelUrl}/train-model", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -215,18 +216,37 @@ public class ExchangeRateService : IExchangeRateService
         return BaseResult.FailureResult([errorMessage]);
     }
 
+    public async Task<BaseResult> PredictAsync(ExchangeRatePredictionDto dto)
+    {
+        var url = $"{_appSettings.ModelUrl}/predict/?pre_date={dto.PreDate}&currency_code={dto.CurrencyCode}";
+        _logger.LogInformation("Sending GET request to {Url}", url);
+        
+        var response = await _httpClient.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            _logger.LogInformation("Successfully received prediction");
+            var prediction = await response.Content.ReadAsStringAsync();
+            return ExchangeRatePredictionResult.SuccessResult(prediction);
+        }
+        
+        var errorMessage = await response.Content.ReadAsStringAsync();
+        _logger.LogError("Failed to get prediction: {ErrorMessage}", errorMessage);
+        return BaseResult.FailureResult([errorMessage]);
+    }
+
     public async Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto dto)
     {
         if (!dto.TryGetDateRange(out var start, out var end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
 
-        var currency = dto.Currency ?? Currency.USD;
+        var currency = dto.Currency ?? Currency.ALL;
         
         var exchangeRates = await _exchangeRateRepository.GetExchangeRatesAsync(
             start.ToUniversalTime(), end.ToUniversalTime(), currency);
         var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
             _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
-        
-        return GetExchangeRateRangeResult.SuccessResult(exchangeRatesDto);
+
+        return GetExchangeRateRangeResult.SuccessResult(new GetExchangeRateListDto(exchangeRatesDto));
     }
 }
