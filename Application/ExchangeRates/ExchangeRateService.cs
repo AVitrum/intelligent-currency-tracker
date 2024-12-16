@@ -4,6 +4,7 @@ using System.Text;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.ExchangeRates.Results;
+using AutoMapper;
 using Domain.Common;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +13,6 @@ using Newtonsoft.Json.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Domain.Enums;
-using IMapper = AutoMapper.IMapper;
 
 namespace Application.ExchangeRates;
 
@@ -23,6 +23,8 @@ public class ExchangeRateService : IExchangeRateService
     private readonly ILogger<ExchangeRateService> _logger;
     private readonly IMapper _mapper;
     private readonly IAppSettings _appSettings;
+    private const int MaxRetries = 3;
+    private const string DateFormat = "dd.MM.yyyy";
 
     public ExchangeRateService(
         HttpClient httpClient,
@@ -43,22 +45,21 @@ public class ExchangeRateService : IExchangeRateService
     {
         if (!dto.TryGetDateRange(out var start, out var end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
-        
+
         _logger.LogInformation("Starting FetchExchangeRatesAsync from {StartDate} to {EndDate}", start, end);
         var collectedData = new List<ExchangeRate>();
         var currentDate = start;
-        const int maxRetries = 3;
 
         while (currentDate <= end)
         {
-            var formattedDate = currentDate.ToString("dd.MM.yyyy");
+            var formattedDate = currentDate.ToString(DateFormat);
             var url = $"{_appSettings.PrivateBankUrl}/exchange_rates?json&date={formattedDate}";
 
-            for (var attempt = 0; attempt < maxRetries; attempt++)
+            for (var attempt = 0; attempt < MaxRetries; attempt++)
             {
                 try
                 {
-                    _logger.LogDebug("Fetching data for {Date}, attempt {Attempt}", formattedDate, attempt + 1);
+                    _logger.LogInformation("Fetching data for {Date}, attempt {Attempt}", formattedDate, attempt + 1);
                     var response = await _httpClient.GetAsync(url);
                     response.EnsureSuccessStatusCode();
 
@@ -67,8 +68,8 @@ public class ExchangeRateService : IExchangeRateService
 
                     collectedData.AddRange(exchangeRates.Select(rate => new ExchangeRate
                     {
-                        Date = DateTime.Parse(((string)JObject.Parse(jsonData)["date"])!),
-                        Currency = Enum.Parse<Currency>(((string)rate["currency"])!),
+                        Date = DateTime.ParseExact((string)JObject.Parse(jsonData)["date"]!, DateFormat, CultureInfo.InvariantCulture),
+                        Currency = Enum.Parse<Currency>((string)rate["currency"]!),
                         SaleRateNb = (decimal?)rate["saleRateNB"] ?? 0,
                         PurchaseRateNb = (decimal?)rate["purchaseRateNB"] ?? 0,
                         SaleRate = (decimal?)rate["saleRate"] ?? 0,
@@ -80,7 +81,7 @@ public class ExchangeRateService : IExchangeRateService
                 catch (HttpRequestException ex)
                 {
                     _logger.LogError(ex, "Error fetching data for {Date}, attempt {Attempt}", formattedDate, attempt + 1);
-                    if (attempt == maxRetries - 1)
+                    if (attempt == MaxRetries - 1)
                     {
                         _logger.LogError("Max retries reached for {Date}", formattedDate);
                     }
@@ -88,6 +89,11 @@ public class ExchangeRateService : IExchangeRateService
                     {
                         await Task.Delay(1000);
                     }
+                }
+                catch (FormatException ex)
+                {
+                    _logger.LogError(ex, "Invalid date format in response for {Date}", formattedDate);
+                    return BaseResult.FailureResult(["Invalid date format in response"]);
                 }
             }
 
@@ -120,12 +126,12 @@ public class ExchangeRateService : IExchangeRateService
 
             if (values.Length != 6) continue;
 
-            if (!DateTime.TryParseExact(values[0], "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+            if (!DateTime.TryParseExact(values[0], DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
             {
                 _logger.LogWarning("Invalid date format in CSV: {Line}", line);
                 return BaseResult.FailureResult(["Invalid date format in CSV"]);
             }
-            
+
             _logger.LogInformation($"Processing {date} exchange rates");
 
             var exchangeRate = new ExchangeRate
@@ -150,13 +156,24 @@ public class ExchangeRateService : IExchangeRateService
     {
         if (!dto.TryGetDateRange(out var start, out var end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
-
-        var currency = dto.Currency ?? Currency.ALL;
         
         try
         {
-            var exchangeRates = await _exchangeRateRepository.GetExchangeRatesAsync(
-                start.ToUniversalTime(), end.ToUniversalTime(), currency);
+            IEnumerable<ExchangeRate> exchangeRates;
+
+            if (dto.Currency is null)
+            {
+                exchangeRates = await _exchangeRateRepository.GetExchangeRatesAsync(
+                    start.ToUniversalTime(), end.ToUniversalTime());
+
+                dto.Currency = Currency.ALL;
+            }
+            else
+            {
+                exchangeRates = await _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(start.ToUniversalTime(),
+                    end.ToUniversalTime(), dto.Currency.Value);
+            }
+
             var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
                 _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
 
@@ -171,7 +188,7 @@ public class ExchangeRateService : IExchangeRateService
             await streamWriter.FlushAsync();
             var fileContent = memoryStream.ToArray();
 
-            var fileName = $"ExchangeRates_{currency.ToString()}_{start:yyyyMMdd}_{end:yyyyMMdd}.csv";
+            var fileName = $"ExchangeRates_{dto.Currency.ToString()}_{start:yyyyMMdd}_{end:yyyyMMdd}.csv";
             _logger.LogInformation("Successfully exported exchange rates to CSV file");
             return ExportExchangeRatesToCsvResult.SuccessResult(fileContent, fileName);
         }
@@ -220,30 +237,32 @@ public class ExchangeRateService : IExchangeRateService
     {
         var url = $"{_appSettings.ModelUrl}/predict/?pre_date={dto.PreDate}&currency_code={dto.CurrencyCode}";
         _logger.LogInformation("Sending GET request to {Url}", url);
-        
-        var response = await _httpClient.GetAsync(url);
 
-        if (response.IsSuccessStatusCode)
+        try
         {
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
             _logger.LogInformation("Successfully received prediction");
             var prediction = await response.Content.ReadAsStringAsync();
             return ExchangeRatePredictionResult.SuccessResult(prediction);
         }
-        
-        var errorMessage = await response.Content.ReadAsStringAsync();
-        _logger.LogError("Failed to get prediction: {ErrorMessage}", errorMessage);
-        return BaseResult.FailureResult([errorMessage]);
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Failed to get prediction: {Message}", ex.Message);
+            return BaseResult.FailureResult(["Failed to get prediction. Please try again later."]);
+        }
     }
 
     public async Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto dto)
     {
         if (!dto.TryGetDateRange(out var start, out var end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
-
-        var currency = dto.Currency ?? Currency.ALL;
         
-        var exchangeRates = await _exchangeRateRepository.GetExchangeRatesAsync(
-            start.ToUniversalTime(), end.ToUniversalTime(), currency);
+        if (dto.Currency is null) return BaseResult.FailureResult(["Currency type is required"]);
+
+        var exchangeRates = await _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(
+            start.ToUniversalTime(), end.ToUniversalTime(), dto.Currency.Value);
         var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
             _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
 

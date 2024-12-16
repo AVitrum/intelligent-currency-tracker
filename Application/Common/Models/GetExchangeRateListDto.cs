@@ -22,7 +22,8 @@ public class GetExchangeRateListDto
     public GetExchangeRateListDto(IEnumerable<ExchangeRateDto> exchangeRates)
     {
         ExchangeRates = exchangeRates;
-        CalculateData();
+        
+        if (ExchangeRates.Any()) CalculateData();
     }
     
     private void CalculateData()

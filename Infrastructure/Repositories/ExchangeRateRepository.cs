@@ -17,14 +17,16 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<ExchangeRate>> GetExchangeRatesAsync(DateTime start, DateTime end, Currency currency)
+    public async Task<IEnumerable<ExchangeRate>> GetExchangeRatesAsync(DateTime start, DateTime end)
     {
-        if (currency.Equals(Currency.ALL))
-            return await _context.ExchangeRates
-                .Where(rate => rate.Date >= start && rate.Date <= end)
-                .OrderBy(rate => rate.Date)
-                .ToListAsync();
-        
+        return await _context.ExchangeRates
+            .Where(rate => rate.Date >= start && rate.Date <= end)
+            .OrderBy(rate => rate.Date)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<ExchangeRate>> GetExchangeRatesByCurrencyAsync(DateTime start, DateTime end, Currency currency)
+    {
         return await _context.ExchangeRates
             .Where(rate => rate.Date >= start && rate.Date <= end && rate.Currency == currency)
             .OrderBy(rate => rate.Date)

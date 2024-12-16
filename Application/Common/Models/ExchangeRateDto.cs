@@ -1,13 +1,12 @@
 using AutoMapper;
 using Domain.Entities;
-using Domain.Enums;
 
 namespace Application.Common.Models;
 
 public class ExchangeRateDto
 {
     public required string Date { get; init; }
-    public required Currency Currency { get; init; }
+    public required string Currency { get; init; }
     public required decimal SaleRateNb { get; init; }
     public required decimal PurchaseRateNb { get; init; }
     public required decimal SaleRate { get; init; }

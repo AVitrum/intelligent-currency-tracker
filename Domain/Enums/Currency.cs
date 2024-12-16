@@ -32,5 +32,6 @@ public enum Currency
     LVL,
     LTL,
     SKK,
-    PLZ
+    PLZ,
+    XAU
 }

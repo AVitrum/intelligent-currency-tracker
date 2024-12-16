@@ -12,6 +12,7 @@ public class ExchangeRatesRangeDto
     {
         start = default;
         end = default;
+        
         return DateTime.TryParseExact(StartDate, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out start) &&
                DateTime.TryParseExact(EndDate, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out end);
     }
