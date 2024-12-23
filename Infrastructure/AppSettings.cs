@@ -12,6 +12,7 @@ public class AppSettings : IAppSettings
     public string GoogleClientSecret { get; private set; } = null!;
     public string ModelUrl { get; private set; } = null!;
     public string PrivateBankUrl { get; private set; } = null!;
+    public string KafkaHost { get; private set; } = null!;
 
     private readonly IConfiguration _configuration;
     private readonly bool _isDocker;
@@ -39,6 +40,7 @@ public class AppSettings : IAppSettings
         GoogleClientSecret = GetConfigurationValue("GOOGLE_CLIENT_SECRET", "Authentication:Google:ClientSecret");
         ModelUrl = GetConfigurationValue("MODEL_URL", "Model:URL");
         PrivateBankUrl = GetConfigurationValue("PRIVATE_BANK_URL", "PrivateBank:URL");
+        KafkaHost = GetConfigurationValue("KAFKA_HOST", "Kafka:Host");
     }
 
     private string GetConnectionString()

@@ -10,5 +10,6 @@ public interface IAppSettings
     string GoogleClientSecret { get; }
     string ModelUrl { get; }
     string PrivateBankUrl { get; }
+    string KafkaHost { get; }
     bool IsDocker();
 }

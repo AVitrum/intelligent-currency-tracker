@@ -1,5 +1,7 @@
+using Application.Kafka;
 using Infrastructure.Identity;
 using Infrastructure.Jwt;
+using Infrastructure.PrivateBank;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,12 +22,14 @@ public static class DependencyInjection
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
-
+        
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
+        
+        services.AddHostedService<ExchangeRateFetcherService>();
 
         if (appSettings.IsDocker()) EnsureDatabaseCreated(services);
         

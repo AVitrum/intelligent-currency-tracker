@@ -55,17 +55,46 @@
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       MODEL_URL: ${MODEL_URL}
       PRIVATE_BANK_URL: ${PRIVATE_BANK_URL}
+      KAFKA_HOST: ${KAFKA_HOST}
     volumes:
       - ${HOME}/.aspnet/https:/https/
     depends_on:
       - db
-        
+      - kafka
+  
   model:
     build:
       context: .
-      dockerfile: CurrencyRatePredictionModel/Dockerfile
+      dockerfile: Model/Dockerfile
     ports:
       - "8050:8050"
 
+  zoo:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zoo
+    container_name: zoo
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zoo:2888:3888
+      
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    depends_on:
+      - zoo
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zoo:2181
+      - KAFKA_BROKERID=1
+      - ALLOW_PLAINTEXT_LISTENER="yes"
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
 volumes:
   pgdata:

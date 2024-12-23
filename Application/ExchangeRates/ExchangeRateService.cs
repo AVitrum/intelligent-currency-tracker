@@ -5,14 +5,15 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.ExchangeRates.Results;
 using AutoMapper;
+using Confluent.Kafka;
 using Domain.Common;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Domain.Enums;
+using Newtonsoft.Json;
 
 namespace Application.ExchangeRates;
 
@@ -23,6 +24,8 @@ public class ExchangeRateService : IExchangeRateService
     private readonly ILogger<ExchangeRateService> _logger;
     private readonly IMapper _mapper;
     private readonly IAppSettings _appSettings;
+    private readonly IKafkaProducer _kafkaProducer;
+    
     private const int MaxRetries = 3;
     private const string DateFormat = "dd.MM.yyyy";
 
@@ -31,7 +34,8 @@ public class ExchangeRateService : IExchangeRateService
         IExchangeRateRepository exchangeRateRepository,
         ILogger<ExchangeRateService> logger,
         IMapper mapper,
-        IAppSettings appSettings)
+        IAppSettings appSettings,
+        IKafkaProducer kafkaProducer)
     {
         _httpClient = httpClient;
         _httpClient.Timeout = TimeSpan.FromMinutes(5);
@@ -39,72 +43,50 @@ public class ExchangeRateService : IExchangeRateService
         _logger = logger;
         _mapper = mapper;
         _appSettings = appSettings;
+        _kafkaProducer = kafkaProducer;
     }
-
+    
     public async Task<BaseResult> FetchExchangeRatesAsync(ExchangeRatesRangeDto dto)
     {
         if (!dto.TryGetDateRange(out var start, out var end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
 
         _logger.LogInformation("Starting FetchExchangeRatesAsync from {StartDate} to {EndDate}", start, end);
-        var collectedData = new List<ExchangeRate>();
-        var currentDate = start;
 
+        var dateRange = new List<string>();
+        var currentDate = start;
         while (currentDate <= end)
         {
-            var formattedDate = currentDate.ToString(DateFormat);
-            var url = $"{_appSettings.PrivateBankUrl}/exchange_rates?json&date={formattedDate}";
-
-            for (var attempt = 0; attempt < MaxRetries; attempt++)
-            {
-                try
-                {
-                    _logger.LogInformation("Fetching data for {Date}, attempt {Attempt}", formattedDate, attempt + 1);
-                    var response = await _httpClient.GetAsync(url);
-                    response.EnsureSuccessStatusCode();
-
-                    var jsonData = await response.Content.ReadAsStringAsync();
-                    var exchangeRates = JObject.Parse(jsonData)["exchangeRate"]!;
-
-                    collectedData.AddRange(exchangeRates.Select(rate => new ExchangeRate
-                    {
-                        Date = DateTime.ParseExact((string)JObject.Parse(jsonData)["date"]!, DateFormat, CultureInfo.InvariantCulture),
-                        Currency = Enum.Parse<Currency>((string)rate["currency"]!),
-                        SaleRateNb = (decimal?)rate["saleRateNB"] ?? 0,
-                        PurchaseRateNb = (decimal?)rate["purchaseRateNB"] ?? 0,
-                        SaleRate = (decimal?)rate["saleRate"] ?? 0,
-                        PurchaseRate = (decimal?)rate["purchaseRate"] ?? 0
-                    }));
-
-                    break;
-                }
-                catch (HttpRequestException ex)
-                {
-                    _logger.LogError(ex, "Error fetching data for {Date}, attempt {Attempt}", formattedDate, attempt + 1);
-                    if (attempt == MaxRetries - 1)
-                    {
-                        _logger.LogError("Max retries reached for {Date}", formattedDate);
-                    }
-                    else
-                    {
-                        await Task.Delay(1000);
-                    }
-                }
-                catch (FormatException ex)
-                {
-                    _logger.LogError(ex, "Invalid date format in response for {Date}", formattedDate);
-                    return BaseResult.FailureResult(["Invalid date format in response"]);
-                }
-            }
-
+            dateRange.Add(currentDate.ToString(DateFormat));
             currentDate = currentDate.AddDays(1);
         }
 
-        await _exchangeRateRepository.SaveExchangeRatesAsync(collectedData);
-        _logger.LogInformation("Successfully fetched and saved exchange rates from {StartDate} to {EndDate}", start, end);
+        var fetchRequest = new FetchRequest
+        {
+            Dates = dateRange,
+            UrlTemplate = _appSettings.PrivateBankUrl + "/exchange_rates?json&date={0}"
+        };
+
+        var message = new Message<string, string>
+        {
+            Key = Guid.NewGuid().ToString(),
+            Value = JsonConvert.SerializeObject(fetchRequest)
+        };
+        
+        try
+        {
+            await _kafkaProducer.ProduceAsync("fetch-exchange-rates", message);
+            _logger.LogInformation("Successfully sent fetch request to Kafka for dates {StartDate} to {EndDate}", start, end);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send fetch request to Kafka");
+            return BaseResult.FailureResult(["Failed to send fetch request to Kafka"]);
+        }
+
         return BaseResult.SuccessResult();
     }
-
+    
     public async Task<BaseResult> GetExchangeRatesFromCsvAsync(IFormFile? file)
     {
         if (file is null || file.Length == 0)
@@ -266,6 +248,14 @@ public class ExchangeRateService : IExchangeRateService
         var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
             _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
 
-        return GetExchangeRateRangeResult.SuccessResult(new GetExchangeRateListDto(exchangeRatesDto));
+        var exchangeRateListDto = new GetExchangeRateListDto(exchangeRatesDto);
+        
+        await _kafkaProducer.ProduceAsync("exchange-rates", new Message<string, string>
+        {
+            Key = "exchange-rates",
+            Value = JsonConvert.SerializeObject(exchangeRateListDto)
+        });
+        
+        return GetExchangeRateRangeResult.SuccessResult(exchangeRateListDto);
     }
 }
