@@ -34,13 +34,13 @@ public class ExchangeRateService : IExchangeRateService
     
     public async Task<BaseResult> FetchExchangeRatesAsync(ExchangeRatesRangeDto dto)
     {
-        if (!dto.TryGetDateRange(out var start, out var end))
+        if (!dto.TryGetDateRange(out DateTime start, out DateTime end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
 
         _logger.LogInformation("Starting FetchExchangeRatesAsync from {StartDate} to {EndDate}", start, end);
 
         var dateRange = new List<string>();
-        var currentDate = start;
+        DateTime currentDate = start;
         while (currentDate <= end)
         {
             dateRange.Add(currentDate.ToString(DateConstants.DateFormat));
@@ -75,7 +75,7 @@ public class ExchangeRateService : IExchangeRateService
 
     public async Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto dto)
     {
-        if (!dto.TryGetDateRange(out var start, out var end))
+        if (!dto.TryGetDateRange(out DateTime start, out DateTime end))
             return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
         
         if (dto.Currency is null) return BaseResult.FailureResult(["Currency type is required"]);

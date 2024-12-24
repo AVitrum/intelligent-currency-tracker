@@ -29,7 +29,7 @@ public class IdentityService : IIdentityService
     public async Task<BaseResult> CreateUserAsync(string userName, string password)
     {
         var user = new ApplicationUser { UserName = userName };
-        var result = await _userManager.CreateAsync(user, password);
+        IdentityResult result = await _userManager.CreateAsync(user, password);
             
         if (result.Succeeded) return BaseResult.SuccessResult();
 
@@ -39,19 +39,19 @@ public class IdentityService : IIdentityService
 
     public async Task<bool> AuthorizeAsync(string userId, string policyName)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
             
         if (user == null) return false;
 
-        var principal = await _userClaimsPrincipalFactory.CreateAsync(user);
-        var result = await _authorizationService.AuthorizeAsync(principal, policyName);
+        ClaimsPrincipal principal = await _userClaimsPrincipalFactory.CreateAsync(user);
+        AuthorizationResult result = await _authorizationService.AuthorizeAsync(principal, policyName);
 
         return result.Succeeded;
     }
 
     public async Task<BaseResult> LoginAsync(string userName, string password)
     {
-        var user = await _userManager.FindByNameAsync(userName);
+        ApplicationUser? user = await _userManager.FindByNameAsync(userName);
             
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             return BaseResult.FailureResult(["Invalid username or password."]);
@@ -63,9 +63,8 @@ public class IdentityService : IIdentityService
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-            
-        var token = _jwtService.GenerateToken(issuer, audience, key, claims);
-
+        JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
+        
         return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));
     }
 }

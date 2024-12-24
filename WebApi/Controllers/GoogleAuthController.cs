@@ -1,3 +1,4 @@
+using Domain.Common;
 using Infrastructure.ExternalApis.GoogleAuth.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -28,8 +29,8 @@ public class GoogleAuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GoogleResponse()
     {
-        var authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-        var result = await _googleAuthService.HandleGoogleResponse(authResult);
+        AuthenticateResult authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        BaseResult result = await _googleAuthService.HandleGoogleResponse(authResult);
         
         if (result is not GoogleAuthResult googleAuthResult) return Unauthorized();
         

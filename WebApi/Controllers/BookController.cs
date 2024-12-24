@@ -1,4 +1,5 @@
 using Application.Books.Results;
+using Domain.Common;
 
 namespace WebApi.Controllers;
 
@@ -17,7 +18,7 @@ public class BookController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddBook(CreateBookModel model)
     {
-        var result = await _bookService.AddBookAsync(model);
+        BaseResult result = await _bookService.AddBookAsync(model);
         
         if (result.Success) return Ok("Book added successfully");
         
@@ -29,7 +30,7 @@ public class BookController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetBooks()
     {
-        var result = await _bookService.GetBooksAsync();
+        BaseResult result = await _bookService.GetBooksAsync();
         
         if (result is not GetBookResult getBooksResult) return BadRequest("Failed to get books");
         

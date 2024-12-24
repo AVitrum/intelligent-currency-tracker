@@ -1,4 +1,5 @@
 using Application.ExchangeRates.Results;
+using Domain.Common;
 
 namespace WebApi.Controllers;
 
@@ -18,7 +19,7 @@ public class CsvController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadCsvAsync([FromForm] CsvFileUploadDto dto)
     {
-        var result = await _csvExchangeRateService.GetExchangeRatesFromCsvAsync(dto.File);
+        BaseResult result = await _csvExchangeRateService.GetExchangeRatesFromCsvAsync(dto.File);
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
@@ -27,7 +28,7 @@ public class CsvController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ExportCsvAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
-        var result = await _csvExchangeRateService.ExportExchangeRatesToCsvAsync(dto);
+        BaseResult result = await _csvExchangeRateService.ExportExchangeRatesToCsvAsync(dto);
         
         if (result is ExportExchangeRatesToCsvResult exportResult)
             return File(exportResult.FileContent, "text/csv", exportResult.FileName);

@@ -32,7 +32,7 @@ public class GoogleAuthService : IGoogleAuthService
         var email = GetEmailFromClaims(authResult);
         if (email is null) return GoogleAuthResult.FailureResult("Email claim not found");
 
-        var user = await GetUserByEmailAsync(email) ?? await HandleNewUserAsync(email);
+        ApplicationUser user = await GetUserByEmailAsync(email) ?? await HandleNewUserAsync(email);
 
         _jwtService.GetJwtConfiguration(out var issuer, out var audience, out var key);
         

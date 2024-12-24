@@ -1,4 +1,5 @@
 using Application.ExchangeRates.Results;
+using Domain.Common;
 
 namespace WebApi.Controllers;
 
@@ -18,7 +19,7 @@ public class ExchangeRateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> FetchExchangeRatesAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
-        var result = await _exchangeRateService.FetchExchangeRatesAsync(dto);
+        BaseResult result = await _exchangeRateService.FetchExchangeRatesAsync(dto);
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
@@ -28,7 +29,7 @@ public class ExchangeRateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetRangeAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
-        var result = await _exchangeRateService.GetRangeAsync(dto);
+        BaseResult result = await _exchangeRateService.GetRangeAsync(dto);
 
         if (result is not GetExchangeRateRangeResult rangeResult) return BadRequest(result.Errors);
 

@@ -1,4 +1,5 @@
 using Application.ExchangeRates.Results;
+using Domain.Common;
 
 namespace WebApi.Controllers;
 
@@ -18,7 +19,7 @@ public class MlModelController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> TrainModelAsync(ExchangeRatesRangeDto dto)
     {
-        var result = await _mlModelService.TrainModelAsync(dto);
+        BaseResult result = await _mlModelService.TrainModelAsync(dto);
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
@@ -27,7 +28,7 @@ public class MlModelController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> PredictAsync([FromQuery] ExchangeRatePredictionDto dto)
     {
-        var result = await _mlModelService.PredictAsync(dto);
+        BaseResult result = await _mlModelService.PredictAsync(dto);
 
         if (result is ExchangeRatePredictionResult predictionResult) return Ok(predictionResult.Prediction);
 

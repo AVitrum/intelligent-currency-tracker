@@ -1,3 +1,4 @@
+using Domain.Common;
 using Infrastructure.Identity.Results;
 
 namespace WebApi.Controllers;
@@ -18,7 +19,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register(CreateUserModel model)
     {
-        var result = await _identityService.CreateUserAsync(model.UserName, model.Password);
+        BaseResult result = await _identityService.CreateUserAsync(model.UserName, model.Password);
         
         if (result.Success) return CreatedAtAction(nameof(Register), new { model.UserName }, null);
 
@@ -30,7 +31,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(CreateUserModel model)
     {
-        var result = await _identityService.LoginAsync(model.UserName, model.Password);
+        BaseResult result = await _identityService.LoginAsync(model.UserName, model.Password);
         
         if (result is not IdentityServiceResult identityServiceResult) return Unauthorized("Invalid login attempt");
 

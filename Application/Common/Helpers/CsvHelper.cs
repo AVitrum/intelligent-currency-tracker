@@ -96,7 +96,7 @@ public class CsvHelper : ICsvHelper
             var line = await reader.ReadLineAsync();
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith("Date")) continue;
 
-            var exchangeRate = ParseCsvLine(line);
+            ExchangeRate? exchangeRate = ParseCsvLine(line);
             if (exchangeRate == null)
             {
                 _logger.LogWarning("Invalid date format in CSV: {Line}", line);

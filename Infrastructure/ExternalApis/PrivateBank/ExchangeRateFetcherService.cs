@@ -60,7 +60,7 @@ public class ExchangeRateFetcherService : BackgroundService
                     continue;
                 }
 
-                var httpClient = _httpClientFactory.CreateClient();
+                HttpClient httpClient = _httpClientFactory.CreateClient();
                 foreach (var date in requestData.Dates)
                 {
                     var formattedUrl = string.Format(requestData.UrlTemplate, date);
@@ -73,7 +73,7 @@ public class ExchangeRateFetcherService : BackgroundService
 
                             response.EnsureSuccessStatusCode();
                             var jsonData = await response.Content.ReadAsStringAsync(stoppingToken);
-                            var exchangeRates = JObject.Parse(jsonData)["exchangeRate"]!;
+                            JToken exchangeRates = JObject.Parse(jsonData)["exchangeRate"]!;
 
                             var exchangeRate = exchangeRates.Select(rate => new ExchangeRate
                             {

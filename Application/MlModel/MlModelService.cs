@@ -26,7 +26,7 @@ public class MlModelService : IMlModelService
     {
         _logger.LogInformation("Starting TrainModelAsync");
 
-        var baseResult = await _csvHelper.ExportExchangeRateToCsvAsync(dto);
+        BaseResult baseResult = await _csvHelper.ExportExchangeRateToCsvAsync(dto);
 
         if (baseResult is not ExportExchangeRatesToCsvResult exportResult)
         {
@@ -43,7 +43,7 @@ public class MlModelService : IMlModelService
 
         _logger.LogInformation("Sending POST request to {Url}", $"{_appSettings.ModelUrl}/train-model");
 
-        var response = await _httpClient.PostAsync($"{_appSettings.ModelUrl}/train-model", content);
+        HttpResponseMessage response = await _httpClient.PostAsync($"{_appSettings.ModelUrl}/train-model", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -63,7 +63,7 @@ public class MlModelService : IMlModelService
 
         try
         {
-            var response = await _httpClient.GetAsync(url);
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             _logger.LogInformation("Successfully received prediction");
