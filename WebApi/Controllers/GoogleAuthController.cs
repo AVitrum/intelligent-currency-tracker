@@ -1,4 +1,4 @@
-using Infrastructure.Identity.Results;
+using Infrastructure.ExternalApis.GoogleAuth.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 

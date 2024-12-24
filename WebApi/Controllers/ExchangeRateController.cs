@@ -22,48 +22,6 @@ public class ExchangeRateController : ControllerBase
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
-    [HttpPost("uploadCsv")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadCsvAsync([FromForm] CsvFileUploadDto dto)
-    {
-        var result = await _exchangeRateService.GetExchangeRatesFromCsvAsync(dto.File);
-        return result.Success ? Ok() : BadRequest(result.Errors);
-    }
-    
-    [HttpGet("exportCsv")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ExportCsvAsync([FromQuery] ExchangeRatesRangeDto dto)
-    {
-        var result = await _exchangeRateService.ExportExchangeRatesToCsvAsync(dto);
-        
-        if (result is ExportExchangeRatesToCsvResult exportResult)
-            return File(exportResult.FileContent, "text/csv", exportResult.FileName);
-        
-        return BadRequest(result.Errors);
-    }
-    
-    [HttpPost("trainModel")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> TrainModelAsync(ExchangeRatesRangeDto dto)
-    {
-        var result = await _exchangeRateService.TrainModelAsync(dto);
-        return result.Success ? Ok() : BadRequest(result.Errors);
-    }
-    
-    [HttpGet("predict")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> PredictAsync([FromQuery] ExchangeRatePredictionDto dto)
-    {
-        var result = await _exchangeRateService.PredictAsync(dto);
-
-        if (result is ExchangeRatePredictionResult predictionResult) return Ok(predictionResult.Prediction);
-
-        return BadRequest(result.Errors);
-    }
     
     [HttpGet("getRange")]
     [ProducesResponseType(StatusCodes.Status200OK)]

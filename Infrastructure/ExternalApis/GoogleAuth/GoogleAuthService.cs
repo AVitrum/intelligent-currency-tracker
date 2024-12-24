@@ -1,12 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Domain.Common;
-using Infrastructure.Identity.Results;
+using Infrastructure.ExternalApis.GoogleAuth.Results;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Identity;
+namespace Infrastructure.ExternalApis.GoogleAuth;
 
 public class GoogleAuthService : IGoogleAuthService
 {

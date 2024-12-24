@@ -96,5 +96,6 @@
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    entrypoint: /bin/sh -c "sleep 15 && /etc/confluent/docker/run"
 volumes:
   pgdata:

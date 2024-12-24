@@ -1,7 +1,7 @@
-using Application.Kafka;
+using Infrastructure.ExternalApis.GoogleAuth;
+using Infrastructure.ExternalApis.PrivateBank;
 using Infrastructure.Identity;
 using Infrastructure.Jwt;
-using Infrastructure.PrivateBank;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;

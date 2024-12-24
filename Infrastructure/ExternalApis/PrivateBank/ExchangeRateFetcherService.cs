@@ -1,13 +1,14 @@
 using System.Globalization;
 using System.Text.Json;
 using Confluent.Kafka;
+using Domain.Constans;
 using Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
-namespace Infrastructure.PrivateBank;
+namespace Infrastructure.ExternalApis.PrivateBank;
 
 public class ExchangeRateFetcherService : BackgroundService
 {
@@ -15,8 +16,6 @@ public class ExchangeRateFetcherService : BackgroundService
     private readonly ILogger<ExchangeRateFetcherService> _logger;
     private readonly IServiceProvider _serviceProvider;
     
-    private const string DateFormat = "dd.MM.yyyy";
-
     public ExchangeRateFetcherService(IHttpClientFactory httpClientFactory, ILogger<ExchangeRateFetcherService> logger, IServiceProvider serviceProvider)
     {
         _httpClientFactory = httpClientFactory;
@@ -32,13 +31,11 @@ public class ExchangeRateFetcherService : BackgroundService
     private async Task ConsumeAsync(string topic, CancellationToken stoppingToken)
     {
         string kafkaHost;
-        
         using (var scope = _serviceProvider.CreateScope())
         {
             var appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
             kafkaHost = appSettings.KafkaHost;
         }
-        
         
         var config = new ConsumerConfig
         {
@@ -80,7 +77,7 @@ public class ExchangeRateFetcherService : BackgroundService
 
                             var exchangeRate = exchangeRates.Select(rate => new ExchangeRate
                             {
-                                Date = DateTime.ParseExact((string)JObject.Parse(jsonData)["date"]!, DateFormat,
+                                Date = DateTime.ParseExact((string)JObject.Parse(jsonData)["date"]!, DateConstants.DateFormat,
                                     CultureInfo.InvariantCulture),
                                 Currency = Enum.Parse<Currency>((string)rate["currency"]!),
                                 SaleRateNb = (decimal?)rate["saleRateNB"] ?? 0,
