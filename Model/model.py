@@ -12,7 +12,7 @@ class CurrencyPredictor(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
 
-def train_model(model, train_loader, test_loader, criterion, optimizer, epochs, early_stop_patience):
+def train_model(model, train_loader, criterion, optimizer, epochs, early_stop_patience):
     best_loss = float('inf')
     patience_counter = 0
 
@@ -21,21 +21,30 @@ def train_model(model, train_loader, test_loader, criterion, optimizer, epochs, 
         total_loss = 0
         for inputs, targets in train_loader:
             optimizer.zero_grad()
-            outputs = model(inputs.unsqueeze(1))
+
+            # Forward pass - remove unsqueeze(1) if not using sequential data
+            outputs = model(inputs)
+
+            # Ensure target and output shapes match
+            if outputs.shape != targets.shape:
+                print(f"Output shape {outputs.shape} doesn't match target shape {targets.shape}")
+                continue
+
             loss = criterion(outputs, targets)
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
 
+        # Evaluate on training set (or validation set if available)
         model.eval()
         with torch.no_grad():
             val_loss = 0
-            for inputs, targets in test_loader:
-                val_outputs = model(inputs.unsqueeze(1))
-                val_loss += criterion(val_outputs, targets).item()
+            for inputs, targets in train_loader:  # If no validation data, use the same loader
+                outputs = model(inputs)
+                val_loss += criterion(outputs, targets).item()
 
         avg_train_loss = total_loss / len(train_loader)
-        avg_val_loss = val_loss / len(test_loader)
+        avg_val_loss = val_loss / len(train_loader)
 
         if avg_val_loss < best_loss:
             best_loss = avg_val_loss

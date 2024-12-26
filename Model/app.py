@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
@@ -7,9 +7,10 @@ from model import CurrencyPredictor, train_model
 from predict import predict_exchange_rate
 import io
 import logging
+from confluent_kafka import Consumer, KafkaError
+import json
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # Increase the limit to 64MB
 
 model = None
 scaler_X = None
@@ -19,37 +20,53 @@ MODEL_PATH = "models/best_model.pth"
 
 logging.basicConfig(level=logging.DEBUG)
 
-@app.route('/train-model/', methods=['POST'])
-def train_model_endpoint():
-    global model, scaler_X, scaler_y, currency_mapping
+# Kafka configuration
+KAFKA_BROKER = "localhost:9092"
+TRAIN_TOPIC = "train-model"
+PREDICT_TOPIC = "predict-model"
 
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-
-    file = request.files['file']
-
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-
-    if not file.filename.endswith('.csv'):
-        return jsonify({"error": "Invalid file type. Only CSV files are accepted."}), 400
+def kafka_consume(topic, group_id, process_function):
+    consumer_conf = {
+        'bootstrap.servers': KAFKA_BROKER,
+        'group.id': group_id,
+        'auto.offset.reset': 'earliest'
+    }
+    consumer = Consumer(consumer_conf)
+    consumer.subscribe([topic])
 
     try:
-        data = file.read()
-        df = pd.read_csv(io.StringIO(data.decode('utf-8')))
+        while True:
+            msg = consumer.poll(1.0)
+            if msg is None:
+                continue
+            if msg.error():
+                if msg.error().code() == KafkaError._PARTITION_EOF:
+                    continue
+                else:
+                    logging.error(f"Consumer error: {msg.error()}")
+                    continue
+
+            logging.info(f"Received message: {msg.value().decode('utf-8')}")
+            process_function(json.loads(msg.value().decode('utf-8')))
+    finally:
+        consumer.close()
+
+
+def process_training_message(message):
+    global model, scaler_X, scaler_y, currency_mapping
+
+    try:
+        file_content = message.get('content', '')
+        file_content = file_content.lstrip('\ufeff')
+        df = pd.read_csv(io.StringIO(file_content))
 
         X_train, X_test, y_train, y_test, scaler_X, scaler_y, currency_mapping = load_and_preprocess_data(df)
 
         X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
         y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
-        X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-        y_test_tensor = torch.tensor(y_test, dtype=torch.float32)
 
         train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
         train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-
-        test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
-        test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
         input_size = X_train.shape[1]
         hidden_size = 128
@@ -64,7 +81,7 @@ def train_model_endpoint():
         criterion = torch.nn.MSELoss()
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
-        train_model(model, train_loader, test_loader, criterion, optimizer, epochs, early_stop_patience)
+        train_model(model, train_loader, None, criterion, optimizer, epochs, early_stop_patience)
 
         torch.save({
             'model_state_dict': model.state_dict(),
@@ -75,24 +92,19 @@ def train_model_endpoint():
             'dropout_rate': dropout_rate
         }, MODEL_PATH)
 
-        return jsonify({"message": "Model trained successfully"})
+        logging.info("Model trained and saved successfully.")
     except Exception as e:
         logging.error(f"Error during model training: {e}")
-        return jsonify({"error": str(e)}), 500
 
-@app.route('/debug-request', methods=['POST'])
-def debug_request():
-    return jsonify({"headers": dict(request.headers), "content_length": request.content_length})
 
-@app.route('/predict/', methods=['GET'])
-def predict_endpoint():
+def process_prediction_message(message):
     global model, scaler_X, scaler_y, currency_mapping
 
-    pre_date = request.args.get('pre_date')
-    currency_code = request.args.get('currency_code')
-
     try:
-        checkpoint = torch.load(MODEL_PATH, weights_only=True)
+        pre_date = message.get("pre_date")
+        currency_code = message.get("currency_code")
+
+        checkpoint = torch.load(MODEL_PATH)
         input_size = checkpoint['input_size']
         hidden_size = checkpoint['hidden_size']
         output_size = checkpoint['output_size']
@@ -104,13 +116,20 @@ def predict_endpoint():
 
         sale_rate_nb, purchase_rate_nb = predict_exchange_rate(model, scaler_X, scaler_y, currency_mapping, pre_date, currency_code)
 
-        return jsonify({
+        logging.info({
             "Predicted Sale Rate (NB)": float(sale_rate_nb),
             "Predicted Purchase Rate (NB)": float(purchase_rate_nb)
         })
     except Exception as e:
         logging.error(f"Error during prediction: {e}")
-        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
+    from threading import Thread
+
+    # Start Kafka consumers in separate threads
+    Thread(target=kafka_consume, args=(TRAIN_TOPIC, 'test-consumer-group', process_training_message)).start()
+    Thread(target=kafka_consume, args=(PREDICT_TOPIC, 'test-consumer-group', process_prediction_message)).start()
+
+    logging.info("Kafka consumers started. Listening for messages...")
     app.run(host='0.0.0.0', port=8050)

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace WebApi.Infrastructure;

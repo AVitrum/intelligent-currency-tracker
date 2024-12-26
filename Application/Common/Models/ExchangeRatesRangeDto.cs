@@ -1,19 +1,37 @@
+using Application.Common.Validation;
 using Domain.Enums;
+using Newtonsoft.Json;
 
 namespace Application.Common.Models;
 
 public class ExchangeRatesRangeDto
 {
-    public required string StartDate { get; set; }
-    public required string EndDate { get; set; }
-    public Currency? Currency { get; set; }
-    
-    public bool TryGetDateRange(out DateTime start, out DateTime end)
+    [DateFormat] public required string StartDateString { get; init; }
+    [DateFormat] public required string EndDateString { get; init; }
+    public Currency? Currency { get; init; }
+
+    private DateTime _start;
+    private DateTime _end;
+
+    [JsonIgnore]
+    public DateTime Start
     {
-        start = default;
-        end = default;
-        
-        return DateTime.TryParseExact(StartDate, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out start) &&
-               DateTime.TryParseExact(EndDate, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out end);
+        get => _start;
+        set
+        {
+            _start = value;
+            _start = DateTime.ParseExact(StartDateString, "dd.MM.yyyy", null);
+        }
+    }
+
+    [JsonIgnore]
+    public DateTime End
+    {
+        get => _end;
+        set
+        {
+            _end = value;
+            _end = DateTime.ParseExact(EndDateString, "dd.MM.yyyy", null);
+        }
     }
 }

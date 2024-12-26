@@ -51,31 +51,27 @@ public class CsvHelper : ICsvHelper
         
     public async Task<BaseResult> ExportExchangeRateToCsvAsync(ExchangeRatesRangeDto dto)
     {
-        if (!dto.TryGetDateRange(out var start, out var end))
-            return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
-
         try
         {
             IEnumerable<ExchangeRate> exchangeRates;
 
-            if (dto.Currency is null)
+            DateTime startUtc = dto.Start.ToUniversalTime();
+            DateTime endUtc = dto.End.ToUniversalTime();
+            
+            if (dto.Currency is null or Currency.ALL)
             {
-                exchangeRates = await _exchangeRateRepository.GetExchangeRatesAsync(
-                    start.ToUniversalTime(), end.ToUniversalTime());
-
-                dto.Currency = Currency.ALL;
+                exchangeRates = await _exchangeRateRepository.GetExchangeRatesAsync(startUtc, endUtc);
             }
             else
             {
-                exchangeRates = await _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(
-                    start.ToUniversalTime(),
-                    end.ToUniversalTime(), dto.Currency.Value);
+                exchangeRates =
+                    await _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(startUtc, endUtc, dto.Currency.Value);
             }
             var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
                 _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
                 
             var fileContent = await CreateCsvFileAsync(exchangeRatesDto);
-            var fileName = $"ExchangeRates_{dto.Currency.ToString()}_{start:yyyyMMdd}_{end:yyyyMMdd}.csv";
+            var fileName = $"ExchangeRates_{dto.Currency.ToString()}_{dto.Start:yyyyMMdd}_{dto.End:yyyyMMdd}.csv";
                 
             return ExportExchangeRatesToCsvResult.SuccessResult(fileContent, fileName);
         }

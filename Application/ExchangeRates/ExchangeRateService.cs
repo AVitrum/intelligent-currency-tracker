@@ -32,28 +32,25 @@ public class ExchangeRateService : IExchangeRateService
         _kafkaProducer = kafkaProducer;
     }
     
-    public async Task<BaseResult> FetchExchangeRatesAsync(ExchangeRatesRangeDto dto)
+    public async Task<BaseResult> FetchExchangeRatesAsync(ExchangeRatesRangeDto exchangeRatesRangeDto)
     {
-        if (!dto.TryGetDateRange(out DateTime start, out DateTime end))
-            return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
+        _logger.LogInformation("Starting FetchExchangeRatesAsync from {StartDate} to {EndDate}", exchangeRatesRangeDto.Start, exchangeRatesRangeDto.End);
 
-        _logger.LogInformation("Starting FetchExchangeRatesAsync from {StartDate} to {EndDate}", start, end);
-
-        var dateRange = new List<string>();
-        DateTime currentDate = start;
-        while (currentDate <= end)
+        var dateRangeList = new List<string>();
+        DateTime currentDate = exchangeRatesRangeDto.Start;
+        while (currentDate <= exchangeRatesRangeDto.End)
         {
-            dateRange.Add(currentDate.ToString(DateConstants.DateFormat));
+            dateRangeList.Add(currentDate.ToString(DateConstants.DateFormat));
             currentDate = currentDate.AddDays(1);
         }
 
         var fetchRequest = new FetchRequest
         {
-            Dates = dateRange,
+            Dates = dateRangeList,
             UrlTemplate = _appSettings.PrivateBankUrl + "/exchange_rates?json&date={0}"
         };
 
-        var message = new Message<string, string>
+        var kafkaMessage = new Message<string, string>
         {
             Key = Guid.NewGuid().ToString(),
             Value = JsonConvert.SerializeObject(fetchRequest)
@@ -61,31 +58,40 @@ public class ExchangeRateService : IExchangeRateService
         
         try
         {
-            await _kafkaProducer.ProduceAsync("fetch-exchange-rates", message);
-            _logger.LogInformation("Successfully sent fetch request to Kafka for dates {StartDate} to {EndDate}", start, end);
+            await _kafkaProducer.ProduceAsync("fetch-exchange-rates", kafkaMessage);
+            _logger.LogInformation("Successfully sent fetch request to Kafka for dates {StartDate} to {EndDate}",
+                exchangeRatesRangeDto.Start, exchangeRatesRangeDto.End);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send fetch request to Kafka");
-            return BaseResult.FailureResult(["Failed to send fetch request to Kafka"]);
+            return BaseResult.FailureResult(new List<string> { "Failed to send fetch request to Kafka" });
         }
 
         return BaseResult.SuccessResult();
     }
 
-    public async Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto dto)
+    public async Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto exchangeRatesRangeDto)
     {
-        if (!dto.TryGetDateRange(out DateTime start, out DateTime end))
-            return BaseResult.FailureResult(["Invalid date format. Please use dd.MM.yyyy"]);
-        
-        if (dto.Currency is null) return BaseResult.FailureResult(["Currency type is required"]);
+        if (exchangeRatesRangeDto.Currency is null)
+        {
+            return BaseResult.FailureResult(["Currency type is required"]);
+        }
 
         var exchangeRates = await _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(
-            start.ToUniversalTime(), end.ToUniversalTime(), dto.Currency.Value);
-        var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
+            exchangeRatesRangeDto.Start.ToUniversalTime(), exchangeRatesRangeDto.End.ToUniversalTime(),
+            exchangeRatesRangeDto.Currency.Value);
+
+        var exchangeRateList = exchangeRates.ToList();
+        if (exchangeRateList.Count == 0)
+        {
+            return BaseResult.FailureResult(["No exchange rates found"]);
+        }
+        
+        var exchangeRateDtoList = exchangeRateList.Select(exchangeRate =>
             _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
 
-        var exchangeRateListDto = new GetExchangeRateListDto(exchangeRatesDto);
+        var exchangeRateListDto = new GetExchangeRateListDto(exchangeRateDtoList);
         
         await _kafkaProducer.ProduceAsync("exchange-rates", new Message<string, string>
         {

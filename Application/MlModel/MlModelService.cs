@@ -1,24 +1,28 @@
-using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.ExchangeRates.Results;
+using Confluent.Kafka;
 using Domain.Common;
 using Microsoft.Extensions.Logging;
 
 namespace Application.MlModel;
-
+//TODO: Change service when finished fixing model.
 public class MlModelService : IMlModelService
 {
     private readonly IAppSettings _appSettings;
     private readonly ILogger<MlModelService> _logger;
     private readonly ICsvHelper _csvHelper;
+    private readonly IKafkaProducer _kafkaProducer;
     private readonly HttpClient _httpClient;
-
-    public MlModelService(IAppSettings appSettings, ILogger<MlModelService> logger, ICsvHelper csvHelper, HttpClient httpClient)
+    
+    public MlModelService(IAppSettings appSettings, ILogger<MlModelService> logger, ICsvHelper csvHelper, IKafkaProducer kafkaProducer, HttpClient httpClient)
     {
         _appSettings = appSettings;
         _logger = logger;
         _csvHelper = csvHelper;
+        _kafkaProducer = kafkaProducer;
         _httpClient = httpClient;
     }
 
@@ -33,27 +37,20 @@ public class MlModelService : IMlModelService
             _logger.LogWarning("Failed to export exchange rates to CSV");
             return BaseResult.FailureResult(["Failed to export exchange rates to CSV"]);
         }
-
         _logger.LogInformation("Successfully exported exchange rates to CSV");
+        var csvContent = Encoding.UTF8.GetString(exportResult.FileContent);
+        var message = new { content = csvContent };
+        
+        var serializedMessage = JsonSerializer.Serialize(message);
+        var messageSize = Encoding.UTF8.GetByteCount(serializedMessage);
 
-        using var content = new MultipartFormDataContent();
-        using var fileContentStream = new ByteArrayContent(exportResult.FileContent);
-        fileContentStream.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
-        content.Add(fileContentStream, "file", exportResult.FileName);
+        _logger.LogInformation("Message size: {Size} bytes", messageSize);
 
-        _logger.LogInformation("Sending POST request to {Url}", $"{_appSettings.ModelUrl}/train-model");
+        await _kafkaProducer.ProduceAsync("train-model",
+            new Message<string, string> { Value = serializedMessage });
 
-        HttpResponseMessage response = await _httpClient.PostAsync($"{_appSettings.ModelUrl}/train-model", content);
-
-        if (response.IsSuccessStatusCode)
-        {
-            _logger.LogInformation("Model training started successfully");
-            return BaseResult.SuccessResult();
-        }
-
-        var errorMessage = await response.Content.ReadAsStringAsync();
-        _logger.LogError("Failed to start model training: {ErrorMessage}", errorMessage);
-        return BaseResult.FailureResult([errorMessage]);
+        _logger.LogInformation("Model training started successfully");
+        return BaseResult.SuccessResult();
     }
 
     public async Task<BaseResult> PredictAsync(ExchangeRatePredictionDto dto)

@@ -1,9 +1,10 @@
 using Application;
 using Infrastructure;
+using Microsoft.AspNetCore.Diagnostics;
 using WebApi;
 using WebApi.Infrastructure;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -19,9 +20,9 @@ builder.Services
     .AddCustomAuthentication()
     .AddApplication();
 
-builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+builder.Services.AddSingleton<IExceptionHandler, CustomExceptionHandler>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
