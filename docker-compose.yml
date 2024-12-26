@@ -33,7 +33,7 @@
     image: webapi
     build:
       context: .
-      dockerfile: WebApi/Dockerfile
+      dockerfile: src/WebApi/Dockerfile
     ports:
       - "8000:80"
       - "8001:443"
