@@ -1,6 +1,7 @@
 using System.Diagnostics;
-using Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace WebApi.Infrastructure;
 
@@ -41,6 +42,8 @@ public class CustomExceptionHandler : IExceptionHandler
     {
         return exception switch
         {
+            DbUpdateException { InnerException: PostgresException { SqlState: "23505" } } => 
+                (409, "Duplicate key value violates unique constraint"),
             _ => (500, "An error occurred while processing your request")
         };
     }

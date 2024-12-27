@@ -17,7 +17,12 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<ExchangeRate>> GetExchangeRatesAsync(DateTime start, DateTime end)
+    public override async Task<IEnumerable<ExchangeRate>> GetAllAsync()
+    {
+        return await _context.ExchangeRates.ToListAsync();
+    }
+
+    public async Task<IEnumerable<ExchangeRate>> GetAllByStartDateAndEndDateAsync(DateTime start, DateTime end)
     {
         return await _context.ExchangeRates
             .Where(rate => rate.Date >= start && rate.Date <= end)
@@ -25,7 +30,7 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ExchangeRate>> GetExchangeRatesByCurrencyAsync(DateTime start, DateTime end, Currency currency)
+    public async Task<IEnumerable<ExchangeRate>> GetAllByStartDateAndEndDateAndCurrencyAsync(DateTime start, DateTime end, Currency currency)
     {
         return await _context.ExchangeRates
             .Where(rate => rate.Date >= start && rate.Date <= end && rate.Currency == currency)

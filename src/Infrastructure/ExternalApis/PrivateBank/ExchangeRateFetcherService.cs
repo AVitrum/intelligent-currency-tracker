@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Npgsql;
 
 namespace Infrastructure.ExternalApis.PrivateBank;
 
@@ -31,7 +32,7 @@ public class ExchangeRateFetcherService : BackgroundService
     private async Task ConsumeAsync(string topic, CancellationToken stoppingToken)
     {
         string kafkaHost;
-        using (var scope = _serviceProvider.CreateScope())
+        using (IServiceScope scope = _serviceProvider.CreateScope())
         {
             var appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
             kafkaHost = appSettings.KafkaHost;
@@ -41,7 +42,8 @@ public class ExchangeRateFetcherService : BackgroundService
         {
             GroupId = "fetch-exchange-rates-group",
             BootstrapServers = kafkaHost,
-            AutoOffsetReset = AutoOffsetReset.Earliest
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            MaxPollIntervalMs = 600000
         };
 
         using var consumer = new ConsumerBuilder<string, string>(config).Build();
@@ -61,6 +63,9 @@ public class ExchangeRateFetcherService : BackgroundService
                 }
 
                 HttpClient httpClient = _httpClientFactory.CreateClient();
+                using IServiceScope scope = _serviceProvider.CreateScope();
+                var exchangeRateRepository = scope.ServiceProvider.GetRequiredService<IExchangeRateRepository>();
+
                 foreach (var date in requestData.Dates)
                 {
                     var formattedUrl = string.Format(requestData.UrlTemplate, date);
@@ -68,8 +73,9 @@ public class ExchangeRateFetcherService : BackgroundService
                     {
                         try
                         {
-                            _logger.LogInformation("Fetching data for {Date}, attempt {Attempt}", date, attempt + 1);
-                            var response = await httpClient.GetAsync(formattedUrl, stoppingToken);
+                            _logger.LogInformation("Fetching data for {Date}, attempt {Attempt}", date,
+                                attempt + 1);
+                            HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, stoppingToken);
 
                             response.EnsureSuccessStatusCode();
                             var jsonData = await response.Content.ReadAsStringAsync(stoppingToken);
@@ -77,7 +83,8 @@ public class ExchangeRateFetcherService : BackgroundService
 
                             var exchangeRate = exchangeRates.Select(rate => new ExchangeRate
                             {
-                                Date = DateTime.ParseExact((string)JObject.Parse(jsonData)["date"]!, DateConstants.DateFormat,
+                                Date = DateTime.ParseExact((string)JObject.Parse(jsonData)["date"]!,
+                                    DateConstants.DateFormat,
                                     CultureInfo.InvariantCulture),
                                 Currency = Enum.Parse<Currency>((string)rate["currency"]!),
                                 SaleRateNb = (decimal?)rate["saleRateNB"] ?? 0,
@@ -85,22 +92,28 @@ public class ExchangeRateFetcherService : BackgroundService
                                 SaleRate = (decimal?)rate["saleRate"] ?? 0,
                                 PurchaseRate = (decimal?)rate["purchaseRate"] ?? 0
                             });
-
-                            using (var scope = _serviceProvider.CreateScope())
-                            {
-                                var exchangeRateRepository = scope.ServiceProvider.GetRequiredService<IExchangeRateRepository>();
-                                await exchangeRateRepository.SaveExchangeRatesAsync(exchangeRate.ToList());
-                            }
+                            await exchangeRateRepository.SaveExchangeRatesAsync(exchangeRate.ToList());
 
                             _logger.LogInformation("Successfully fetched data for {Date}", date);
-
-                            break; 
+                            break;
+                        }
+                        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" }) 
+                        {
+                            _logger.LogWarning("Data for {Date} already exists in the database", date);
+                            break;
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Failed to fetch data for {Date}, attempt {Attempt}", date, attempt + 1);
-                            if (attempt == 2) _logger.LogError("Max retries reached for {Date}", date);
-                            else await Task.Delay(1000, stoppingToken);
+                            _logger.LogError(ex, "Failed to fetch data for {Date}, attempt {Attempt}", date,
+                                attempt + 1);
+                            if (attempt == 2)
+                            {
+                                _logger.LogError("Max retries reached for {Date}", date);
+                            }
+                            else
+                            {
+                                await Task.Delay(1000, stoppingToken);
+                            }
                         }
                     }
                 }

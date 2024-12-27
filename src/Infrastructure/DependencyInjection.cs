@@ -38,8 +38,8 @@ public static class DependencyInjection
 
     private static void EnsureDatabaseCreated(IServiceCollection services)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        using var scope = serviceProvider.CreateScope();
+        ServiceProvider serviceProvider = services.BuildServiceProvider();
+        using IServiceScope scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
     }

@@ -78,7 +78,7 @@ public class ExchangeRateService : IExchangeRateService
             return BaseResult.FailureResult(["Currency type is required"]);
         }
 
-        var exchangeRates = await _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(
+        var exchangeRates = await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(
             exchangeRatesRangeDto.Start.ToUniversalTime(), exchangeRatesRangeDto.End.ToUniversalTime(),
             exchangeRatesRangeDto.Currency.Value);
 

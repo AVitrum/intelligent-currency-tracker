@@ -83,6 +83,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Date", "Currency")
+                        .IsUnique();
+
                     b.ToTable("ExchangeRates");
                 });
 

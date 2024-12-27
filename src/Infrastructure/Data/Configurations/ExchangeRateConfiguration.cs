@@ -11,5 +11,7 @@ public class ExchangeRateConfiguration: IEntityTypeConfiguration<ExchangeRate>
             .HasConversion(
                 v => v.ToString(),
                 v => Enum.Parse<Currency>(v));
+        
+        builder.HasIndex(e => new { e.Date, e.Currency }).IsUnique();
     }
 }

@@ -27,10 +27,16 @@ public class GoogleAuthService : IGoogleAuthService
 
     public async Task<BaseResult> HandleGoogleResponse(AuthenticateResult authResult)
     {
-        if (!authResult.Succeeded) return GoogleAuthResult.FailureResult("Authentication failed");
+        if (!authResult.Succeeded)
+        {
+            return GoogleAuthResult.FailureResult("Authentication failed");
+        }
 
         var email = GetEmailFromClaims(authResult);
-        if (email is null) return GoogleAuthResult.FailureResult("Email claim not found");
+        if (email is null)
+        {
+            return GoogleAuthResult.FailureResult("Email claim not found");
+        }
 
         ApplicationUser user = await GetUserByEmailAsync(email) ?? await HandleNewUserAsync(email);
 
@@ -43,7 +49,7 @@ public class GoogleAuthService : IGoogleAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
         
-        var token = _jwtService.GenerateToken(issuer, audience, key, claims);
+        JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
         
         return GoogleAuthResult.SuccessResult(new JwtSecurityTokenHandler().WriteToken(token));
     }

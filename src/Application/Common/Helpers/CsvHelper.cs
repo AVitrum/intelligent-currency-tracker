@@ -60,12 +60,12 @@ public class CsvHelper : ICsvHelper
             
             if (dto.Currency is null or Currency.ALL)
             {
-                exchangeRates = await _exchangeRateRepository.GetExchangeRatesAsync(startUtc, endUtc);
+                exchangeRates = await _exchangeRateRepository.GetAllByStartDateAndEndDateAsync(startUtc, endUtc);
             }
             else
             {
                 exchangeRates =
-                    await _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(startUtc, endUtc, dto.Currency.Value);
+                    await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(startUtc, endUtc, dto.Currency.Value);
             }
             var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
                 _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();

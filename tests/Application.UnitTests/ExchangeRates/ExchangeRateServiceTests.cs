@@ -70,7 +70,7 @@ public class ExchangeRateServiceTests
             PurchaseRate = 0
         };
 
-        A.CallTo(() => _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(dto.Start, dto.End, dto.Currency.Value))
+        A.CallTo(() => _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(dto.Start, dto.End, dto.Currency.Value))
             .Returns(exchangeRates);
         A.CallTo(() => _mapper.Map<ExchangeRateDto>(A<ExchangeRate>.Ignored)).Returns(exchangeRateDto);
 
@@ -99,7 +99,7 @@ public class ExchangeRateServiceTests
         dto.Start = startDate;
         dto.End = endDate;
 
-        A.CallTo(() => _exchangeRateRepository.GetExchangeRatesByCurrencyAsync(dto.Start, dto.End, dto.Currency.Value))
+        A.CallTo(() => _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(dto.Start, dto.End, dto.Currency.Value))
             .Returns(new List<ExchangeRate>());
 
         // Act
