@@ -26,7 +26,6 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
-        services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
         
         services.AddHostedService<ExchangeRateFetcherService>();

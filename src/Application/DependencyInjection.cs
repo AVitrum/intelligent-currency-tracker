@@ -1,4 +1,3 @@
-using Application.Books;
 using Application.Common.Interfaces;
 using Application.ExchangeRates;
 using Application.Kafka;
@@ -15,7 +14,6 @@ public static class DependencyInjection
 
         services.AddHttpClient();
         
-        services.AddScoped<IBookService, BookService>();
         services.AddScoped<IExchangeRateService, ExchangeRateService>();
         services.AddScoped<ICsvExchangeRateService, CsvExchangeRateService>();
         services.AddScoped<IMlModelService, MlModelService>();

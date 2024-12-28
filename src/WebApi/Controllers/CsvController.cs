@@ -29,9 +29,10 @@ public class CsvController : ControllerBase
     public async Task<IActionResult> ExportCsvAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
         BaseResult result = await _csvExchangeRateService.ExportExchangeRatesToCsvAsync(dto);
-        
         if (result is ExportExchangeRatesToCsvResult exportResult)
+        {
             return File(exportResult.FileContent, "text/csv", exportResult.FileName);
+        }
         
         return BadRequest(result.Errors);
     }

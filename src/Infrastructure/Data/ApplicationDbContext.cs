@@ -7,7 +7,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     
-    public DbSet<Book> Books => Set<Book>();
     public DbSet<ExchangeRate> ExchangeRates => Set<ExchangeRate>();
     
     protected override void OnModelCreating(ModelBuilder builder)

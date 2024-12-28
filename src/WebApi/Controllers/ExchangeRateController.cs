@@ -30,8 +30,10 @@ public class ExchangeRateController : ControllerBase
     public async Task<IActionResult> GetRangeAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
         BaseResult result = await _exchangeRateService.GetRangeAsync(dto);
-
-        if (result is not GetExchangeRateRangeResult rangeResult) return BadRequest(result.Errors);
+        if (result is not GetExchangeRateRangeResult rangeResult)
+        {
+            return BadRequest(result.Errors);
+        }
 
         return Ok(rangeResult.Data);
     }

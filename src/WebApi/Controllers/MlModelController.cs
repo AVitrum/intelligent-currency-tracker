@@ -29,8 +29,10 @@ public class MlModelController : ControllerBase
     public async Task<IActionResult> PredictAsync([FromQuery] ExchangeRatePredictionDto dto)
     {
         BaseResult result = await _mlModelService.PredictAsync(dto);
-
-        if (result is ExchangeRatePredictionResult predictionResult) return Ok(predictionResult.Prediction);
+        if (result is ExchangeRatePredictionResult predictionResult)
+        {
+            return Ok(predictionResult.Prediction);
+        }
 
         return BadRequest(result.Errors);
     }

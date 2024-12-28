@@ -21,7 +21,10 @@ public class GoogleAuthController : ControllerBase
     {
         return new ChallengeResult(
             GoogleDefaults.AuthenticationScheme,
-            new AuthenticationProperties { RedirectUri = "/api/GoogleAuth/response" });
+            new AuthenticationProperties
+            {
+                RedirectUri = "/api/GoogleAuth/response"
+            });
     }
     
     [HttpGet("response")]
@@ -31,8 +34,10 @@ public class GoogleAuthController : ControllerBase
     {
         AuthenticateResult authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
         BaseResult result = await _googleAuthService.HandleGoogleResponse(authResult);
-        
-        if (result is not GoogleAuthResult googleAuthResult) return Unauthorized();
+        if (result is not GoogleAuthResult googleAuthResult)
+        {
+            return Unauthorized();
+        }
         
         Response.Cookies.Append("jwt", googleAuthResult.Token, new CookieOptions
         {
