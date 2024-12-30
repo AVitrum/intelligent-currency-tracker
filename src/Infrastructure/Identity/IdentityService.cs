@@ -62,23 +62,48 @@ public class IdentityService : IIdentityService
         return result.Succeeded;
     }
 
-    public async Task<BaseResult> LoginAsync(string userName, string password)
+    public async Task<BaseResult> LoginAsync(LoginUserModel model)
     {
-        ApplicationUser? user = await _userManager.FindByNameAsync(userName);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+        if (model.UserName is not null)
         {
-            throw new UserNotFoundException("User not found or password is incorrect");
+            ApplicationUser? user = await _userManager.FindByNameAsync(model.UserName);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                throw new UserNotFoundException("User not found or password is incorrect");
+            }
+
+            _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
+            
+            Claim[] claims =
+            [
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            ];
+            JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
+        
+            return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));
+        }
+        
+        if (model.Email is not null)
+        {
+            ApplicationUser? user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                throw new UserNotFoundException("User not found or password is incorrect");
+            }
+
+            _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
+            
+            Claim[] claims =
+            [
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            ];
+            JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
+        
+            return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));
         }
 
-        _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
-            
-        Claim[] claims =
-        [
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        ];
-        JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
-        
-        return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));
+        throw new UserNotFoundException("User not found or password is incorrect");
     }
 }

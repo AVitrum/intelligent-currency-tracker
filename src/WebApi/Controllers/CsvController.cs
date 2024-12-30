@@ -1,5 +1,6 @@
 using Application.ExchangeRates.Results;
 using Domain.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers;
 
@@ -14,9 +15,11 @@ public class CsvController : ControllerBase
         _csvExchangeRateService = csvExchangeRateService;
     }
 
-    [HttpPost("uploadCsv")]
+    [HttpPost("upload")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UploadCsvAsync([FromForm] CsvFileUploadDto dto)
     {
@@ -24,9 +27,11 @@ public class CsvController : ControllerBase
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
-    [HttpGet("exportCsv")]
+    [HttpGet("export")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ExportCsvAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
         BaseResult result = await _csvExchangeRateService.ExportExchangeRatesToCsvAsync(dto);

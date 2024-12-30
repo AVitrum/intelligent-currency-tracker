@@ -1,5 +1,6 @@
 using Application.ExchangeRates.Results;
 using Domain.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers;
 
@@ -15,8 +16,10 @@ public class MlModelController : ControllerBase
     }
 
     [HttpPost("trainModel")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> TrainModelAsync(ExchangeRatesRangeDto dto)
     {
         BaseResult result = await _mlModelService.TrainModelAsync(dto);
@@ -24,8 +27,10 @@ public class MlModelController : ControllerBase
     }
     
     [HttpGet("predict")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> PredictAsync([FromQuery] ExchangeRatePredictionDto dto)
     {
         BaseResult result = await _mlModelService.PredictAsync(dto);

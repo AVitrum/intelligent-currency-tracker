@@ -7,6 +7,6 @@ namespace Application.Common.Interfaces
     {
         Task<BaseResult> CreateUserAsync(CreateUserModel userModel);
         Task<bool> AuthorizeAsync(string userId, string policyName);
-        Task<BaseResult> LoginAsync(string userName, string password);
+        Task<BaseResult> LoginAsync(LoginUserModel model);
     }
 }

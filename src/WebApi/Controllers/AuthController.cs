@@ -32,9 +32,9 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login(CreateUserModel model)
+    public async Task<IActionResult> Login(LoginUserModel model)
     {
-        BaseResult result = await _identityService.LoginAsync(model.UserName, model.Password);
+        BaseResult result = await _identityService.LoginAsync(model);
         if (result is not IdentityServiceResult identityServiceResult)
         {
             return Unauthorized("Invalid login attempt");
