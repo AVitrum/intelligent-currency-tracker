@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -16,7 +17,7 @@ public class CustomExceptionHandler : IExceptionHandler
     
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+        string traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
         
         _logger.LogError(
             exception,
@@ -25,7 +26,7 @@ public class CustomExceptionHandler : IExceptionHandler
             traceId
         );
 
-        var (statusCode, title) = MapException(exception);
+        (int statusCode, string title) = MapException(exception);
 
         await Results.Problem(
             title: title,
@@ -44,6 +45,10 @@ public class CustomExceptionHandler : IExceptionHandler
         {
             DbUpdateException { InnerException: PostgresException { SqlState: "23505" } } => 
                 (409, "Duplicate key value violates unique constraint"),
+            DataNotFoundException ex => (404, ex.Message),
+            ImportCsvException ex => (400, ex.Message),
+            ExportCsvException ex => (400, ex.Message),
+            UserNotFoundException ex => (401, ex.Message),
             _ => (500, "An error occurred while processing your request")
         };
     }

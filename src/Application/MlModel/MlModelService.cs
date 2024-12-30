@@ -28,21 +28,12 @@ public class MlModelService : IMlModelService
 
     public async Task<BaseResult> TrainModelAsync(ExchangeRatesRangeDto dto)
     {
-        _logger.LogInformation("Starting TrainModelAsync");
-
-        BaseResult baseResult = await _csvHelper.ExportExchangeRateToCsvAsync(dto);
-
-        if (baseResult is not ExportExchangeRatesToCsvResult exportResult)
-        {
-            _logger.LogWarning("Failed to export exchange rates to CSV");
-            return BaseResult.FailureResult(["Failed to export exchange rates to CSV"]);
-        }
-        _logger.LogInformation("Successfully exported exchange rates to CSV");
-        var csvContent = Encoding.UTF8.GetString(exportResult.FileContent);
-        var message = new { content = csvContent };
+        (_, byte[] content) = await _csvHelper.ExportExchangeRateToCsvAsync(dto);
         
-        var serializedMessage = JsonSerializer.Serialize(message);
-        var messageSize = Encoding.UTF8.GetByteCount(serializedMessage);
+        string csvContent = Encoding.UTF8.GetString(content);
+        var message = new { content = csvContent };
+        string serializedMessage = JsonSerializer.Serialize(message);
+        int messageSize = Encoding.UTF8.GetByteCount(serializedMessage);
 
         _logger.LogInformation("Message size: {Size} bytes", messageSize);
 
@@ -64,7 +55,8 @@ public class MlModelService : IMlModelService
             response.EnsureSuccessStatusCode();
 
             _logger.LogInformation("Successfully received prediction");
-            var prediction = await response.Content.ReadAsStringAsync();
+            string prediction = await response.Content.ReadAsStringAsync();
+            
             return ExchangeRatePredictionResult.SuccessResult(prediction);
         }
         catch (HttpRequestException ex)

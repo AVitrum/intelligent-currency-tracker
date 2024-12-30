@@ -1,12 +1,11 @@
 using System.Globalization;
 using System.Text;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
-using Application.ExchangeRates.Results;
 using AutoMapper;
 using CsvHelper;
 using CsvHelper.Configuration;
-using Domain.Common;
 using Domain.Constans;
 using Domain.Entities;
 using Domain.Enums;
@@ -28,28 +27,25 @@ public class CsvHelper : ICsvHelper
         _logger = logger;
     }
 
-    public async Task<BaseResult> ImportExchangeRateFromCsvAsync(IFormFile? file)
+    public async Task<bool> ImportExchangeRateFromCsvAsync(IFormFile? file)
     {
         if (file is null || file.Length == 0)
         {
             _logger.LogWarning("File is empty or null");
-            return BaseResult.FailureResult(["File is empty"]);
+            throw new ArgumentNullException(nameof(file));
         }
 
         _logger.LogInformation("Starting GetExchangeRatesFromCsvAsync");
 
-        var csvData = await ReadCsvFileAsync(file);
-        if (csvData == null)
-        {
-            return BaseResult.FailureResult(new[] { "Invalid date format in CSV" });
-        }
+        List<ExchangeRate> csvData = await ReadCsvFileAsync(file) 
+                                     ?? throw new ImportCsvException("Invalid date format in CSV");
 
         await _exchangeRateRepository.SaveExchangeRatesAsync(csvData);
         _logger.LogInformation("Successfully processed CSV file and saved exchange rates");
-        return BaseResult.SuccessResult();
+        return true;
     }
         
-    public async Task<BaseResult> ExportExchangeRateToCsvAsync(ExchangeRatesRangeDto dto)
+    public async Task<(string, byte[])> ExportExchangeRateToCsvAsync(ExchangeRatesRangeDto dto)
     {
         try
         {
@@ -65,20 +61,31 @@ public class CsvHelper : ICsvHelper
             else
             {
                 exchangeRates =
-                    await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(startUtc, endUtc, dto.Currency.Value);
+                    await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(startUtc, endUtc,
+                        dto.Currency.Value);
             }
             var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
                 _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
+            
+            if (exchangeRatesDto.Count == 0)
+            {
+                throw new DataNotFoundException("No exchange rates found for the specified date range");
+            }
                 
-            var fileContent = await CreateCsvFileAsync(exchangeRatesDto);
             var fileName = $"ExchangeRates_{dto.Currency.ToString()}_{dto.Start:yyyyMMdd}_{dto.End:yyyyMMdd}.csv";
-                
-            return ExportExchangeRatesToCsvResult.SuccessResult(fileContent, fileName);
+            byte[] fileContent = await CreateCsvFileAsync(exchangeRatesDto);
+            _logger.LogInformation("Successfully exported exchange rates to CSV file");
+            return (fileName, fileContent);
+        }
+        catch (DataNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "No exchange rates found for the specified date range");
+            throw;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while exporting exchange rates to CSV file");
-            return BaseResult.FailureResult(["An error occurred while exporting exchange rates to CSV file"]);
+            throw new ExportCsvException("An error occurred while exporting exchange rates to CSV file");
         }
     }
         
@@ -89,7 +96,7 @@ public class CsvHelper : ICsvHelper
 
         while (!reader.EndOfStream)
         {
-            var line = await reader.ReadLineAsync();
+            string? line = await reader.ReadLineAsync();
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith("Date")) continue;
 
             ExchangeRate? exchangeRate = ParseCsvLine(line);
@@ -107,11 +114,11 @@ public class CsvHelper : ICsvHelper
 
     private ExchangeRate? ParseCsvLine(string line)
     {
-        var values = line.Split(',');
+        string[] values = line.Split(',');
 
         if (values.Length != 6) return null;
 
-        if (!DateTime.TryParseExact(values[0], DateConstants.DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+        if (!DateTime.TryParseExact(values[0], DateConstants.DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
         {
             return null;
         }

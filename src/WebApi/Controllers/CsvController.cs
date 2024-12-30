@@ -17,6 +17,7 @@ public class CsvController : ControllerBase
     [HttpPost("uploadCsv")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UploadCsvAsync([FromForm] CsvFileUploadDto dto)
     {
         BaseResult result = await _csvExchangeRateService.GetExchangeRatesFromCsvAsync(dto.File);

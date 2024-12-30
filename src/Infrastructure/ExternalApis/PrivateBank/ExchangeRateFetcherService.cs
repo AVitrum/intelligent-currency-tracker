@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using Npgsql;
 
 namespace Infrastructure.ExternalApis.PrivateBank;
 
@@ -15,28 +14,26 @@ public class ExchangeRateFetcherService : BackgroundService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExchangeRateFetcherService> _logger;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _scopeFactory;
     
-    public ExchangeRateFetcherService(IHttpClientFactory httpClientFactory, ILogger<ExchangeRateFetcherService> logger, IServiceProvider serviceProvider)
+    public ExchangeRateFetcherService(
+        IHttpClientFactory httpClientFactory,
+        ILogger<ExchangeRateFetcherService> logger,
+        IServiceScopeFactory scopeFactory)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _serviceProvider = serviceProvider;
+        _scopeFactory = scopeFactory;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        return Task.Run(() => _ = ConsumeAsync("fetch-exchange-rates", stoppingToken), stoppingToken);
-    }
+    protected override Task ExecuteAsync(CancellationToken stoppingToken) =>
+        Task.Run(() => ConsumeAsync("fetch-exchange-rates", stoppingToken), stoppingToken);
 
     private async Task ConsumeAsync(string topic, CancellationToken stoppingToken)
     {
-        string kafkaHost;
-        using (IServiceScope scope = _serviceProvider.CreateScope())
-        {
-            var appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
-            kafkaHost = appSettings.KafkaHost;
-        }
+        using IServiceScope scope = _scopeFactory.CreateScope();
+        IAppSettings appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
+        string kafkaHost = appSettings.KafkaHost;
         
         var config = new ConsumerConfig
         {
@@ -46,85 +43,102 @@ public class ExchangeRateFetcherService : BackgroundService
             MaxPollIntervalMs = 600000
         };
 
-        using var consumer = new ConsumerBuilder<string, string>(config).Build();
+        using IConsumer<string, string> consumer = new ConsumerBuilder<string, string>(config).Build();
         consumer.Subscribe(topic);
 
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var consumeResult = consumer.Consume(stoppingToken);
-                var requestData = JsonSerializer.Deserialize<RequestData>(consumeResult.Message.Value);
+                ConsumeResult<string, string> consumeResult = consumer.Consume(stoppingToken);
+                RequestData? requestData = JsonSerializer.Deserialize<RequestData>(consumeResult.Message.Value);
 
                 if (requestData == null)
                 {
-                    _logger.LogError("Received null or invalid data from Kafka");
+                    _logger.LogError("Received invalid data from Kafka");
                     continue;
                 }
 
-                HttpClient httpClient = _httpClientFactory.CreateClient();
-                using IServiceScope scope = _serviceProvider.CreateScope();
-                var exchangeRateRepository = scope.ServiceProvider.GetRequiredService<IExchangeRateRepository>();
-
-                foreach (var date in requestData.Dates)
+                foreach (string date in requestData.Dates)
                 {
-                    var formattedUrl = string.Format(requestData.UrlTemplate, date);
-                    for (var attempt = 0; attempt < 3; attempt++)
-                    {
-                        try
-                        {
-                            _logger.LogInformation("Fetching data for {Date}, attempt {Attempt}", date,
-                                attempt + 1);
-                            HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, stoppingToken);
-
-                            response.EnsureSuccessStatusCode();
-                            var jsonData = await response.Content.ReadAsStringAsync(stoppingToken);
-                            JToken exchangeRates = JObject.Parse(jsonData)["exchangeRate"]!;
-
-                            var exchangeRate = exchangeRates.Select(rate => new ExchangeRate
-                            {
-                                Date = DateTime.ParseExact((string)JObject.Parse(jsonData)["date"]!,
-                                    DateConstants.DateFormat,
-                                    CultureInfo.InvariantCulture),
-                                Currency = Enum.Parse<Currency>((string)rate["currency"]!),
-                                SaleRateNb = (decimal?)rate["saleRateNB"] ?? 0,
-                                PurchaseRateNb = (decimal?)rate["purchaseRateNB"] ?? 0,
-                                SaleRate = (decimal?)rate["saleRate"] ?? 0,
-                                PurchaseRate = (decimal?)rate["purchaseRate"] ?? 0
-                            });
-                            await exchangeRateRepository.SaveExchangeRatesAsync(exchangeRate.ToList());
-
-                            _logger.LogInformation("Successfully fetched data for {Date}", date);
-                            break;
-                        }
-                        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" }) 
-                        {
-                            _logger.LogWarning("Data for {Date} already exists in the database", date);
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to fetch data for {Date}, attempt {Attempt}", date,
-                                attempt + 1);
-                            if (attempt == 2)
-                            {
-                                _logger.LogError("Max retries reached for {Date}", date);
-                            }
-                            else
-                            {
-                                await Task.Delay(1000, stoppingToken);
-                            }
-                        }
-                    }
+                    await ProcessDateAsync(requestData.UrlTemplate, date, stoppingToken);
                 }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error consuming Kafka messages");
+        }
+        finally
+        {
+            consumer.Close();
+        }
+    }
+
+    private async Task ProcessDateAsync(string urlTemplate, string date, CancellationToken stoppingToken)
+    {
+        using IServiceScope scope = _scopeFactory.CreateScope();
+        IExchangeRateRepository repository = scope.ServiceProvider.GetRequiredService<IExchangeRateRepository>();
+
+        var url = string.Format(urlTemplate, date);
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            try
+            {
+                bool exists = await repository.ExistsByDateAsync(
+                    DateTime.SpecifyKind(
+                        DateTime.ParseExact(date, "dd.MM.yyyy", CultureInfo.InvariantCulture),
+                        DateTimeKind.Utc).ToUniversalTime());
+                
+                if (exists)
+                {
+                    _logger.LogWarning("Data for {Date} already exists", date);
+                    break;
+                }
+
+                await FetchAndSaveDataAsync(url, repository, stoppingToken);
+                _logger.LogInformation("Successfully fetched data for {Date}", date);
+                break;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error consuming messages from Kafka");
+                _logger.LogError(ex, "Error fetching data for {Date}, attempt {Attempt}", date, attempt + 1);
+                if (attempt == 2) _logger.LogError("Max retries reached for {Date}", date);
+                else await Task.Delay(1000, stoppingToken);
             }
         }
+    }
 
-        consumer.Close();
+    private async Task FetchAndSaveDataAsync(string url, IExchangeRateRepository repository, CancellationToken token)
+    {
+        HttpClient httpClient = _httpClientFactory.CreateClient();
+        HttpResponseMessage response = await httpClient.GetAsync(url, token);
+        
+        response.EnsureSuccessStatusCode();
+        
+        string jsonData = await response.Content.ReadAsStringAsync(token);
+        var jsonObject = JObject.Parse(jsonData);
+        
+        string responseDate = jsonObject["date"]?.ToString() ?? throw new Exception("Missing 'date' field in response");
+        var parsedDate = DateTime.ParseExact(responseDate, DateConstants.DateFormat, CultureInfo.InvariantCulture);
+
+        JToken? exchangeRatesToken = jsonObject["exchangeRate"];
+        if (exchangeRatesToken is not { HasValues: true })
+        {
+            throw new Exception("Missing or empty 'exchangeRate' field in response");
+        }
+
+        var exchangeRates = exchangeRatesToken.Select(rate => new ExchangeRate
+        {
+            Date = parsedDate,
+            Currency = Enum.TryParse(rate["currency"]?.ToString(), out Currency currency) ? currency : throw new Exception("Invalid 'currency' field"),
+            SaleRateNb = rate["saleRateNB"]?.ToObject<decimal>() ?? 0,
+            PurchaseRateNb = rate["purchaseRateNB"]?.ToObject<decimal>() ?? 0,
+            SaleRate = rate["saleRate"]?.ToObject<decimal>() ?? 0,
+            PurchaseRate = rate["purchaseRate"]?.ToObject<decimal>() ?? 0
+        }).ToList();
+
+        await repository.SaveExchangeRatesAsync(exchangeRates);
     }
 
     private record RequestData

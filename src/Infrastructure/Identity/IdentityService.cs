@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Application.Common.Exceptions;
+using Application.Common.Models;
 using Domain.Common;
 using Infrastructure.Identity.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -26,12 +28,21 @@ public class IdentityService : IIdentityService
         _jwtService = jwtService;
     }
 
-    public async Task<BaseResult> CreateUserAsync(string userName, string password)
+    //TODO: Add phone number validation
+    public async Task<BaseResult> CreateUserAsync(CreateUserModel userModel)
     {
-        var user = new ApplicationUser { UserName = userName };
-        IdentityResult result = await _userManager.CreateAsync(user, password);
-            
-        if (result.Succeeded) return BaseResult.SuccessResult();
+        var user = new ApplicationUser
+        {
+            UserName = userModel.UserName,
+            Email = userModel.Email,
+            PhoneNumber = userModel.PhoneNumber
+        };
+        
+        IdentityResult result = await _userManager.CreateAsync(user, userModel.Password);
+        if (result.Succeeded)
+        {
+            return BaseResult.SuccessResult();
+        }
 
         var errors = result.Errors.Select(error => error.Description).ToList();
         return BaseResult.FailureResult(errors);
@@ -40,8 +51,10 @@ public class IdentityService : IIdentityService
     public async Task<bool> AuthorizeAsync(string userId, string policyName)
     {
         ApplicationUser? user = await _userManager.FindByIdAsync(userId);
-            
-        if (user == null) return false;
+        if (user is null)
+        {
+            return false;
+        }
 
         ClaimsPrincipal principal = await _userClaimsPrincipalFactory.CreateAsync(user);
         AuthorizationResult result = await _authorizationService.AuthorizeAsync(principal, policyName);
@@ -52,17 +65,18 @@ public class IdentityService : IIdentityService
     public async Task<BaseResult> LoginAsync(string userName, string password)
     {
         ApplicationUser? user = await _userManager.FindByNameAsync(userName);
-            
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-            return BaseResult.FailureResult(["Invalid username or password."]);
-
-        _jwtService.GetJwtConfiguration(out var issuer, out var audience, out var key);
-            
-        var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+            throw new UserNotFoundException("User not found or password is incorrect");
+        }
+
+        _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
+            
+        Claim[] claims =
+        [
+            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        ];
         JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
         
         return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));

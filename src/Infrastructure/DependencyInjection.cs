@@ -14,7 +14,7 @@ public static class DependencyInjection
     { 
         services.AddSingleton<IAppSettings, AppSettings>();
         
-        var appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
+        IAppSettings appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(appSettings.DbConnectionString));
@@ -39,7 +39,12 @@ public static class DependencyInjection
     {
         ServiceProvider serviceProvider = services.BuildServiceProvider();
         using IServiceScope scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
+        ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
+        if (pendingMigrations.Any())
+        {
+            context.Database.Migrate();
+        }
     }
 }

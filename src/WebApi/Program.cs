@@ -31,6 +31,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler("/error");
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCookiePolicy();
@@ -38,5 +39,14 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.Map("/error", async (HttpContext context, IExceptionHandler exceptionHandler) =>
+{
+    IExceptionHandlerFeature? exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+    if (exceptionFeature?.Error != null)
+    {
+        await exceptionHandler.TryHandleAsync(context, exceptionFeature.Error, context.RequestAborted);
+    }
+});
 
 app.Run();

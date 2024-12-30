@@ -27,9 +27,11 @@ public class GoogleAuthController : ControllerBase
             });
     }
     
+    //TODO: Fix http status codes
     [HttpGet("response")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> GoogleResponse()
     {
         AuthenticateResult authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);

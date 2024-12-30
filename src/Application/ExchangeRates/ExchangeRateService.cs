@@ -5,6 +5,7 @@ using AutoMapper;
 using Confluent.Kafka;
 using Domain.Common;
 using Domain.Constans;
+using Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -65,7 +66,7 @@ public class ExchangeRateService : IExchangeRateService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send fetch request to Kafka");
-            return BaseResult.FailureResult(new List<string> { "Failed to send fetch request to Kafka" });
+            return BaseResult.FailureResult(["Failed to send fetch request to Kafka"]);
         }
 
         return BaseResult.SuccessResult();
@@ -78,14 +79,15 @@ public class ExchangeRateService : IExchangeRateService
             return BaseResult.FailureResult(["Currency type is required"]);
         }
 
-        var exchangeRates = await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(
-            exchangeRatesRangeDto.Start.ToUniversalTime(), exchangeRatesRangeDto.End.ToUniversalTime(),
-            exchangeRatesRangeDto.Currency.Value);
+        IEnumerable<ExchangeRate> exchangeRates =
+            await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(
+                exchangeRatesRangeDto.Start.ToUniversalTime(), exchangeRatesRangeDto.End.ToUniversalTime(),
+                exchangeRatesRangeDto.Currency.Value);
 
         var exchangeRateList = exchangeRates.ToList();
         if (exchangeRateList.Count == 0)
         {
-            return BaseResult.FailureResult(["No exchange rates found"]);
+            return GetExchangeRateRangeResult.FailureNotFoundResult();
         }
         
         var exchangeRateDtoList = exchangeRateList.Select(exchangeRate =>

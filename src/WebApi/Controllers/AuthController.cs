@@ -3,6 +3,7 @@ using Infrastructure.Identity.Results;
 
 namespace WebApi.Controllers;
 
+//TODO: Refactor whole controller
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -16,16 +17,16 @@ public class AuthController : ControllerBase
 
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register(CreateUserModel model)
     {
-        BaseResult result = await _identityService.CreateUserAsync(model.UserName, model.Password);
+        BaseResult result = await _identityService.CreateUserAsync(model);
         if (result.Success)
         {
             return CreatedAtAction(nameof(Register), new { model.UserName }, null);
         }
 
-        return BadRequest(result.Errors);
+        return Conflict(result.Errors);
     }
 
     [HttpPost("login")]
@@ -39,7 +40,7 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid login attempt");
         }
 
-        var token = identityServiceResult.Token;
+        string token = identityServiceResult.Token;
         
         return Ok(new { Token = token });
     }

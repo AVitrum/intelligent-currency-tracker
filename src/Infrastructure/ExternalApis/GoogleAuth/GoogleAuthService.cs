@@ -32,7 +32,7 @@ public class GoogleAuthService : IGoogleAuthService
             return GoogleAuthResult.FailureResult("Authentication failed");
         }
 
-        var email = GetEmailFromClaims(authResult);
+        string? email = GetEmailFromClaims(authResult);
         if (email is null)
         {
             return GoogleAuthResult.FailureResult("Email claim not found");
@@ -40,14 +40,14 @@ public class GoogleAuthService : IGoogleAuthService
 
         ApplicationUser user = await GetUserByEmailAsync(email) ?? await HandleNewUserAsync(email);
 
-        _jwtService.GetJwtConfiguration(out var issuer, out var audience, out var key);
+        _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
         
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+        Claim[] claims =
+        [
+            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Email, email),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        ];
         
         JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
         

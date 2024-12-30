@@ -23,18 +23,18 @@ public class ExchangeRateController : ControllerBase
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
     
-    
     [HttpGet("getRange")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRangeAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
         BaseResult result = await _exchangeRateService.GetRangeAsync(dto);
-        if (result is not GetExchangeRateRangeResult rangeResult)
+        return result switch
         {
-            return BadRequest(result.Errors);
-        }
-
-        return Ok(rangeResult.Data);
+            GetExchangeRateRangeResult { Success: true } rangeResult => Ok(rangeResult.Data),
+            GetExchangeRateRangeResult rangeResult when rangeResult.Equals(GetExchangeRateRangeResult.FailureNotFoundResult()) => NotFound(rangeResult.Errors),
+            _ => BadRequest(result.Errors)
+        };
     }
 }

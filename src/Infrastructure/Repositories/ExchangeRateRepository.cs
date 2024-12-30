@@ -37,4 +37,9 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
             .OrderBy(rate => rate.Date)
             .ToListAsync();
     }
+
+    public async Task<bool> ExistsByDateAsync(DateTime date)
+    {
+        return await _context.ExchangeRates.AnyAsync(rate => rate.Date == date);
+    }
 }
