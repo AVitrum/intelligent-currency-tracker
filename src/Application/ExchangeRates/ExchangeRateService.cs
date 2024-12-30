@@ -92,15 +92,8 @@ public class ExchangeRateService : IExchangeRateService
         
         var exchangeRateDtoList = exchangeRateList.Select(exchangeRate =>
             _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
-
         var exchangeRateListDto = new GetExchangeRateListDto(exchangeRateDtoList);
-        
-        await _kafkaProducer.ProduceAsync("exchange-rates", new Message<string, string>
-        {
-            Key = "exchange-rates",
-            Value = JsonConvert.SerializeObject(exchangeRateListDto)
-        });
-        
+
         return GetExchangeRateRangeResult.SuccessResult(exchangeRateListDto);
     }
 }
