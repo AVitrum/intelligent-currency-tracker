@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text.Json;
 using Confluent.Kafka;
 using Domain.Constans;
-using Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -131,7 +130,7 @@ public class ExchangeRateFetcherService : BackgroundService
         var exchangeRates = exchangeRatesToken.Select(rate => new ExchangeRate
         {
             Date = parsedDate,
-            Currency = Enum.TryParse(rate["currency"]?.ToString(), out Currency currency) ? currency : throw new Exception("Invalid 'currency' field"),
+            Currency = rate["currency"]?.ToString() ?? throw new Exception("Invalid 'currency' field"),
             SaleRateNb = rate["saleRateNB"]?.ToObject<decimal>() ?? 0,
             PurchaseRateNb = rate["purchaseRateNB"]?.ToObject<decimal>() ?? 0,
             SaleRate = rate["saleRate"]?.ToObject<decimal>() ?? 0,
