@@ -1,5 +1,3 @@
-using Domain.Enums;
-
 namespace Infrastructure.Repositories;
 
 public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRateRepository
@@ -30,7 +28,7 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ExchangeRate>> GetAllByStartDateAndEndDateAndCurrencyAsync(DateTime start, DateTime end, Currency currency)
+    public async Task<IEnumerable<ExchangeRate>> GetAllByStartDateAndEndDateAndCurrencyAsync(DateTime start, DateTime end, string currency)
     {
         return await _context.ExchangeRates
             .Where(rate => rate.Date >= start && rate.Date <= end && rate.Currency == currency)

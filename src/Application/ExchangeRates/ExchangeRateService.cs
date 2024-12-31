@@ -82,7 +82,7 @@ public class ExchangeRateService : IExchangeRateService
         IEnumerable<ExchangeRate> exchangeRates =
             await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(
                 exchangeRatesRangeDto.Start.ToUniversalTime(), exchangeRatesRangeDto.End.ToUniversalTime(),
-                exchangeRatesRangeDto.Currency.Value);
+                exchangeRatesRangeDto.Currency);
 
         var exchangeRateList = exchangeRates.ToList();
         if (exchangeRateList.Count == 0)

@@ -1,5 +1,4 @@
 using Domain.Common;
-using Domain.Enums;
 
 namespace Domain.Entities;
 
@@ -12,9 +11,9 @@ public class ExchangeRate : BaseEntity
     }
     
     private readonly DateTime _date;
-    public required Currency Currency { get; init; }
-    public decimal SaleRateNb { get; set; }
-    public decimal PurchaseRateNb { get; set; }
-    public decimal SaleRate { get; set; }
-    public decimal PurchaseRate { get; set; }
+    public required string? Currency { get; init; }
+    public decimal SaleRateNb { get; init; }
+    public decimal PurchaseRateNb { get; init; }
+    public decimal SaleRate { get; init; }
+    public decimal PurchaseRate { get; init; }
 }
