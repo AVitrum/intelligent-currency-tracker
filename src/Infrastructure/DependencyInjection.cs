@@ -30,11 +30,15 @@ public static class DependencyInjection
         
         services.AddHostedService<ExchangeRateFetcherService>();
 
-        if (appSettings.IsDocker()) EnsureDatabaseCreated(services);
+        if (appSettings.IsDocker())
+        {
+            EnsureDatabaseCreated(services);
+        }
         
         return services;
     }
 
+    //TODO: Fix this method and move it to a separate class file.
     private static void EnsureDatabaseCreated(IServiceCollection services)
     {
         ServiceProvider serviceProvider = services.BuildServiceProvider();
