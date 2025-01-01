@@ -1,10 +1,15 @@
 using Application;
+using DotNetEnv;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
 using WebApi;
 using WebApi.Infrastructure;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+Env.Load(Path.Combine("..", "..", ".env.development"));
+builder.Configuration.AddEnvironmentVariables();
+
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
