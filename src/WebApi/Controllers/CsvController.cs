@@ -21,7 +21,7 @@ public class CsvController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> UploadCsvAsync([FromForm] CsvFileUploadDto dto)
+    public async Task<IActionResult> UploadAsync([FromForm] CsvFileUploadDto dto)
     {
         BaseResult result = await _csvExchangeRateService.GetExchangeRatesFromCsvAsync(dto.File);
         return result.Success ? Ok() : BadRequest(result.Errors);
@@ -32,7 +32,7 @@ public class CsvController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> ExportCsvAsync([FromQuery] ExchangeRatesRangeDto dto)
+    public async Task<IActionResult> ExportAsync([FromQuery] ExchangeRatesRangeDto dto)
     {
         BaseResult result = await _csvExchangeRateService.ExportExchangeRatesToCsvAsync(dto);
         if (result is ExportExchangeRatesToCsvResult exportResult)

@@ -33,28 +33,29 @@ public class AppSettings : IAppSettings
     private void Initialize()
     {
         DbConnectionString = GetConnectionString();
-        JwtKey = GetConfigurationValue("JWT_KEY", "Jwt:Key");
-        JwtIssuer = GetConfigurationValue("JWT_ISSUER", "Jwt:Issuer");
-        JwtAudience = GetConfigurationValue("JWT_AUDIENCE", "Jwt:Audience");
-        GoogleClientId = GetConfigurationValue("GOOGLE_CLIENT_ID", "Authentication:Google:ClientId");
-        GoogleClientSecret = GetConfigurationValue("GOOGLE_CLIENT_SECRET", "Authentication:Google:ClientSecret");
-        ModelUrl = GetConfigurationValue("MODEL_URL", "Model:URL");
-        PrivateBankUrl = GetConfigurationValue("PRIVATE_BANK_URL", "PrivateBank:URL");
-        KafkaHost = GetConfigurationValue("KAFKA_HOST", "Kafka:Host");
+        JwtKey = GetConfigurationValue("JWT_KEY");
+        JwtIssuer = GetConfigurationValue("JWT_ISSUER");
+        JwtAudience = GetConfigurationValue("JWT_AUDIENCE");
+        GoogleClientId = GetConfigurationValue("GOOGLE_CLIENT_ID");
+        GoogleClientSecret = GetConfigurationValue("GOOGLE_CLIENT_SECRET");
+        ModelUrl = GetConfigurationValue("MODEL_URL");
+        PrivateBankUrl = GetConfigurationValue("PRIVATE_BANK_URL");
+        KafkaHost = GetConfigurationValue("KAFKA_HOST");
     }
 
     private string GetConnectionString()
     {
-        return (_isDocker
-            ? $"Host={_configuration["DB_HOST"]};Port={_configuration["DB_PORT"]};Database={_configuration["DB_NAME"]};Username={_configuration["DB_USER"]};Password={_configuration["DB_PASSWORD"]}"
-            : _configuration.GetConnectionString("DefaultConnection"))!;
+        return
+            $"Host={_configuration["DB_HOST"]};Port={_configuration["DB_PORT"]};Database={_configuration["DB_NAME"]};Username={_configuration["DB_USER"]};Password={_configuration["DB_PASSWORD"]}";
     }
 
-    private string GetConfigurationValue(string dockerKey, string defaultKey)
+    private string GetConfigurationValue(string key)
     {
-        var value = _isDocker ? _configuration[dockerKey] : _configuration[defaultKey];
-        
-        if (string.IsNullOrEmpty(value)) throw new Exception($"{( _isDocker ? dockerKey : defaultKey)} cannot be null or empty");
+        string? value = _configuration[key];
+        if (string.IsNullOrEmpty(value))
+        {
+            throw new Exception($"{key} cannot be null or empty");
+        }
         
         return value;
     }
