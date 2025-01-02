@@ -36,6 +36,11 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
             .ToListAsync();
     }
 
+    public async Task<DateTime> GetLastDateAsync()
+    {
+        return await _context.ExchangeRates.MaxAsync(rate => rate.Date);
+    }
+
     public async Task<bool> ExistsByDateAsync(DateTime date)
     {
         return await _context.ExchangeRates.AnyAsync(rate => rate.Date == date);

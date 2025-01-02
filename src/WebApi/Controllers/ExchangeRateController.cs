@@ -15,18 +15,7 @@ public class ExchangeRateController : ControllerBase
     {
         _exchangeRateService = exchangeRateService;
     }
-
-    [HttpPost("fetch")]
-    [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> FetchExchangeRatesAsync(ExchangeRateRequest request)
-    {
-        BaseResult result = await _exchangeRateService.FetchExchangeRatesAsync(request);
-        return result.Success ? Ok() : BadRequest(result.Errors);
-    }
-
+    
     [HttpGet("get-range")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]

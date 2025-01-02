@@ -5,6 +5,5 @@ namespace Application.Common.Interfaces;
 
 public interface IExchangeRateService
 {
-    Task<BaseResult> FetchExchangeRatesAsync(ExchangeRateRequest request);
     Task<BaseResult> GetRangeAsync(ExchangeRateRequest request);
 }

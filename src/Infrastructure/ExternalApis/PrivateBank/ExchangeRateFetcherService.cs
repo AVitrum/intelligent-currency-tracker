@@ -1,6 +1,5 @@
 using System.Globalization;
-using System.Text.Json;
-using Confluent.Kafka;
+using Application.Common.Exceptions;
 using Domain.Constans;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +13,8 @@ public class ExchangeRateFetcherService : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExchangeRateFetcherService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
-    
+    private Timer? _timer;
+
     public ExchangeRateFetcherService(
         IHttpClientFactory httpClientFactory,
         ILogger<ExchangeRateFetcherService> logger,
@@ -25,60 +25,31 @@ public class ExchangeRateFetcherService : BackgroundService
         _scopeFactory = scopeFactory;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken) =>
-        Task.Run(() => ConsumeAsync("fetch-exchange-rates", stoppingToken), stoppingToken);
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _timer = new Timer(CheckAndFetchData, null, TimeSpan.Zero, TimeSpan.FromDays(1));
+        return Task.CompletedTask;
+    }
 
-    private async Task ConsumeAsync(string topic, CancellationToken stoppingToken)
+    private async void CheckAndFetchData(object? state)
     {
         using IServiceScope scope = _scopeFactory.CreateScope();
         IAppSettings appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
-        string kafkaHost = appSettings.KafkaHost;
-        
-        var config = new ConsumerConfig
-        {
-            GroupId = "fetch-exchange-rates-group",
-            BootstrapServers = kafkaHost,
-            AutoOffsetReset = AutoOffsetReset.Earliest,
-            MaxPollIntervalMs = 600000
-        };
+        IExchangeRateRepository repository = scope.ServiceProvider.GetRequiredService<IExchangeRateRepository>();
 
-        using IConsumer<string, string> consumer = new ConsumerBuilder<string, string>(config).Build();
-        consumer.Subscribe(topic);
+        DateTime lastDate = await repository.GetLastDateAsync();
+        DateTime firstToFetch = lastDate.AddDays(1);
+        DateTime today = DateTime.UtcNow.Date;
 
-        try
+        for (DateTime date = firstToFetch; date <= today; date = date.AddDays(1))
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                ConsumeResult<string, string> consumeResult = consumer.Consume(stoppingToken);
-                RequestData? requestData = JsonSerializer.Deserialize<RequestData>(consumeResult.Message.Value);
-
-                if (requestData == null)
-                {
-                    _logger.LogError("Received invalid data from Kafka");
-                    continue;
-                }
-
-                foreach (string date in requestData.Dates)
-                {
-                    await ProcessDateAsync(requestData.UrlTemplate, date, stoppingToken);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error consuming Kafka messages");
-        }
-        finally
-        {
-            consumer.Close();
+            var dateString = date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+            await ProcessDateAsync(appSettings.PrivateBankUrl + "/exchange_rates?json&date={0}", dateString, repository, CancellationToken.None);
         }
     }
 
-    private async Task ProcessDateAsync(string urlTemplate, string date, CancellationToken stoppingToken)
+    private async Task ProcessDateAsync(string urlTemplate, string date, IExchangeRateRepository repository, CancellationToken stoppingToken)
     {
-        using IServiceScope scope = _scopeFactory.CreateScope();
-        IExchangeRateRepository repository = scope.ServiceProvider.GetRequiredService<IExchangeRateRepository>();
-
         var url = string.Format(urlTemplate, date);
         for (var attempt = 0; attempt < 3; attempt++)
         {
@@ -88,14 +59,14 @@ public class ExchangeRateFetcherService : BackgroundService
                     DateTime.SpecifyKind(
                         DateTime.ParseExact(date, "dd.MM.yyyy", CultureInfo.InvariantCulture),
                         DateTimeKind.Utc).ToUniversalTime());
-                
+
                 if (exists)
                 {
                     _logger.LogWarning("Data for {Date} already exists", date);
                     break;
                 }
 
-                await FetchAndSaveDataAsync(url, repository, stoppingToken);
+                await FetchAndSaveDataAsync(url, date, repository, stoppingToken);
                 _logger.LogInformation("Successfully fetched data for {Date}", date);
                 break;
             }
@@ -108,41 +79,54 @@ public class ExchangeRateFetcherService : BackgroundService
         }
     }
 
-    private async Task FetchAndSaveDataAsync(string url, IExchangeRateRepository repository, CancellationToken token)
+    private async Task FetchAndSaveDataAsync(string url, string date, IExchangeRateRepository repository, CancellationToken token)
     {
-        HttpClient httpClient = _httpClientFactory.CreateClient();
-        HttpResponseMessage response = await httpClient.GetAsync(url, token);
-        
-        response.EnsureSuccessStatusCode();
-        
-        string jsonData = await response.Content.ReadAsStringAsync(token);
-        var jsonObject = JObject.Parse(jsonData);
-        
-        string responseDate = jsonObject["date"]?.ToString() ?? throw new Exception("Missing 'date' field in response");
-        var parsedDate = DateTime.ParseExact(responseDate, DateConstants.DateFormat, CultureInfo.InvariantCulture);
-
-        JToken? exchangeRatesToken = jsonObject["exchangeRate"];
-        if (exchangeRatesToken is not { HasValues: true })
+        try
         {
-            throw new Exception("Missing or empty 'exchangeRate' field in response");
+            HttpClient httpClient = _httpClientFactory.CreateClient();
+            HttpResponseMessage response = await httpClient.GetAsync(url, token);
+
+            response.EnsureSuccessStatusCode();
+
+            string jsonData = await response.Content.ReadAsStringAsync(token);
+            var jsonObject = JObject.Parse(jsonData);
+
+            string responseDate = jsonObject["date"]?.ToString() ?? throw new Exception("Missing 'date' field in response");
+            var parsedDate = DateTime.ParseExact(responseDate, DateConstants.DateFormat, CultureInfo.InvariantCulture);
+            var parsedDateString = parsedDate.Date.ToString(CultureInfo.InvariantCulture);
+
+            if (parsedDate != DateTime.ParseExact(date, DateConstants.DateFormat, CultureInfo.InvariantCulture))
+            {
+                throw new WrongDateException(date, parsedDateString);
+            }
+
+            JToken? exchangeRatesToken = jsonObject["exchangeRate"];
+            if (exchangeRatesToken is not { HasValues: true })
+            {
+                throw new Exception("Missing or empty 'exchangeRate' field in response");
+            }
+
+            var exchangeRates = exchangeRatesToken.Select(rate => new ExchangeRate
+            {
+                Date = parsedDate,
+                Currency = rate["currency"]?.ToString() ?? throw new Exception("Invalid 'currency' field"),
+                SaleRateNb = rate["saleRateNB"]?.ToObject<decimal>() ?? 0,
+                PurchaseRateNb = rate["purchaseRateNB"]?.ToObject<decimal>() ?? 0,
+                SaleRate = rate["saleRate"]?.ToObject<decimal>() ?? 0,
+                PurchaseRate = rate["purchaseRate"]?.ToObject<decimal>() ?? 0
+            }).ToList();
+
+            await repository.SaveExchangeRatesAsync(exchangeRates);
         }
-
-        var exchangeRates = exchangeRatesToken.Select(rate => new ExchangeRate
+        catch (WrongDateException e)
         {
-            Date = parsedDate,
-            Currency = rate["currency"]?.ToString() ?? throw new Exception("Invalid 'currency' field"),
-            SaleRateNb = rate["saleRateNB"]?.ToObject<decimal>() ?? 0,
-            PurchaseRateNb = rate["purchaseRateNB"]?.ToObject<decimal>() ?? 0,
-            SaleRate = rate["saleRate"]?.ToObject<decimal>() ?? 0,
-            PurchaseRate = rate["purchaseRate"]?.ToObject<decimal>() ?? 0
-        }).ToList();
-
-        await repository.SaveExchangeRatesAsync(exchangeRates);
+            _logger.LogError(e.Message);
+        }
     }
 
-    private record RequestData
+    public override void Dispose()
     {
-        public List<string> Dates { get; init; } = null!;
-        public string UrlTemplate { get; init; } = null!;
+        _timer?.Dispose();
+        base.Dispose();
     }
 }
