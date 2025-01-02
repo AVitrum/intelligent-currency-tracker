@@ -72,20 +72,18 @@ public class IdentityService : IIdentityService
 
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        ApplicationUser? user = null;
+        UserLookupDelegate lookupDelegate = request.UserName is not null 
+            ? _userManager.FindByNameAsync 
+            : _userManager.FindByEmailAsync;
 
-        if (request.UserName is not null)
-        {
-            user = await _userManager.FindByNameAsync(request.UserName);
-        }
-        else if (request.Email is not null)
-        {
-            user = await _userManager.FindByEmailAsync(request.Email);
-        }
+        string identifier = request.UserName ?? request.Email 
+            ?? throw new ArgumentException("Username or Email must be provided");
 
-        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
+        ApplicationUser user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
+
+        if (!await _userManager.CheckPasswordAsync(user, request.Password))
         {
-            throw new UserNotFoundException("User not found or password is incorrect");
+            throw new PasswordException();
         }
 
         return await GenerateTokenResultAsync(user);

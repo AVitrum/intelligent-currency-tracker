@@ -48,9 +48,13 @@ public class CustomExceptionHandler : IExceptionHandler
             DbUpdateException { InnerException: PostgresException { SqlState: "23505" } } =>
                 (409, "Duplicate key value violates unique constraint"),
             DataNotFoundException ex => (404, ex.Message),
+            
             ImportCsvException ex => (400, ex.Message),
             ExportCsvException ex => (400, ex.Message),
+            
             UserNotFoundException ex => (401, ex.Message),
+            PasswordException ex => (400, ex.Message),
+            UnauthorizedAccessException ex => (401, ex.Message),
             _ => (500, "An error occurred while processing your request")
         };
     }

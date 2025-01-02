@@ -17,28 +17,21 @@ public class IdentityAdminService : IIdentityAdminService
 
     public async Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request)
     {
-        ApplicationUser user = await FindUserAsync(request.Username, request.Email);
+        UserLookupDelegate lookupDelegate = request.Username is not null 
+            ? _userManager.FindByNameAsync 
+            : _userManager.FindByEmailAsync;
+        
+        string identifier = request.Username ?? request.Email 
+            ?? throw new UserNotFoundException("Email or username must be provided");
+        
+        ApplicationUser user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
+        
         if (await _userManager.IsInRoleAsync(user, UserRoles.Admin.ToString()))
         {
             return BaseResult.FailureResult(["User is already an admin"]);
         }
         
         return await AddUserToRoleAsync(user, UserRoles.Admin.ToString());
-    }
-    
-    private async Task<ApplicationUser> FindUserAsync(string? username, string? email)
-    {
-        if (username is not null)
-        {
-            return await _userManager.FindByNameAsync(username) ??
-                   throw new UserNotFoundException("User not found by username");
-        }
-        if (email is not null)
-        {
-            return await _userManager.FindByEmailAsync(email) ??
-                   throw new UserNotFoundException("User not found by email");
-        }
-        throw new UserNotFoundException("Email or username must be provided");
     }
 
     private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, string role)
