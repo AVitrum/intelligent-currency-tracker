@@ -7,7 +7,7 @@ Logs/
 
 #Env
 .env
-.env.development
+.env.*
 
 # Generated files
 project.lock.json

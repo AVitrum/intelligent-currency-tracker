@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Application.Common.Models;
+namespace Application.Common.Payload.Dtos;
 
 public class GetExchangeRateListDto
 {

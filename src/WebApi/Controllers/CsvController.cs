@@ -1,3 +1,5 @@
+using Application.Common.Payload.Dtos;
+using Application.Common.Payload.Requests;
 using Application.ExchangeRates.Results;
 using Domain.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -26,20 +28,18 @@ public class CsvController : ControllerBase
         BaseResult result = await _csvExchangeRateService.GetExchangeRatesFromCsvAsync(dto.File);
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
-    
+
     [HttpGet("export")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> ExportAsync([FromQuery] ExchangeRatesRangeDto dto)
+    public async Task<IActionResult> ExportAsync([FromQuery] ExchangeRateRequest request)
     {
-        BaseResult result = await _csvExchangeRateService.ExportExchangeRatesToCsvAsync(dto);
+        BaseResult result = await _csvExchangeRateService.ExportExchangeRatesToCsvAsync(request);
         if (result is ExportExchangeRatesToCsvResult exportResult)
-        {
             return File(exportResult.FileContent, "text/csv", exportResult.FileName);
-        }
-        
+
         return BadRequest(result.Errors);
     }
 }

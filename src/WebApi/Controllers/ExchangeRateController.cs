@@ -1,3 +1,4 @@
+using Application.Common.Payload.Requests;
 using Application.ExchangeRates.Results;
 using Domain.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -14,31 +15,32 @@ public class ExchangeRateController : ControllerBase
     {
         _exchangeRateService = exchangeRateService;
     }
-    
+
     [HttpPost("fetch")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> FetchExchangeRatesAsync(ExchangeRatesRangeDto dto)
+    public async Task<IActionResult> FetchExchangeRatesAsync(ExchangeRateRequest request)
     {
-        BaseResult result = await _exchangeRateService.FetchExchangeRatesAsync(dto);
+        BaseResult result = await _exchangeRateService.FetchExchangeRatesAsync(request);
         return result.Success ? Ok() : BadRequest(result.Errors);
     }
-    
-    [HttpGet("getRange")]
+
+    [HttpGet("get-range")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetRangeAsync([FromQuery] ExchangeRatesRangeDto dto)
+    public async Task<IActionResult> GetRangeAsync([FromQuery] ExchangeRateRequest request)
     {
-        BaseResult result = await _exchangeRateService.GetRangeAsync(dto);
+        BaseResult result = await _exchangeRateService.GetRangeAsync(request);
         return result switch
         {
             GetExchangeRateRangeResult { Success: true } rangeResult => Ok(rangeResult.Data),
-            GetExchangeRateRangeResult rangeResult when rangeResult.Equals(GetExchangeRateRangeResult.FailureNotFoundResult()) => NotFound(rangeResult.Errors),
+            GetExchangeRateRangeResult rangeResult when rangeResult.Equals(GetExchangeRateRangeResult
+                .FailureNotFoundResult()) => NotFound(rangeResult.Errors),
             _ => BadRequest(result.Errors)
         };
     }

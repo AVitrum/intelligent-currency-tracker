@@ -1,6 +1,6 @@
-namespace Application.Common.Models;
+namespace Application.Common.Payload.Requests;
 
-public class LoginUserModel
+public class LoginRequest
 {
     public string? UserName { get; set; }
     public string? Email { get; set; }

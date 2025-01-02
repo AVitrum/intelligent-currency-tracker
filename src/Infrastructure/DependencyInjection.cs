@@ -24,6 +24,7 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
         
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IIdentityAdminService, IdentityAdminService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();

@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
-using Application.Common.Models;
+using Application.Common.Payload.Dtos;
+using Application.Common.Payload.Requests;
 using Application.ExchangeRates.Results;
 using AutoMapper;
 using Confluent.Kafka;
@@ -33,13 +34,13 @@ public class ExchangeRateService : IExchangeRateService
         _kafkaProducer = kafkaProducer;
     }
     
-    public async Task<BaseResult> FetchExchangeRatesAsync(ExchangeRatesRangeDto exchangeRatesRangeDto)
+    public async Task<BaseResult> FetchExchangeRatesAsync(ExchangeRateRequest request)
     {
-        _logger.LogInformation("Starting FetchExchangeRatesAsync from {StartDate} to {EndDate}", exchangeRatesRangeDto.Start, exchangeRatesRangeDto.End);
+        _logger.LogInformation("Starting FetchExchangeRatesAsync from {StartDate} to {EndDate}", request.Start, request.End);
 
         var dateRangeList = new List<string>();
-        DateTime currentDate = exchangeRatesRangeDto.Start;
-        while (currentDate <= exchangeRatesRangeDto.End)
+        DateTime currentDate = request.Start;
+        while (currentDate <= request.End)
         {
             dateRangeList.Add(currentDate.ToString(DateConstants.DateFormat));
             currentDate = currentDate.AddDays(1);
@@ -61,7 +62,7 @@ public class ExchangeRateService : IExchangeRateService
         {
             await _kafkaProducer.ProduceAsync("fetch-exchange-rates", kafkaMessage);
             _logger.LogInformation("Successfully sent fetch request to Kafka for dates {StartDate} to {EndDate}",
-                exchangeRatesRangeDto.Start, exchangeRatesRangeDto.End);
+                request.Start, request.End);
         }
         catch (Exception ex)
         {
@@ -72,17 +73,17 @@ public class ExchangeRateService : IExchangeRateService
         return BaseResult.SuccessResult();
     }
 
-    public async Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto exchangeRatesRangeDto)
+    public async Task<BaseResult> GetRangeAsync(ExchangeRateRequest request)
     {
-        if (exchangeRatesRangeDto.Currency is null)
+        if (request.Currency is null)
         {
             return BaseResult.FailureResult(["Currency type is required"]);
         }
 
         IEnumerable<ExchangeRate> exchangeRates =
             await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(
-                exchangeRatesRangeDto.Start.ToUniversalTime(), exchangeRatesRangeDto.End.ToUniversalTime(),
-                exchangeRatesRangeDto.Currency);
+                request.Start.ToUniversalTime(), request.End.ToUniversalTime(),
+                request.Currency);
 
         var exchangeRateList = exchangeRates.ToList();
         if (exchangeRateList.Count == 0)

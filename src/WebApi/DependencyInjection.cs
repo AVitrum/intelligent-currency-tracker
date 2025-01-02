@@ -7,7 +7,7 @@ public static class DependencyInjection
     public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)
     {
         IAppSettings appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
-        
+
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -31,7 +31,8 @@ public static class DependencyInjection
             .AddGoogle(options =>
             {
                 options.ClientId = appSettings.GoogleClientId ?? throw new Exception("Google Client ID is missing.");
-                options.ClientSecret = appSettings.GoogleClientSecret ?? throw new Exception("Google Client Secret is missing.");
+                options.ClientSecret = appSettings.GoogleClientSecret ??
+                                       throw new Exception("Google Client Secret is missing.");
                 options.SaveTokens = true;
             });
 

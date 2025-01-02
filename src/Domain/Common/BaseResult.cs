@@ -2,8 +2,8 @@ namespace Domain.Common;
 
 public class BaseResult
 {
-    public bool Success { get; init; }
-    public string[] Errors { get; set; }
+    public bool Success { get; }
+    public string[] Errors { get; }
     
     protected BaseResult(bool success, IEnumerable<string> errors)
     {

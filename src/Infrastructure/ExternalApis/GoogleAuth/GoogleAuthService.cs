@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Domain.Common;
+using Domain.Exceptions;
 using Infrastructure.ExternalApis.GoogleAuth.Results;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -39,10 +40,10 @@ public class GoogleAuthService : IGoogleAuthService
         }
 
         ApplicationUser user = await GetUserByEmailAsync(email) ?? await HandleNewUserAsync(email);
-
+        
         _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
         
-        Claim[] claims =
+        List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Email, email),
@@ -73,10 +74,16 @@ public class GoogleAuthService : IGoogleAuthService
             UserName = email,
             EmailConfirmed = true,
             NormalizedEmail = email.ToUpper(),
-            NormalizedUserName = email.ToUpper(),
+            NormalizedUserName = email.ToUpper()
         };
         await _userManager.CreateAsync(newUser);
         
-        return (await GetUserByEmailAsync(email))!;
+        IdentityResult result = await _userManager.AddToRoleAsync(newUser, "User");
+        if (result.Succeeded)
+        {
+            return (await GetUserByEmailAsync(email))!;
+        }
+        
+        throw new EntityCreationException<ApplicationUser>();
     }
 }

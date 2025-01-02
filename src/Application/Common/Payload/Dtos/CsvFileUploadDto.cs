@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Common.Models;
+namespace Application.Common.Payload.Dtos;
 
 public class CsvFileUploadDto
 {

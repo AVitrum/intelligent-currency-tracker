@@ -1,9 +1,9 @@
 using Application.Common.Validation;
 using Newtonsoft.Json;
 
-namespace Application.Common.Models;
+namespace Application.Common.Payload.Requests;
 
-public class ExchangeRatesRangeDto
+public class ExchangeRateRequest
 {
     [DateFormat] public required string StartDateString { get; init; }
     [DateFormat] public required string EndDateString { get; init; }

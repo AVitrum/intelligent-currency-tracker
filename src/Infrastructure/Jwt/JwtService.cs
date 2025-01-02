@@ -22,7 +22,7 @@ public class JwtService : IJwtService
         key = _appSettings.JwtKey;
     }
 
-    public JwtSecurityToken GenerateToken(string issuer, string audience, string key, Claim[] claims)
+    public JwtSecurityToken GenerateToken(string issuer, string audience, string key, List<Claim> claims)
     {
         var generatedKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var credentials = new SigningCredentials(generatedKey, SecurityAlgorithms.HmacSha256);

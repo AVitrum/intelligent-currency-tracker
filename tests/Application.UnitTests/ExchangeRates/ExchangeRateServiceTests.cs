@@ -1,6 +1,7 @@
 using System.Globalization;
 using Application.Common.Interfaces;
-using Application.Common.Models;
+using Application.Common.Payload.Dtos;
+using Application.Common.Payload.Requests;
 using Application.ExchangeRates;
 using Application.ExchangeRates.Results;
 using AutoMapper;
@@ -36,7 +37,7 @@ public class ExchangeRateServiceTests
     public async Task GetRangeAsync_ShouldReturnSuccessResult_WhenAllDataIsRight()
     {
         // Arrange
-        var dto = new ExchangeRatesRangeDto
+        var dto = new ExchangeRateRequest
         {
             Currency = "USD",
             StartDateString = "01.01.2022",
@@ -86,7 +87,7 @@ public class ExchangeRateServiceTests
     public async Task GetRangeAsync_ShouldReturnFailureResult_WhenNoExchangeRatesFound()
     {
         // Arrange
-        var dto = new ExchangeRatesRangeDto
+        var dto = new ExchangeRateRequest
         {
             StartDateString = "01.01.2022",
             EndDateString = "02.01.2022",

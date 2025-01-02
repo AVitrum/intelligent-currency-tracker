@@ -2,7 +2,8 @@ using System.Globalization;
 using System.Text;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Common.Models;
+using Application.Common.Payload.Dtos;
+using Application.Common.Payload.Requests;
 using AutoMapper;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -44,16 +45,16 @@ public class CsvHelper : ICsvHelper
         return true;
     }
         
-    public async Task<(string, byte[])> ExportExchangeRateToCsvAsync(ExchangeRatesRangeDto dto)
+    public async Task<(string, byte[])> ExportExchangeRateToCsvAsync(ExchangeRateRequest request)
     {
         try
         {
             IEnumerable<ExchangeRate> exchangeRates;
 
-            DateTime startUtc = dto.Start.ToUniversalTime();
-            DateTime endUtc = dto.End.ToUniversalTime();
+            DateTime startUtc = request.Start.ToUniversalTime();
+            DateTime endUtc = request.End.ToUniversalTime();
             
-            if (dto.Currency is null)
+            if (request.Currency is null)
             {
                 exchangeRates = await _exchangeRateRepository.GetAllByStartDateAndEndDateAsync(startUtc, endUtc);
             }
@@ -61,7 +62,7 @@ public class CsvHelper : ICsvHelper
             {
                 exchangeRates =
                     await _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(startUtc, endUtc,
-                        dto.Currency);
+                        request.Currency);
             }
             var exchangeRatesDto = exchangeRates.Select(exchangeRate =>
                 _mapper.Map<ExchangeRateDto>(exchangeRate)).ToList();
@@ -71,7 +72,7 @@ public class CsvHelper : ICsvHelper
                 throw new DataNotFoundException("No exchange rates found for the specified date range");
             }
                 
-            var fileName = $"ExchangeRates_{dto.Currency}_{dto.Start:yyyyMMdd}_{dto.End:yyyyMMdd}.csv";
+            var fileName = $"ExchangeRates_{request.Currency}_{request.Start:yyyyMMdd}_{request.End:yyyyMMdd}.csv";
             byte[] fileContent = await CreateCsvFileAsync(exchangeRatesDto);
             _logger.LogInformation("Successfully exported exchange rates to CSV file");
             return (fileName, fileContent);
@@ -128,10 +129,10 @@ public class CsvHelper : ICsvHelper
         {
             Date = date,
             Currency = values[1],
-            SaleRateNb = decimal.TryParse(values[2], NumberStyles.Any, CultureInfo.InvariantCulture, out var saleRateNb) ? saleRateNb : -1,
-            PurchaseRateNb = decimal.TryParse(values[3], NumberStyles.Any, CultureInfo.InvariantCulture, out var purchaseRateNb) ? purchaseRateNb : -1,
-            SaleRate = decimal.TryParse(values[4], NumberStyles.Any, CultureInfo.InvariantCulture, out var saleRate) ? saleRate : -1,
-            PurchaseRate = decimal.TryParse(values[5], NumberStyles.Any, CultureInfo.InvariantCulture, out var purchaseRate) ? purchaseRate : -1
+            SaleRateNb = decimal.TryParse(values[2], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal saleRateNb) ? saleRateNb : -1,
+            PurchaseRateNb = decimal.TryParse(values[3], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal purchaseRateNb) ? purchaseRateNb : -1,
+            SaleRate = decimal.TryParse(values[4], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal saleRate) ? saleRate : -1,
+            PurchaseRate = decimal.TryParse(values[5], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal purchaseRate) ? purchaseRate : -1
         };
     }
 
