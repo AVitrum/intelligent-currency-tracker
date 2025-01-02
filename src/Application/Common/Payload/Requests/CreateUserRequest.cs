@@ -1,6 +1,6 @@
-namespace Application.Common.Models;
+namespace Application.Common.Payload.Requests;
 
-public class CreateUserModel
+public class CreateUserRequest
 {
     public required string UserName { get; set; }
     public required string Password { get; set; }

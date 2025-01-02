@@ -1,7 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using Application.Common.Interfaces;
-using Application.Common.Models;
+using Application.Common.Payload.Dtos;
+using Application.Common.Payload.Requests;
 using Application.ExchangeRates.Results;
 using Confluent.Kafka;
 using Domain.Common;
@@ -26,9 +27,9 @@ public class MlModelService : IMlModelService
         _httpClient = httpClient;
     }
 
-    public async Task<BaseResult> TrainModelAsync(ExchangeRatesRangeDto dto)
+    public async Task<BaseResult> TrainModelAsync(ExchangeRateRequest request)
     {
-        (_, byte[] content) = await _csvHelper.ExportExchangeRateToCsvAsync(dto);
+        (_, byte[] content) = await _csvHelper.ExportExchangeRateToCsvAsync(request);
         
         string csvContent = Encoding.UTF8.GetString(content);
         var message = new { content = csvContent };

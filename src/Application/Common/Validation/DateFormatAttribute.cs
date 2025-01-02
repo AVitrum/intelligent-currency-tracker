@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Application.Common.Models;
+using Application.Common.Payload.Requests;
 
 namespace Application.Common.Validation;
 
@@ -9,23 +9,22 @@ public class DateFormatAttribute : ValidationAttribute
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        var dto = (ExchangeRatesRangeDto)validationContext.ObjectInstance;
-        if (DateTime.TryParseExact(dto.StartDateString, DateFormat, null, System.Globalization.DateTimeStyles.None, out DateTime startDate) &&
-            DateTime.TryParseExact(dto.EndDateString, DateFormat, null, System.Globalization.DateTimeStyles.None, out DateTime endDate))
+        var dto = (ExchangeRateRequest)validationContext.ObjectInstance;
+        if (!DateTime.TryParseExact(dto.StartDateString, DateFormat, null, System.Globalization.DateTimeStyles.None,
+                out DateTime startDate) ||
+            !DateTime.TryParseExact(dto.EndDateString, DateFormat, null, System.Globalization.DateTimeStyles.None,
+                out DateTime endDate)) return new ValidationResult("Invalid date range or format");
+        if (startDate <= endDate)
         {
-            if (startDate <= endDate)
-            {
-                dto.Start = startDate;
-                dto.End = endDate;
-            }
-            else
-            {
-                dto.Start = endDate;
-                dto.End = startDate;
-            }
-
-            return ValidationResult.Success;
+            dto.Start = startDate;
+            dto.End = endDate;
         }
-        return new ValidationResult("Invalid date range or format");
+        else
+        {
+            dto.Start = endDate;
+            dto.End = startDate;
+        }
+
+        return ValidationResult.Success;
     }
 }

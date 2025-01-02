@@ -1,14 +1,13 @@
 using Application.Common.Validation;
-using Domain.Enums;
 using Newtonsoft.Json;
 
-namespace Application.Common.Models;
+namespace Application.Common.Payload.Requests;
 
-public class ExchangeRatesRangeDto
+public class ExchangeRateRequest
 {
     [DateFormat] public required string StartDateString { get; init; }
     [DateFormat] public required string EndDateString { get; init; }
-    public Currency? Currency { get; init; }
+    public string? Currency { get; init; }
 
     private DateTime _start;
     private DateTime _end;

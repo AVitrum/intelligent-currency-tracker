@@ -4,7 +4,7 @@ namespace Infrastructure.Identity.Results;
 
 public class IdentityServiceResult : BaseResult
 {
-    public string Token { get; init; }
+    public string Token { get; }
     
     private IdentityServiceResult(bool success, IEnumerable<string> errors, string token) : base(success, errors)
     {

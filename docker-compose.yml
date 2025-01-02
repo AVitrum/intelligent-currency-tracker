@@ -35,11 +35,10 @@
       context: .
       dockerfile: src/WebApi/Dockerfile
     ports:
-      - "8000:80"
       - "8001:443"
     environment:
-      ASPNETCORE_URLS: "https://+;http://+"
       ASPNETCORE_HTTPS_PORTS: "8001"
+      ASPNETCORE_URLS: "https://+"
       ASPNETCORE_ENVIRONMENT: "Development"
       ASPNETCORE_Kestrel__Certificates__Default__Password: ${KESTREL_CERTIFICATES_DEFAULT_PASSWORD}
       ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/cleantest.pfx"

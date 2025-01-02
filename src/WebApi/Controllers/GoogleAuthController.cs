@@ -10,7 +10,7 @@ namespace WebApi.Controllers;
 public class GoogleAuthController : ControllerBase
 {
     private readonly IGoogleAuthService _googleAuthService;
-    
+
     public GoogleAuthController(IGoogleAuthService googleAuthService)
     {
         _googleAuthService = googleAuthService;
@@ -26,7 +26,7 @@ public class GoogleAuthController : ControllerBase
                 RedirectUri = "/api/GoogleAuth/response"
             });
     }
-    
+
     //TODO: Fix http status codes
     [HttpGet("response")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -36,18 +36,15 @@ public class GoogleAuthController : ControllerBase
     {
         AuthenticateResult authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
         BaseResult result = await _googleAuthService.HandleGoogleResponse(authResult);
-        if (result is not GoogleAuthResult googleAuthResult)
-        {
-            return Unauthorized();
-        }
-        
+        if (result is not GoogleAuthResult googleAuthResult) return Unauthorized();
+
         Response.Cookies.Append("jwt", googleAuthResult.Token, new CookieOptions
         {
             HttpOnly = true,
             SameSite = SameSiteMode.Strict,
             Secure = true
         });
-        
+
         return Ok($"User authenticated successfully, {googleAuthResult.Token}");
     }
 }

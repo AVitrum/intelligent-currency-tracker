@@ -24,17 +24,22 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
         
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IIdentityAdminService, IdentityAdminService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
         
         services.AddHostedService<ExchangeRateFetcherService>();
 
-        if (appSettings.IsDocker()) EnsureDatabaseCreated(services);
+        if (appSettings.IsDocker())
+        {
+            EnsureDatabaseCreated(services);
+        }
         
         return services;
     }
 
+    //TODO: Fix this method and move it to a separate class file.
     private static void EnsureDatabaseCreated(IServiceCollection services)
     {
         ServiceProvider serviceProvider = services.BuildServiceProvider();

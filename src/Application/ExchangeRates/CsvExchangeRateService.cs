@@ -1,5 +1,5 @@
 using Application.Common.Interfaces;
-using Application.Common.Models;
+using Application.Common.Payload.Requests;
 using Application.ExchangeRates.Results;
 using Domain.Common;
 using Microsoft.AspNetCore.Http;
@@ -25,9 +25,9 @@ public class CsvExchangeRateService : ICsvExchangeRateService
             : BaseResult.FailureResult(["Failed to import exchange rates from CSV"]);
     }
 
-    public async Task<BaseResult> ExportExchangeRatesToCsvAsync(ExchangeRatesRangeDto dto)
+    public async Task<BaseResult> ExportExchangeRatesToCsvAsync(ExchangeRateRequest request)
     {
-        (string name, byte[] content) = await _csvHelper.ExportExchangeRateToCsvAsync(dto);
+        (string name, byte[] content) = await _csvHelper.ExportExchangeRateToCsvAsync(request);
         return ExportExchangeRatesToCsvResult.SuccessResult(content, name);
     }
 }

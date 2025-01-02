@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Common.Exceptions;
-using Application.Common.Models;
+using Application.Common.Payload.Requests;
 using Domain.Common;
+using Domain.Enums;
 using Infrastructure.Identity.Results;
 using Microsoft.AspNetCore.Authorization;
 
@@ -29,19 +30,26 @@ public class IdentityService : IIdentityService
     }
 
     //TODO: Add phone number validation
-    public async Task<BaseResult> CreateUserAsync(CreateUserModel userModel)
+    public async Task<BaseResult> CreateUserAsync(CreateUserRequest request)
     {
         var user = new ApplicationUser
         {
-            UserName = userModel.UserName,
-            Email = userModel.Email,
-            PhoneNumber = userModel.PhoneNumber
+            UserName = request.UserName,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber
         };
         
-        IdentityResult result = await _userManager.CreateAsync(user, userModel.Password);
+        IdentityResult result = await _userManager.CreateAsync(user, request.Password);
         if (result.Succeeded)
         {
-            return BaseResult.SuccessResult();
+            IdentityResult roleResult = await _userManager.AddToRoleAsync(user, UserRoles.User.ToString());
+            if (roleResult.Succeeded)
+            {
+                return BaseResult.SuccessResult();
+            }
+
+            var roleErrors = roleResult.Errors.Select(error => error.Description).ToList();
+            return BaseResult.FailureResult(roleErrors);
         }
 
         var errors = result.Errors.Select(error => error.Description).ToList();
@@ -62,23 +70,43 @@ public class IdentityService : IIdentityService
         return result.Succeeded;
     }
 
-    public async Task<BaseResult> LoginAsync(string userName, string password)
+    public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        ApplicationUser? user = await _userManager.FindByNameAsync(userName);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+        ApplicationUser? user = null;
+
+        if (request.UserName is not null)
+        {
+            user = await _userManager.FindByNameAsync(request.UserName);
+        }
+        else if (request.Email is not null)
+        {
+            user = await _userManager.FindByEmailAsync(request.Email);
+        }
+
+        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
         {
             throw new UserNotFoundException("User not found or password is incorrect");
         }
 
+        return await GenerateTokenResultAsync(user);
+    }
+
+    private async Task<BaseResult> GenerateTokenResultAsync(ApplicationUser user)
+    {
         _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
-            
-        Claim[] claims =
+
+        IList<string> roles = await _userManager.GetRolesAsync(user);
+        var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
+
+        List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
+        claims.AddRange(roleClaims);
+
         JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
-        
+
         return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));
     }
 }

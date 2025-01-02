@@ -14,11 +14,12 @@ public class CustomExceptionHandler : IExceptionHandler
     {
         _logger = logger;
     }
-    
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
+        CancellationToken cancellationToken)
     {
         string traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
-        
+
         _logger.LogError(
             exception,
             "Could not process a request on machine {MachineName}. TraceId: {TraceId}",
@@ -39,11 +40,12 @@ public class CustomExceptionHandler : IExceptionHandler
 
         return true;
     }
+
     private static (int statusCode, string title) MapException(Exception exception)
     {
         return exception switch
         {
-            DbUpdateException { InnerException: PostgresException { SqlState: "23505" } } => 
+            DbUpdateException { InnerException: PostgresException { SqlState: "23505" } } =>
                 (409, "Duplicate key value violates unique constraint"),
             DataNotFoundException ex => (404, ex.Message),
             ImportCsvException ex => (400, ex.Message),

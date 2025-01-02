@@ -1,10 +1,10 @@
-using Application.Common.Models;
+using Application.Common.Payload.Requests;
 using Domain.Common;
 
 namespace Application.Common.Interfaces;
 
 public interface IExchangeRateService
 {
-    Task<BaseResult> FetchExchangeRatesAsync(ExchangeRatesRangeDto dto);
-    Task<BaseResult> GetRangeAsync(ExchangeRatesRangeDto dto);
+    Task<BaseResult> FetchExchangeRatesAsync(ExchangeRateRequest request);
+    Task<BaseResult> GetRangeAsync(ExchangeRateRequest request);
 }

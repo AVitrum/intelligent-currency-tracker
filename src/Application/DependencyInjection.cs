@@ -8,7 +8,7 @@ namespace Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static void AddApplication(this IServiceCollection services)
     {
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
 
@@ -21,7 +21,5 @@ public static class DependencyInjection
         services.AddScoped<IKafkaProducer, KafkaProducer>();
 
         services.AddScoped<ICsvHelper, Common.Helpers.CsvHelper>();
-        
-        return services;
     }
 }

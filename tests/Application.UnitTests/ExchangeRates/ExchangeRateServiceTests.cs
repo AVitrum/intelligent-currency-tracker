@@ -1,13 +1,13 @@
 using System.Globalization;
 using Application.Common.Interfaces;
-using Application.Common.Models;
+using Application.Common.Payload.Dtos;
+using Application.Common.Payload.Requests;
 using Application.ExchangeRates;
 using Application.ExchangeRates.Results;
 using AutoMapper;
 using Confluent.Kafka;
 using Domain.Common;
 using Domain.Entities;
-using Domain.Enums;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
 
@@ -37,9 +37,9 @@ public class ExchangeRateServiceTests
     public async Task GetRangeAsync_ShouldReturnSuccessResult_WhenAllDataIsRight()
     {
         // Arrange
-        var dto = new ExchangeRatesRangeDto
+        var dto = new ExchangeRateRequest
         {
-            Currency = Currency.USD,
+            Currency = "USD",
             StartDateString = "01.01.2022",
             EndDateString = "02.01.2022"
         };
@@ -53,7 +53,7 @@ public class ExchangeRateServiceTests
         {
             new()
             {
-                Currency = Currency.USD,
+                Currency = "USD",
                 SaleRateNb = 1.0m,
                 PurchaseRateNb = 1.0m,
                 Date = DateTime.UtcNow
@@ -70,7 +70,7 @@ public class ExchangeRateServiceTests
             PurchaseRate = 0
         };
 
-        A.CallTo(() => _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(dto.Start, dto.End, dto.Currency.Value))
+        A.CallTo(() => _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(dto.Start, dto.End, dto.Currency))
             .Returns(exchangeRates);
         A.CallTo(() => _mapper.Map<ExchangeRateDto>(A<ExchangeRate>.Ignored)).Returns(exchangeRateDto);
 
@@ -87,11 +87,11 @@ public class ExchangeRateServiceTests
     public async Task GetRangeAsync_ShouldReturnFailureResult_WhenNoExchangeRatesFound()
     {
         // Arrange
-        var dto = new ExchangeRatesRangeDto
+        var dto = new ExchangeRateRequest
         {
             StartDateString = "01.01.2022",
             EndDateString = "02.01.2022",
-            Currency = Currency.USD
+            Currency = "USD"
         };
 
         DateTime.TryParseExact(dto.StartDateString, "dd.MM.yyyy", null, DateTimeStyles.None, out DateTime startDate);
@@ -99,7 +99,7 @@ public class ExchangeRateServiceTests
         dto.Start = startDate;
         dto.End = endDate;
 
-        A.CallTo(() => _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(dto.Start, dto.End, dto.Currency.Value))
+        A.CallTo(() => _exchangeRateRepository.GetAllByStartDateAndEndDateAndCurrencyAsync(dto.Start, dto.End, dto.Currency))
             .Returns(new List<ExchangeRate>());
 
         // Act
