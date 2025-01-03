@@ -9,6 +9,7 @@ namespace Infrastructure.Identity;
 public class IdentityAdminService : IIdentityAdminService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private delegate Task<ApplicationUser?> UserLookupDelegate(string identifier);
 
     public IdentityAdminService(UserManager<ApplicationUser> userManager)
     {
@@ -17,12 +18,10 @@ public class IdentityAdminService : IIdentityAdminService
 
     public async Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request)
     {
-        UserLookupDelegate lookupDelegate = request.Username is not null 
-            ? _userManager.FindByNameAsync 
-            : _userManager.FindByEmailAsync;
-        
-        string identifier = request.Username ?? request.Email 
-            ?? throw new UserNotFoundException("Email or username must be provided");
+        UserLookupDelegate lookupDelegate = GetUserLookupDelegate(request);
+
+        string identifier = request.UserName ?? request.Email 
+            ?? throw new ArgumentException("Username or Email must be provided");
         
         ApplicationUser user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
         
@@ -44,5 +43,20 @@ public class IdentityAdminService : IIdentityAdminService
         }
         var errors = roleResult.Errors.Select(error => error.Description).ToList();
         return BaseResult.FailureResult(errors);
+    }
+    
+    private UserLookupDelegate GetUserLookupDelegate(ProvideAdminFunctionalityRequest request)
+    {
+        if (request.UserName is not null)
+        {
+            return _userManager.FindByNameAsync;
+        }
+
+        if (request.Email is not null)
+        {
+            return _userManager.FindByEmailAsync;
+        }
+
+        throw new ArgumentException("Username or Email must be provided");
     }
 }

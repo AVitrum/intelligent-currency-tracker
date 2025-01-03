@@ -16,44 +16,42 @@ public class IdentityService : IIdentityService
     private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
     private readonly IAuthorizationService _authorizationService;
     private readonly IJwtService _jwtService;
+    private readonly UserFactory _userFactory;
 
     public IdentityService(
         UserManager<ApplicationUser> userManager,
         IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
         IAuthorizationService authorizationService,
-        IJwtService jwtService)
+        IJwtService jwtService,
+        UserFactory userFactory)
     {
         _userManager = userManager;
         _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
         _authorizationService = authorizationService;
         _jwtService = jwtService;
+        _userFactory = userFactory;
     }
 
-    //TODO: Add phone number validation
+    //TODO: Add phone & email validation
     public async Task<BaseResult> CreateUserAsync(CreateUserRequest request)
     {
-        var user = new ApplicationUser
-        {
-            UserName = request.UserName,
-            Email = request.Email,
-            PhoneNumber = request.PhoneNumber
-        };
-        
-        IdentityResult result = await _userManager.CreateAsync(user, request.Password);
-        if (result.Succeeded)
-        {
-            IdentityResult roleResult = await _userManager.AddToRoleAsync(user, UserRoles.User.ToString());
-            if (roleResult.Succeeded)
+        return await _userFactory.CreateUserAsync(
+            () => new ApplicationUser 
             {
-                return BaseResult.SuccessResult();
-            }
+                UserName = request.UserName,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber ?? string.Empty 
+            },
+            async user =>
+            {
+                IdentityResult passwordResult = await _userManager.AddPasswordAsync(user, request.Password);
+                if (!passwordResult.Succeeded)
+                {
+                    return passwordResult;
+                }
 
-            var roleErrors = roleResult.Errors.Select(error => error.Description).ToList();
-            return BaseResult.FailureResult(roleErrors);
-        }
-
-        var errors = result.Errors.Select(error => error.Description).ToList();
-        return BaseResult.FailureResult(errors);
+                return await _userManager.AddToRoleAsync(user, UserRoles.User.ToString());
+            });
     }
 
     public async Task<bool> AuthorizeAsync(string userId, string policyName)
@@ -72,23 +70,42 @@ public class IdentityService : IIdentityService
 
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        UserLookupDelegate lookupDelegate = request.UserName is not null 
-            ? _userManager.FindByNameAsync 
-            : _userManager.FindByEmailAsync;
+        UserLookupDelegate lookupDelegate = GetUserLookupDelegate(request);
 
         string identifier = request.UserName ?? request.Email 
             ?? throw new ArgumentException("Username or Email must be provided");
 
-        ApplicationUser user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
+        ApplicationUser user = await lookupDelegate(identifier) 
+                               ?? throw new UserNotFoundException("User not found");
 
-        if (!await _userManager.CheckPasswordAsync(user, request.Password))
-        {
-            throw new PasswordException();
-        }
+        await ValidatePasswordAsync(user, request.Password);
 
         return await GenerateTokenResultAsync(user);
     }
+    
+    private UserLookupDelegate GetUserLookupDelegate(LoginRequest request)
+    {
+        if (request.UserName is not null)
+        {
+            return _userManager.FindByNameAsync;
+        }
 
+        if (request.Email is not null)
+        {
+            return _userManager.FindByEmailAsync;
+        }
+
+        throw new ArgumentException("Username or Email must be provided");
+    }
+    
+    private async Task ValidatePasswordAsync(ApplicationUser user, string password)
+    {
+        if (!await _userManager.CheckPasswordAsync(user, password))
+        {
+            throw new PasswordException();
+        }
+    }
+    
     private async Task<BaseResult> GenerateTokenResultAsync(ApplicationUser user)
     {
         _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);

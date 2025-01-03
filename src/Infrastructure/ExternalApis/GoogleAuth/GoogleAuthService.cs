@@ -1,60 +1,95 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Domain.Common;
+using Domain.Enums;
 using Domain.Exceptions;
 using Infrastructure.ExternalApis.GoogleAuth.Results;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.ExternalApis.GoogleAuth;
 
 public class GoogleAuthService : IGoogleAuthService
 {
-    private readonly ILogger<GoogleAuthService> _logger;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IJwtService _jwtService;
+    private readonly UserFactory _userFactory;
 
-    public GoogleAuthService(
-        ILogger<GoogleAuthService> logger,
-        UserManager<ApplicationUser> userManager, 
-        IJwtService jwtService)
+    public GoogleAuthService(UserManager<ApplicationUser> userManager, 
+        IJwtService jwtService,
+        UserFactory userFactory)
     {
-        _logger = logger;
         _userManager = userManager;
         _jwtService = jwtService;
+        _userFactory = userFactory;
     }
 
     public async Task<BaseResult> HandleGoogleResponse(AuthenticateResult authResult)
     {
         if (!authResult.Succeeded)
         {
-            return GoogleAuthResult.FailureResult("Authentication failed");
+            return GoogleAuthResult.FailureResult(["Authentication failed"]);
         }
 
         string? email = GetEmailFromClaims(authResult);
         if (email is null)
         {
-            return GoogleAuthResult.FailureResult("Email claim not found");
+            return GoogleAuthResult.FailureResult(["Email claim not found"]);
         }
 
-        ApplicationUser user = await GetUserByEmailAsync(email) ?? await HandleNewUserAsync(email);
-        
+        ApplicationUser user = await EnsureUserExistsAsync(email);
+
         _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
+        List<Claim> claims = GenerateClaims(user, email);
+        JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
+
+        return GoogleAuthResult.SuccessResult(new JwtSecurityTokenHandler().WriteToken(token));
+    }
+
+    private async Task<ApplicationUser> EnsureUserExistsAsync(string email)
+    {
+        ApplicationUser? user = await GetUserByEmailAsync(email);
+        if (user != null)
+        {
+            return user;
+        }
         
+        BaseResult result = await _userFactory.CreateUserAsync(
+            () => new ApplicationUser
+            {
+                Email = email,
+                UserName = email,
+                EmailConfirmed = true,
+                NormalizedEmail = email.ToUpper(),
+                NormalizedUserName = email.ToUpper()
+            }, 
+            async newUser => await _userManager.AddToRoleAsync(newUser, UserRoles.User.ToString())
+        );
+
+        if (!result.Success)
+        {
+            throw new Exception($"Failed to create user for email: {email}");
+        }
+
+        user = await GetUserByEmailAsync(email) ?? throw new EntityNotFoundException<ApplicationUser>();
+
+        return user;
+    }
+
+    
+    private static List<Claim> GenerateClaims(ApplicationUser user, string email)
+    {
         List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Email, email),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
-        
-        JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
-        
-        return GoogleAuthResult.SuccessResult(new JwtSecurityTokenHandler().WriteToken(token));
+        return claims;
     }
-    
+
+
     private static string? GetEmailFromClaims(AuthenticateResult authenticateResult)
     {
         return authenticateResult.Principal?.FindFirst(ClaimTypes.Email)?.Value;
@@ -63,27 +98,5 @@ public class GoogleAuthService : IGoogleAuthService
     private async Task<ApplicationUser?> GetUserByEmailAsync(string email)
     {
         return await _userManager.FindByEmailAsync(email);
-    }
-
-    private async Task<ApplicationUser> HandleNewUserAsync(string email)
-    {
-        _logger.LogInformation("User not found, creating new user");
-        var newUser = new ApplicationUser
-        {
-            Email = email,
-            UserName = email,
-            EmailConfirmed = true,
-            NormalizedEmail = email.ToUpper(),
-            NormalizedUserName = email.ToUpper()
-        };
-        await _userManager.CreateAsync(newUser);
-        
-        IdentityResult result = await _userManager.AddToRoleAsync(newUser, "User");
-        if (result.Succeeded)
-        {
-            return (await GetUserByEmailAsync(email))!;
-        }
-        
-        throw new EntityCreationException<ApplicationUser>();
     }
 }

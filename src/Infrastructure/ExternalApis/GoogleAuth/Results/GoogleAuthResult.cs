@@ -12,5 +12,5 @@ public class GoogleAuthResult : BaseResult
     }
     
     public static GoogleAuthResult SuccessResult(string token) => new(true, Array.Empty<string>(), token);
-    public static GoogleAuthResult FailureResult(string error) => new(false, [error], string.Empty);
+    public new static GoogleAuthResult FailureResult(IEnumerable<string> errors) => new(false, errors, string.Empty);
 }
