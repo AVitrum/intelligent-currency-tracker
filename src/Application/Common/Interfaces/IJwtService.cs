@@ -5,6 +5,5 @@ namespace Application.Common.Interfaces;
 
 public interface IJwtService
 {
-    void GetJwtConfiguration(out string issuer, out string audience, out string key);
-    JwtSecurityToken GenerateToken(string issuer, string audience, string key, List<Claim> claims);
+    JwtSecurityToken GenerateToken(List<Claim> claims);
 }

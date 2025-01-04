@@ -16,14 +16,14 @@ public class IdentityService : IIdentityService
     private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
     private readonly IAuthorizationService _authorizationService;
     private readonly IJwtService _jwtService;
-    private readonly UserFactory _userFactory;
+    private readonly IUserFactory _userFactory;
 
     public IdentityService(
         UserManager<ApplicationUser> userManager,
         IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
         IAuthorizationService authorizationService,
         IJwtService jwtService,
-        UserFactory userFactory)
+        IUserFactory userFactory)
     {
         _userManager = userManager;
         _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
@@ -40,7 +40,8 @@ public class IdentityService : IIdentityService
             {
                 UserName = request.UserName,
                 Email = request.Email,
-                PhoneNumber = request.PhoneNumber ?? string.Empty 
+                PhoneNumber = request.PhoneNumber ?? string.Empty,
+                CreationMethod = UserCreationMethod.EMAIL
             },
             async user =>
             {
@@ -108,8 +109,6 @@ public class IdentityService : IIdentityService
     
     private async Task<BaseResult> GenerateTokenResultAsync(ApplicationUser user)
     {
-        _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
-
         IList<string> roles = await _userManager.GetRolesAsync(user);
         var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
 
@@ -120,7 +119,7 @@ public class IdentityService : IIdentityService
         ];
         claims.AddRange(roleClaims);
 
-        JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
+        JwtSecurityToken token = _jwtService.GenerateToken(claims);
 
         return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));
     }

@@ -22,8 +22,8 @@ public static class DependencyInjection
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
-
-        services.AddScoped<UserFactory>();
+        
+        services.AddScoped<IUserFactory, UserFactory>();
         
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IIdentityAdminService, IdentityAdminService>();

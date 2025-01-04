@@ -4,12 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Identity;
 
-public class UserFactory
+public class UserFactory : IUserFactory
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<UserFactory> _logger;
-    public delegate ApplicationUser UserFactoryDelegate();
-    public delegate Task<IdentityResult> PostCreationDelegate(ApplicationUser user);
 
     public UserFactory(UserManager<ApplicationUser> userManager, ILogger<UserFactory> logger)
     {
@@ -17,8 +15,7 @@ public class UserFactory
         _logger = logger;
     }
 
-    public async Task<BaseResult> CreateUserAsync(UserFactoryDelegate userFactory, 
-        PostCreationDelegate? postCreationDelegate = null)
+    public async Task<BaseResult> CreateUserAsync(UserFactoryDelegate userFactory, PostCreationDelegate? postCreationDelegate = null)
     {
         ApplicationUser user = userFactory();
     

@@ -9,7 +9,6 @@ namespace Infrastructure.Identity;
 public class IdentityAdminService : IIdentityAdminService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private delegate Task<ApplicationUser?> UserLookupDelegate(string identifier);
 
     public IdentityAdminService(UserManager<ApplicationUser> userManager)
     {

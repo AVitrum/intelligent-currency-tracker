@@ -14,11 +14,11 @@ public class GoogleAuthService : IGoogleAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IJwtService _jwtService;
-    private readonly UserFactory _userFactory;
+    private readonly IUserFactory _userFactory;
 
     public GoogleAuthService(UserManager<ApplicationUser> userManager, 
         IJwtService jwtService,
-        UserFactory userFactory)
+        IUserFactory userFactory)
     {
         _userManager = userManager;
         _jwtService = jwtService;
@@ -40,9 +40,8 @@ public class GoogleAuthService : IGoogleAuthService
 
         ApplicationUser user = await EnsureUserExistsAsync(email);
 
-        _jwtService.GetJwtConfiguration(out string issuer, out string audience, out string key);
         List<Claim> claims = GenerateClaims(user, email);
-        JwtSecurityToken token = _jwtService.GenerateToken(issuer, audience, key, claims);
+        JwtSecurityToken token = _jwtService.GenerateToken(claims);
 
         return GoogleAuthResult.SuccessResult(new JwtSecurityTokenHandler().WriteToken(token));
     }
@@ -62,7 +61,8 @@ public class GoogleAuthService : IGoogleAuthService
                 UserName = email,
                 EmailConfirmed = true,
                 NormalizedEmail = email.ToUpper(),
-                NormalizedUserName = email.ToUpper()
+                NormalizedUserName = email.ToUpper(),
+                CreationMethod = UserCreationMethod.GOOGLE
             }, 
             async newUser => await _userManager.AddToRoleAsync(newUser, UserRoles.User.ToString())
         );
@@ -72,9 +72,7 @@ public class GoogleAuthService : IGoogleAuthService
             throw new Exception($"Failed to create user for email: {email}");
         }
 
-        user = await GetUserByEmailAsync(email) ?? throw new EntityNotFoundException<ApplicationUser>();
-
-        return user;
+        return await GetUserByEmailAsync(email) ?? throw new EntityNotFoundException<ApplicationUser>();
     }
 
     

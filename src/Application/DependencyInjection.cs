@@ -13,6 +13,8 @@ public static class DependencyInjection
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
 
         services.AddHttpClient();
+
+        services.AddScoped<IExchangeRateFactory, ExchangeRateFactory>();
         
         services.AddScoped<IExchangeRateService, ExchangeRateService>();
         services.AddScoped<ICsvExchangeRateService, CsvExchangeRateService>();

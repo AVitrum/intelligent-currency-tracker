@@ -36,6 +36,7 @@ public class ExchangeRateFetcherService : BackgroundService
         using IServiceScope scope = _scopeFactory.CreateScope();
         IAppSettings appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
         IExchangeRateRepository repository = scope.ServiceProvider.GetRequiredService<IExchangeRateRepository>();
+        IExchangeRateFactory factory = scope.ServiceProvider.GetRequiredService<IExchangeRateFactory>();
 
         DateTime lastDate = await repository.GetLastDateAsync();
         DateTime firstToFetch = lastDate.AddDays(1);
@@ -44,11 +45,11 @@ public class ExchangeRateFetcherService : BackgroundService
         for (DateTime date = firstToFetch; date <= today; date = date.AddDays(1))
         {
             var dateString = date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
-            await ProcessDateAsync(appSettings.PrivateBankUrl + "/exchange_rates?json&date={0}", dateString, repository, CancellationToken.None);
+            await ProcessDateAsync(appSettings.PrivateBankUrl + "/exchange_rates?json&date={0}", dateString, repository, factory, CancellationToken.None);
         }
     }
 
-    private async Task ProcessDateAsync(string urlTemplate, string date, IExchangeRateRepository repository, CancellationToken stoppingToken)
+    private async Task ProcessDateAsync(string urlTemplate, string date, IExchangeRateRepository repository,  IExchangeRateFactory factory, CancellationToken stoppingToken)
     {
         var url = string.Format(urlTemplate, date);
         for (var attempt = 0; attempt < 3; attempt++)
@@ -66,7 +67,7 @@ public class ExchangeRateFetcherService : BackgroundService
                     break;
                 }
 
-                await FetchAndSaveDataAsync(url, date, repository, stoppingToken);
+                await FetchAndSaveDataAsync(url, date, repository, factory, stoppingToken);
                 _logger.LogInformation("Successfully fetched data for {Date}", date);
                 break;
             }
@@ -79,7 +80,7 @@ public class ExchangeRateFetcherService : BackgroundService
         }
     }
 
-    private async Task FetchAndSaveDataAsync(string url, string date, IExchangeRateRepository repository, CancellationToken token)
+    private async Task FetchAndSaveDataAsync(string url, string date, IExchangeRateRepository repository, IExchangeRateFactory factory, CancellationToken token)
     {
         try
         {
@@ -106,17 +107,10 @@ public class ExchangeRateFetcherService : BackgroundService
                 throw new Exception("Missing or empty 'exchangeRate' field in response");
             }
 
-            var exchangeRates = exchangeRatesToken.Select(rate => new ExchangeRate
+            foreach (JToken rateToken in exchangeRatesToken)
             {
-                Date = parsedDate,
-                Currency = rate["currency"]?.ToString() ?? throw new Exception("Invalid 'currency' field"),
-                SaleRateNb = rate["saleRateNB"]?.ToObject<decimal>() ?? 0,
-                PurchaseRateNb = rate["purchaseRateNB"]?.ToObject<decimal>() ?? 0,
-                SaleRate = rate["saleRate"]?.ToObject<decimal>() ?? 0,
-                PurchaseRate = rate["purchaseRate"]?.ToObject<decimal>() ?? 0
-            }).ToList();
-
-            await repository.SaveExchangeRatesAsync(exchangeRates);
+                await factory.CreateExchangeRate(rateToken);
+            }
         }
         catch (WrongDateException e)
         {
