@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure;
+namespace Infrastructure.Configuration;
 
 public class AppSettings : IAppSettings
 {
@@ -10,6 +10,8 @@ public class AppSettings : IAppSettings
     public string JwtAudience { get; private set; } = null!;
     public string GoogleClientId { get; private set; } = null!;
     public string GoogleClientSecret { get; private set; } = null!;
+    public string GmailEmail { get; private set; } = null!;
+    public string GmailPassword { get; private set; } = null!;
     public string ModelUrl { get; private set; } = null!;
     public string PrivateBankUrl { get; private set; } = null!;
     public string KafkaHost { get; private set; } = null!;
@@ -38,6 +40,8 @@ public class AppSettings : IAppSettings
         JwtAudience = GetConfigurationValue("JWT_AUDIENCE");
         GoogleClientId = GetConfigurationValue("GOOGLE_CLIENT_ID");
         GoogleClientSecret = GetConfigurationValue("GOOGLE_CLIENT_SECRET");
+        GmailEmail = GetConfigurationValue("GMAIL_EMAIL");
+        GmailPassword = GetConfigurationValue("GMAIL_PASSWORD");
         ModelUrl = GetConfigurationValue("MODEL_URL");
         PrivateBankUrl = GetConfigurationValue("PRIVATE_BANK_URL");
         KafkaHost = GetConfigurationValue("KAFKA_HOST");

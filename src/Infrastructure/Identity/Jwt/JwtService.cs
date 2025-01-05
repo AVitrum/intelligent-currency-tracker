@@ -4,7 +4,7 @@ using System.Text;
 using Application.Common.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Infrastructure.Jwt;
+namespace Infrastructure.Identity.Jwt;
 
 public class JwtService : IJwtService
 {

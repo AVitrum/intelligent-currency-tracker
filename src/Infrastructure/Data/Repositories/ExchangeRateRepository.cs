@@ -1,4 +1,4 @@
-namespace Infrastructure.Repositories;
+namespace Infrastructure.Data.Repositories;
 
 public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRateRepository
 {

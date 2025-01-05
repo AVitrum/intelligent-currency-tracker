@@ -9,6 +9,7 @@ using Domain.Common;
 using Microsoft.Extensions.Logging;
 
 namespace Application.MlModel;
+
 //TODO: Change service when finished fixing model.
 public class MlModelService : IMlModelService
 {
@@ -18,7 +19,12 @@ public class MlModelService : IMlModelService
     private readonly IKafkaProducer _kafkaProducer;
     private readonly HttpClient _httpClient;
     
-    public MlModelService(IAppSettings appSettings, ILogger<MlModelService> logger, ICsvHelper csvHelper, IKafkaProducer kafkaProducer, HttpClient httpClient)
+    public MlModelService(
+        IAppSettings appSettings,
+        ILogger<MlModelService> logger,
+        ICsvHelper csvHelper,
+        IKafkaProducer kafkaProducer,
+        HttpClient httpClient)
     {
         _appSettings = appSettings;
         _logger = logger;
@@ -35,12 +41,12 @@ public class MlModelService : IMlModelService
         var message = new { content = csvContent };
         string serializedMessage = JsonSerializer.Serialize(message);
         int messageSize = Encoding.UTF8.GetByteCount(serializedMessage);
-
+        
         _logger.LogInformation("Message size: {Size} bytes", messageSize);
-
+        
         await _kafkaProducer.ProduceAsync("train-model",
             new Message<string, string> { Value = serializedMessage });
-
+        
         _logger.LogInformation("Model training started successfully");
         return BaseResult.SuccessResult();
     }

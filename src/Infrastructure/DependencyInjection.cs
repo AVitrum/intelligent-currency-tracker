@@ -1,8 +1,10 @@
+using Infrastructure.BackgroundServices;
+using Infrastructure.Configuration;
+using Infrastructure.Data.Repositories;
+using Infrastructure.Email;
 using Infrastructure.ExternalApis.GoogleAuth;
-using Infrastructure.ExternalApis.PrivateBank;
 using Infrastructure.Identity;
-using Infrastructure.Jwt;
-using Infrastructure.Repositories;
+using Infrastructure.Identity.Jwt;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,6 +26,8 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
         
         services.AddScoped<IUserFactory, UserFactory>();
+
+        services.AddScoped<IEmailSender, EmailSender>();
         
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IIdentityAdminService, IdentityAdminService>();
@@ -48,10 +52,22 @@ public static class DependencyInjection
         using IServiceScope scope = serviceProvider.CreateScope();
         ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
-        if (pendingMigrations.Any())
+        if (context.Database.CanConnect())
         {
-            context.Database.Migrate();
+            IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
+            if (pendingMigrations.Any())
+            {
+                context.Database.Migrate();
+            }
+        }
+        else
+        {
+            context.Database.EnsureCreated();
+            IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
+            if (pendingMigrations.Any())
+            {
+                context.Database.Migrate();
+            }
         }
     }
 }

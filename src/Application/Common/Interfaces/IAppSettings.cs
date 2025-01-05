@@ -8,6 +8,8 @@ public interface IAppSettings
     string JwtAudience { get; }
     string GoogleClientId { get; }
     string GoogleClientSecret { get; }
+    string GmailEmail { get; }
+    string GmailPassword { get; }
     string ModelUrl { get; }
     string PrivateBankUrl { get; }
     string KafkaHost { get; }

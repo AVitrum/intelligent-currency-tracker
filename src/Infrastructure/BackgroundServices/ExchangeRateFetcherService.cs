@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
-namespace Infrastructure.ExternalApis.PrivateBank;
+namespace Infrastructure.BackgroundServices;
 
 public class ExchangeRateFetcherService : BackgroundService
 {

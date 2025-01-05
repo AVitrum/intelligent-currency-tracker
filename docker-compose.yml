@@ -24,6 +24,7 @@
       - db
     entrypoint: >
       /bin/sh -c "
+      sleep 10;
       while true; do
         pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER $DB_NAME > /backups/backup_$(date +%Y%m%d%H%M%S).sql;
         sleep 3600;

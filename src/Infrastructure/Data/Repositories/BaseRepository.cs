@@ -1,4 +1,4 @@
-namespace Infrastructure.Repositories;
+namespace Infrastructure.Data.Repositories;
 
 public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
 {
