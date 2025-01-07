@@ -49,7 +49,7 @@ public class ExchangeRateFetcherService : BackgroundService
         }
     }
 
-    private async Task ProcessDateAsync(string urlTemplate, string date, IExchangeRateRepository repository,  IExchangeRateFactory factory, CancellationToken stoppingToken)
+    private async Task ProcessDateAsync(string urlTemplate, string date, IExchangeRateRepository repository, IExchangeRateFactory factory, CancellationToken stoppingToken)
     {
         var url = string.Format(urlTemplate, date);
         for (var attempt = 0; attempt < 3; attempt++)
@@ -68,7 +68,6 @@ public class ExchangeRateFetcherService : BackgroundService
                 }
 
                 await FetchAndSaveDataAsync(url, date, repository, factory, stoppingToken);
-                _logger.LogInformation("Successfully fetched data for {Date}", date);
                 break;
             }
             catch (Exception ex)
@@ -107,10 +106,11 @@ public class ExchangeRateFetcherService : BackgroundService
                 throw new Exception("Missing or empty 'exchangeRate' field in response");
             }
 
-            foreach (JToken rateToken in exchangeRatesToken)
-            {
-                await factory.CreateExchangeRate(rateToken);
-            }
+            List<ExchangeRate> exchangeRates = [];
+            exchangeRates.AddRange(exchangeRatesToken.Select(factory.CreateExchangeRate));
+            await repository.AddExchangeRateRangeAsync(exchangeRates);
+            
+            _logger.LogInformation("Successfully fetched data for {Date}", exchangeRates[0].Date);
         }
         catch (WrongDateException e)
         {

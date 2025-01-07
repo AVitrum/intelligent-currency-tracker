@@ -9,7 +9,7 @@ public class ExchangeRateRepository : BaseRepository<ExchangeRate>, IExchangeRat
         _context = context;
     }
 
-    public async Task SaveExchangeRatesAsync(List<ExchangeRate> exchangeRates)
+    public async Task AddExchangeRateRangeAsync(List<ExchangeRate> exchangeRates)
     {
         await _context.ExchangeRates.AddRangeAsync(exchangeRates);
         await _context.SaveChangesAsync();

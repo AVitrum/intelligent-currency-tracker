@@ -24,12 +24,12 @@ public class IdentityAdminService : IIdentityAdminService
         
         ApplicationUser user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
         
-        if (await _userManager.IsInRoleAsync(user, UserRoles.Admin.ToString()))
+        if (await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString()))
         {
             return BaseResult.FailureResult(["User is already an admin"]);
         }
         
-        return await AddUserToRoleAsync(user, UserRoles.Admin.ToString());
+        return await AddUserToRoleAsync(user, UserRole.Admin.ToString());
     }
 
     private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, string role)
@@ -37,7 +37,7 @@ public class IdentityAdminService : IIdentityAdminService
         IdentityResult roleResult = await _userManager.AddToRoleAsync(user, role);
         if (roleResult.Succeeded)
         {
-            await _userManager.RemoveFromRoleAsync(user, UserRoles.User.ToString());
+            await _userManager.RemoveFromRoleAsync(user, UserRole.User.ToString());
             return BaseResult.SuccessResult();
         }
         var errors = roleResult.Errors.Select(error => error.Description).ToList();

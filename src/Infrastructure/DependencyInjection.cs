@@ -24,14 +24,15 @@ public static class DependencyInjection
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
-        
-        services.AddScoped<IUserFactory, UserFactory>();
 
         services.AddScoped<IEmailSender, EmailSender>();
+
+        services.AddScoped<UserService>();
+        services.AddScoped<GoogleUserService>();
+        services.AddScoped<IUserFactory, UserFactory>();
         
-        services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IIdentityAdminService, IdentityAdminService>();
-        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+        
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
         

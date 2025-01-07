@@ -4,16 +4,15 @@ using Infrastructure.Identity.Results;
 
 namespace WebApi.Controllers;
 
-//TODO: Refactor whole controller
 [ApiController]
 [Route("api/[controller]")]
 public class IdentityController : ControllerBase
 {
-    private readonly IIdentityService _identityService;
+    private readonly IUserFactory _userFactory;
 
-    public IdentityController(IIdentityService identityService)
+    public IdentityController(IUserFactory userFactory)
     {
-        _identityService = identityService;
+        _userFactory = userFactory;
     }
 
     [HttpPost("register")]
@@ -21,22 +20,28 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register(CreateUserRequest request)
     {
-        BaseResult result = await _identityService.CreateUserAsync(request);
-        if (result.Success) return CreatedAtAction(nameof(Register), new { request.UserName }, null);
+        IUserService service = _userFactory.Create(request.ServiceType);
+        BaseResult result = await service.CreateUserAsync(request);
+        if (result.Success)
+        {
+            return CreatedAtAction(nameof(Register), new { request.UserName }, null);
+        }
 
-        return Conflict(result.Errors);
+        return BadRequest(result.Errors);
     }
-
+    
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        BaseResult result = await _identityService.LoginAsync(request);
-        if (result is not IdentityServiceResult identityServiceResult) return Unauthorized("Invalid login attempt");
+        IUserService service = _userFactory.Create(request.ServiceType);
+        BaseResult result = await service.LoginAsync(request);
+        if (result is IdentityServiceResult identityServiceResult)
+        {
+            return Ok(new { identityServiceResult.Token });
+        }
 
-        string token = identityServiceResult.Token;
-
-        return Ok(new { Token = token });
+        return Unauthorized();
     }
 }

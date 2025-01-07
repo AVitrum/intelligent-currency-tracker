@@ -6,14 +6,7 @@ namespace Application.ExchangeRates;
 
 public class ExchangeRateFactory : IExchangeRateFactory
 {
-    private readonly IExchangeRateRepository _repository;
-
-    public ExchangeRateFactory(IExchangeRateRepository repository)
-    {
-        _repository = repository;
-    }
-
-    public async Task<ExchangeRate> CreateExchangeRate(JToken rateToken)
+    public ExchangeRate CreateExchangeRate(JToken rateToken)
     {
         var rate = new ExchangeRate
         {
@@ -24,11 +17,10 @@ public class ExchangeRateFactory : IExchangeRateFactory
             SaleRate = rateToken["saleRate"]?.ToObject<decimal>() ?? 0,
             PurchaseRate = rateToken["purchaseRate"]?.ToObject<decimal>() ?? 0
         };
-        await _repository.AddAsync(rate);
         return rate;
     }
 
-    public async Task<ExchangeRate> CreateExchangeRate(ExchangeRate data)
+    public ExchangeRate CreateExchangeRate(ExchangeRate data)
     {
         var rate = new ExchangeRate
         {
@@ -39,15 +31,12 @@ public class ExchangeRateFactory : IExchangeRateFactory
             SaleRate = data.SaleRate,
             PurchaseRate = data.PurchaseRate
         };
-        await _repository.AddAsync(rate);
         return rate;
     }
 
     public async Task<ExchangeRate> CreateExchangeRateFromDelegate(ExchangeRateDelegate rateDelegate, PostCreationDelegate? postCreationDelegate = null)
     {
         ExchangeRate rate = rateDelegate() ?? throw new Exception("Exchange rate is null");
-        await _repository.AddAsync(rate);
-        
         if (postCreationDelegate is not null)
         {
             await postCreationDelegate(rate);

@@ -40,7 +40,7 @@ public class CsvHelper : ICsvHelper
         List<ExchangeRate> csvData = await ReadCsvFileAsync(file) 
                                      ?? throw new ImportCsvException("Invalid date format in CSV");
 
-        await _exchangeRateRepository.SaveExchangeRatesAsync(csvData);
+        await _exchangeRateRepository.AddExchangeRateRangeAsync(csvData);
         _logger.LogInformation("Successfully processed CSV file and saved exchange rates");
         return true;
     }

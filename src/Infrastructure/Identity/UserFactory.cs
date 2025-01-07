@@ -1,46 +1,25 @@
-using Domain.Common;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
+using Domain.Enums;
+using Infrastructure.ExternalApis.GoogleAuth;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Identity;
 
 public class UserFactory : IUserFactory
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ILogger<UserFactory> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
-    public UserFactory(UserManager<ApplicationUser> userManager, ILogger<UserFactory> logger)
+    public UserFactory(IServiceProvider serviceProvider)
     {
-        _userManager = userManager;
-        _logger = logger;
+        _serviceProvider = serviceProvider;
     }
 
-    public async Task<BaseResult> CreateUserAsync(UserFactoryDelegate userFactory, PostCreationDelegate? postCreationDelegate = null)
+    public IUserService Create(UserServiceType type)
     {
-        ApplicationUser user = userFactory();
-    
-        _logger.LogInformation("Creating user with email: {Email}", user.Email);
-        IdentityResult creationResult = await _userManager.CreateAsync(user);
-        if (!creationResult.Succeeded)
+        return type switch
         {
-            var errors = creationResult.Errors.Select(error => error.Description).ToList();
-            _logger.LogError("User creation failed: {Errors}", string.Join(", ", errors));
-            return BaseResult.FailureResult(errors);
-        }
-    
-        if (postCreationDelegate is not null)
-        {
-            _logger.LogInformation("Executing post-creation action for user: {Email}", user.Email);
-            IdentityResult postActionResult = await postCreationDelegate(user);
-            if (!postActionResult.Succeeded)
-            {
-                var errors = postActionResult.Errors.Select(error => error.Description).ToList();
-                _logger.LogError("Post-creation action failed: {Errors}", string.Join(", ", errors));
-                return BaseResult.FailureResult(errors);
-            }
-        }
-
-        _logger.LogInformation("User created successfully: {Email}", user.Email);
-        return BaseResult.SuccessResult();
+            UserServiceType.GOOGLE => _serviceProvider.GetRequiredService<GoogleUserService>(),
+            UserServiceType.EMAIL => _serviceProvider.GetRequiredService<UserService>(),
+            _ => throw new ArgumentException("Invalid type for user service")
+        };
     }
 }
