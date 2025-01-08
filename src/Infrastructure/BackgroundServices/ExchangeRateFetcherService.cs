@@ -100,17 +100,20 @@ public class ExchangeRateFetcherService : BackgroundService
                 throw new WrongDateException(date, parsedDateString);
             }
 
-            JToken? exchangeRatesToken = jsonObject["exchangeRate"];
-            if (exchangeRatesToken is not { HasValues: true })
+            JToken? exchangeRateTokens = jsonObject["exchangeRate"];
+            if (exchangeRateTokens is not { HasValues: true })
             {
                 throw new Exception("Missing or empty 'exchangeRate' field in response");
             }
 
             List<ExchangeRate> exchangeRates = [];
-            exchangeRates.AddRange(exchangeRatesToken.Select(factory.CreateExchangeRate));
-            await repository.AddExchangeRateRangeAsync(exchangeRates);
+            foreach (JToken exchangeRateToken in exchangeRateTokens)
+            {
+                exchangeRates.AddRange(factory.CreateExchangeRate(exchangeRateToken, parsedDate));
+            }
             
-            _logger.LogInformation("Successfully fetched data for {Date}", exchangeRates[0].Date);
+            await repository.AddExchangeRateRangeAsync(exchangeRates);
+            _logger.LogInformation("Successfully fetched data for {Date}", parsedDate);
         }
         catch (WrongDateException e)
         {

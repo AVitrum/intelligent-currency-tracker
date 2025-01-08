@@ -6,11 +6,11 @@ namespace Application.ExchangeRates;
 
 public class ExchangeRateFactory : IExchangeRateFactory
 {
-    public ExchangeRate CreateExchangeRate(JToken rateToken)
+    public ExchangeRate CreateExchangeRate(JToken rateToken, DateTime date)
     {
         var rate = new ExchangeRate
         {
-            Date = rateToken["date"]?.ToObject<DateTime>() ?? DateTime.UtcNow,
+            Date = date,
             Currency = rateToken["currency"]?.ToString() ?? throw new Exception("Currency is missing"),
             SaleRateNb = rateToken["saleRateNB"]?.ToObject<decimal>() ?? 0,
             PurchaseRateNb = rateToken["purchaseRateNB"]?.ToObject<decimal>() ?? 0,
