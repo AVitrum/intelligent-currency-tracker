@@ -1,7 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Application.Common.Exceptions;
-using Application.Common.Payload.Dtos;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.ExternalApis.GoogleAuth.Results;
@@ -11,29 +9,19 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.ExternalApis.GoogleAuth;
 
-public class GoogleUserService : IUserService
+public class GoogleAuthService : IGoogleAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IJwtService _jwtService;
 
-    public GoogleUserService(UserManager<ApplicationUser> userManager, IJwtService jwtService)
+    public GoogleAuthService(UserManager<ApplicationUser> userManager, IJwtService jwtService)
     {
         _userManager = userManager;
         _jwtService = jwtService;
     }
 
-    public async Task<BaseResult> CreateUserAsync(IUserRequest request)
+    public async Task<BaseResult> HandleGoogleResponse(AuthenticateResult authResult)
     {
-        if (request is not GoogleAuthDto dto)
-        {
-            throw new WrongTypeRequestException(nameof(dto), nameof(request));
-        }
-        
-        AuthenticateResult authResult = dto.AuthenticateResult;
-        if (!authResult.Succeeded)
-        {
-            return GoogleAuthResult.FailureResult(new List<string> {"Authentication failed"});
-        }
         
         string? email = authResult.Principal?.FindFirst(ClaimTypes.Email)?.Value;
         if (email is null)
@@ -44,7 +32,7 @@ public class GoogleUserService : IUserService
         ApplicationUser? newUser = await _userManager.FindByEmailAsync(email);
         if (newUser is not null)
         {
-            return await LoginAsync(new GoogleLoginDto(newUser));
+            return await LoginAsync(newUser);
         }
         
         newUser = new ApplicationUser
@@ -68,29 +56,20 @@ public class GoogleUserService : IUserService
         {
             return BaseResult.FailureResult(addToRoleResult.Errors.Select(error => error.Description).ToList());
         }
-        return await LoginAsync(new GoogleLoginDto(newUser));
+        return await LoginAsync(newUser);
     }
 
-    public Task<BaseResult> LoginAsync(IUserRequest request)
+    private Task<BaseResult> LoginAsync(ApplicationUser user)
     {
-        if (request is not GoogleLoginDto dto)
-        {
-            throw new WrongTypeRequestException(nameof(dto), nameof(request));
-        }
-        ApplicationUser user = dto.ApplicationUser;
-        
         List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
+        
         JwtSecurityToken token = _jwtService.GenerateToken(claims);
-        return Task.FromResult<BaseResult>(GoogleAuthResult.SuccessResult(new JwtSecurityTokenHandler().WriteToken(token)));
-    }
-    
-    private record GoogleLoginDto(ApplicationUser ApplicationUser) : IUserRequest
-    {
-        public UserServiceType ServiceType { get; set; } = UserServiceType.GOOGLE;
+        return Task.FromResult<BaseResult>(
+            GoogleAuthResult.SuccessResult(new JwtSecurityTokenHandler().WriteToken(token)));
     }
 }

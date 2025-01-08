@@ -1,5 +1,5 @@
+using System.Text.Json.Serialization;
 using Application.Common.Validation;
-using Newtonsoft.Json;
 
 namespace Application.Common.Payload.Requests;
 

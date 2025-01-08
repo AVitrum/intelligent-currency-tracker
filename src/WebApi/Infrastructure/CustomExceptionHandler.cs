@@ -52,6 +52,7 @@ public class CustomExceptionHandler : IExceptionHandler
             ImportCsvException ex => (400, ex.Message),
             ExportCsvException ex => (400, ex.Message),
             
+            IdentityException ex => (400, ex.Message),
             UserNotFoundException ex => (401, ex.Message),
             PasswordException ex => (400, ex.Message),
             UnauthorizedAccessException ex => (401, ex.Message),

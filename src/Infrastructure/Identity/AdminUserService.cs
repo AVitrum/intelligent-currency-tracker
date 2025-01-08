@@ -1,18 +1,51 @@
 using Application.Common.Exceptions;
+using Application.Common.Payload.Dtos;
 using Application.Common.Payload.Requests;
 using Domain.Common;
 using Domain.Enums;
+using Infrastructure.Identity.Utils;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Identity;
 
-public class IdentityAdminService : IIdentityAdminService
+public class AdminUserService : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public IdentityAdminService(UserManager<ApplicationUser> userManager)
+    public AdminUserService(UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
+    }
+
+    public async Task<BaseResult> CreateUserAsync(CreateUserDto dto)
+    {
+        var newUser = new ApplicationUser
+        {
+            UserName = dto.UserName,
+            Email = dto.Email,
+            PhoneNumber = dto.PhoneNumber ?? string.Empty,
+            CreationMethod = UserCreationMethod.EMAIL
+        };
+        await _userManager.CreateAsync(newUser);
+
+        IdentityResult passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
+        if (!passwordResult.Succeeded)
+        {
+            return BaseResult.FailureResult(passwordResult.Errors.Select(error => error.Description).ToList());
+        }
+
+        IdentityResult roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.Admin.ToString());
+        if (!roleResult.Succeeded)
+        {
+            return BaseResult.FailureResult(roleResult.Errors.Select(error => error.Description).ToList());
+        }
+
+        return BaseResult.SuccessResult();
+    }
+
+    public Task<BaseResult> LoginAsync(LoginRequest request)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request)

@@ -1,12 +1,15 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Common.Exceptions;
+using Application.Common.Payload.Dtos;
 using Application.Common.Payload.Requests;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Identity.Results;
+using Infrastructure.Identity.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+
 
 namespace Infrastructure.Identity;
 
@@ -27,23 +30,18 @@ public class UserService : IUserService
         _jwtService = jwtService;
     }
 
-    public async Task<BaseResult> CreateUserAsync(IUserRequest request)
+    public async Task<BaseResult> CreateUserAsync(CreateUserDto dto)
     {
-        if (request is not CreateUserRequest createUserRequest)
-        {
-            throw new WrongTypeRequestException(nameof(request), nameof(createUserRequest));   
-        }
-        
         var newUser = new ApplicationUser
         {
-            UserName = createUserRequest.UserName,
-            Email = createUserRequest.Email,
-            PhoneNumber = createUserRequest.PhoneNumber ?? string.Empty,
+            UserName = dto.UserName,
+            Email = dto.Email,
+            PhoneNumber = dto.PhoneNumber ?? string.Empty,
             CreationMethod = UserCreationMethod.EMAIL
         };
         await _userManager.CreateAsync(newUser);
 
-        IdentityResult passwordResult = await _userManager.AddPasswordAsync(newUser, createUserRequest.Password);
+        IdentityResult passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
         if (!passwordResult.Succeeded)
         {
             return BaseResult.FailureResult(passwordResult.Errors.Select(error => error.Description).ToList());
@@ -58,24 +56,24 @@ public class UserService : IUserService
         return BaseResult.SuccessResult();
     }
 
-    public async Task<BaseResult> LoginAsync(IUserRequest request)
+    public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        if (request is not LoginRequest loginRequest)
-        {
-            throw new WrongTypeRequestException(nameof(request), nameof(loginRequest)); 
-        }
+        UserLookupDelegate lookupDelegate = GetUserLookupDelegate(request);
 
-        UserLookupDelegate lookupDelegate = GetUserLookupDelegate(loginRequest);
-
-        string identifier = loginRequest.UserName ?? loginRequest.Email
+        string identifier = request.UserName ?? request.Email
             ?? throw new ArgumentException("Username or Email must be provided");
 
         ApplicationUser user = await lookupDelegate(identifier)
                                ?? throw new UserNotFoundException("User not found");
 
-        await ValidatePasswordAsync(user, loginRequest.Password);
+        await ValidatePasswordAsync(user, request.Password);
 
         return await GenerateTokenResultAsync(user);
+    }
+
+    public Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request)
+    {
+        throw new NotImplementedException();
     }
 
     // public async Task<bool> AuthorizeAsync(string userId, string policyName)
@@ -120,7 +118,7 @@ public class UserService : IUserService
         IList<string> roles = await _userManager.GetRolesAsync(user);
         var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
 
-        List<Claim> claims =
+                        List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())

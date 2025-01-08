@@ -1,4 +1,3 @@
-using Application.Common.Payload.Dtos;
 using Domain.Common;
 using Infrastructure.ExternalApis.GoogleAuth.Results;
 using Microsoft.AspNetCore.Authentication;
@@ -10,11 +9,11 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public class GoogleAuthController : ControllerBase
 {
-    private readonly IUserFactory _userFactory;
+    private readonly IGoogleAuthService _service;
     
-    public GoogleAuthController(IUserFactory userFactory)
+    public GoogleAuthController(IGoogleAuthService service)
     {
-        _userFactory = userFactory;
+        _service = service;
     }
 
     [HttpGet("login")]
@@ -36,11 +35,7 @@ public class GoogleAuthController : ControllerBase
     {
         
         AuthenticateResult authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-        var dto = new GoogleAuthDto { AuthenticateResult = authResult };
-        
-        IUserService service = _userFactory.Create(dto.ServiceType);
-        
-        BaseResult result = await service.CreateUserAsync(new GoogleAuthDto { AuthenticateResult = authResult });
+        BaseResult result = await _service.HandleGoogleResponse(authResult);
         if (result is not GoogleAuthResult googleAuthResult)
         {
             return Unauthorized();

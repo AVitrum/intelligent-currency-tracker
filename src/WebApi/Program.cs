@@ -1,7 +1,7 @@
 using Application;
 using DotNetEnv;
 using Infrastructure;
-using Infrastructure.Identity;
+using Infrastructure.Identity.Utils;
 using Microsoft.AspNetCore.Diagnostics;
 using WebApi;
 using WebApi.Infrastructure;

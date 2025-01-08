@@ -1,8 +1,7 @@
 using Domain.Enums;
-using Infrastructure.ExternalApis.GoogleAuth;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Identity;
+namespace Infrastructure.Identity.Utils;
 
 public class UserFactory : IUserFactory
 {
@@ -13,12 +12,12 @@ public class UserFactory : IUserFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IUserService Create(UserServiceType type)
+    public IUserService Create(UserServiceProvider provider)
     {
-        return type switch
+        return provider switch
         {
-            UserServiceType.GOOGLE => _serviceProvider.GetRequiredService<GoogleUserService>(),
-            UserServiceType.EMAIL => _serviceProvider.GetRequiredService<UserService>(),
+            UserServiceProvider.DEFAULT => _serviceProvider.GetRequiredService<UserService>(),
+            UserServiceProvider.ADMIN => _serviceProvider.GetRequiredService<AdminUserService>(),
             _ => throw new ArgumentException("Invalid type for user service")
         };
     }
