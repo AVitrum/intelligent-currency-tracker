@@ -6,7 +6,7 @@ namespace Application.Kafka;
 public class KafkaProducer : IKafkaProducer
 {
     private readonly IProducer<string, string> _producer;
-    
+
     public KafkaProducer(IAppSettings appSettings)
     {
         var config = new ConsumerConfig

@@ -22,7 +22,38 @@ namespace Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.ExchangeRate", b =>
+            modelBuilder.Entity("Domain.Entities.Currency", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("R030")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("R030")
+                        .IsUnique();
+
+                    b.ToTable("Currencies");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Rate", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -31,8 +62,8 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Currency")
-                        .HasColumnType("text");
+                    b.Property<Guid>("CurrencyId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
@@ -40,24 +71,15 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("PurchaseRate")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("PurchaseRateNb")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("SaleRate")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("SaleRateNb")
+                    b.Property<decimal>("Value")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Date", "Currency")
+                    b.HasIndex("CurrencyId", "Date")
                         .IsUnique();
 
-                    b.ToTable("ExchangeRates");
+                    b.ToTable("Rates");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
@@ -257,6 +279,17 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Rate", b =>
+                {
+                    b.HasOne("Domain.Entities.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

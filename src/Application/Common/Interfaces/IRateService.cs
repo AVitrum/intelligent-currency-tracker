@@ -3,7 +3,7 @@ using Domain.Common;
 
 namespace Application.Common.Interfaces;
 
-public interface IExchangeRateService
+public interface IRateService
 {
-    Task<BaseResult> GetRangeAsync(ExchangeRateRequest request);
+    Task<BaseResult> GetRatesAsync(ExchangeRateRequest request);
 }

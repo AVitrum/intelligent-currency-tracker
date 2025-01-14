@@ -3,7 +3,7 @@ using Application.Common.Payload.Dtos;
 using Application.Common.Payload.Requests;
 using Domain.Common;
 using Domain.Enums;
-using Infrastructure.Identity.Utils;
+using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Identity;
@@ -28,19 +28,14 @@ public class AdminUserService : IUserService
         };
         await _userManager.CreateAsync(newUser);
 
-        IdentityResult passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
+        var passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
         if (!passwordResult.Succeeded)
-        {
             return BaseResult.FailureResult(passwordResult.Errors.Select(error => error.Description).ToList());
-        }
 
-        IdentityResult roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.Admin.ToString());
-        if (!roleResult.Succeeded)
-        {
-            return BaseResult.FailureResult(roleResult.Errors.Select(error => error.Description).ToList());
-        }
-
-        return BaseResult.SuccessResult();
+        var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.Admin.ToString());
+        return roleResult.Succeeded
+            ? BaseResult.SuccessResult()
+            : BaseResult.FailureResult(roleResult.Errors.Select(error => error.Description).ToList());
     }
 
     public Task<BaseResult> LoginAsync(LoginRequest request)
@@ -50,44 +45,37 @@ public class AdminUserService : IUserService
 
     public async Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request)
     {
-        UserLookupDelegate lookupDelegate = GetUserLookupDelegate(request);
+        var lookupDelegate = GetUserLookupDelegate(request);
 
-        string identifier = request.UserName ?? request.Email 
+        var identifier = request.UserName ?? request.Email
             ?? throw new ArgumentException("Username or Email must be provided");
-        
-        ApplicationUser user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
-        
+
+        var user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
+
         if (await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString()))
-        {
             return BaseResult.FailureResult(["User is already an admin"]);
-        }
-        
+
         return await AddUserToRoleAsync(user, UserRole.Admin.ToString());
     }
 
     private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, string role)
     {
-        IdentityResult roleResult = await _userManager.AddToRoleAsync(user, role);
+        var roleResult = await _userManager.AddToRoleAsync(user, role);
         if (roleResult.Succeeded)
         {
             await _userManager.RemoveFromRoleAsync(user, UserRole.User.ToString());
             return BaseResult.SuccessResult();
         }
+
         var errors = roleResult.Errors.Select(error => error.Description).ToList();
         return BaseResult.FailureResult(errors);
     }
-    
+
     private UserLookupDelegate GetUserLookupDelegate(ProvideAdminFunctionalityRequest request)
     {
-        if (request.UserName is not null)
-        {
-            return _userManager.FindByNameAsync;
-        }
+        if (request.UserName is not null) return _userManager.FindByNameAsync;
 
-        if (request.Email is not null)
-        {
-            return _userManager.FindByEmailAsync;
-        }
+        if (request.Email is not null) return _userManager.FindByEmailAsync;
 
         throw new ArgumentException("Username or Email must be provided");
     }

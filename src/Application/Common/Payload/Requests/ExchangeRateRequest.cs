@@ -5,17 +5,17 @@ namespace Application.Common.Payload.Requests;
 
 public class ExchangeRateRequest
 {
+    private DateTime _end;
+
+    private DateTime _start;
     [DateFormat] public required string StartDateString { get; init; }
     [DateFormat] public required string EndDateString { get; init; }
     public string? Currency { get; init; }
 
-    private DateTime _start;
-    private DateTime _end;
-
     [JsonIgnore]
     public DateTime Start
     {
-        get => _start;
+        get => _start.ToUniversalTime();
         set
         {
             _start = value;
@@ -26,7 +26,7 @@ public class ExchangeRateRequest
     [JsonIgnore]
     public DateTime End
     {
-        get => _end;
+        get => _end.ToUniversalTime();
         set
         {
             _end = value;

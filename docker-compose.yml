@@ -57,9 +57,11 @@
       GMAIL_PASSWORD: ${GMAIL_PASSWORD}
       MODEL_URL: ${MODEL_URL}
       PRIVATE_BANK_URL: ${PRIVATE_BANK_URL}
+      NBU_URL: ${NBU_URL}
       KAFKA_HOST: ${KAFKA_HOST}
     volumes:
       - ${HOME}/.aspnet/https:/https/
+      - ./logs:/app/logs
     depends_on:
       - db
       - kafka
@@ -81,7 +83,7 @@
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_SERVERS: zoo:2888:3888
-      
+  
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:

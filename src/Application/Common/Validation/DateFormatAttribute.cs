@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using Application.Common.Payload.Requests;
 
 namespace Application.Common.Validation;
@@ -10,10 +11,10 @@ public class DateFormatAttribute : ValidationAttribute
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
         var dto = (ExchangeRateRequest)validationContext.ObjectInstance;
-        if (!DateTime.TryParseExact(dto.StartDateString, DateFormat, null, System.Globalization.DateTimeStyles.None,
-                out DateTime startDate) ||
-            !DateTime.TryParseExact(dto.EndDateString, DateFormat, null, System.Globalization.DateTimeStyles.None,
-                out DateTime endDate)) return new ValidationResult("Invalid date range or format");
+        if (!DateTime.TryParseExact(dto.StartDateString, DateFormat, null, DateTimeStyles.None,
+                out var startDate) ||
+            !DateTime.TryParseExact(dto.EndDateString, DateFormat, null, DateTimeStyles.None,
+                out var endDate)) return new ValidationResult("Invalid date range or format");
         if (startDate <= endDate)
         {
             dto.Start = startDate;

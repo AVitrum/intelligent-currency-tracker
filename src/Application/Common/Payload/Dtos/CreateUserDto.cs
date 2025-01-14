@@ -6,7 +6,8 @@ namespace Application.Common.Payload.Dtos;
 
 public class CreateUserDto
 {
-    [Required(ErrorMessage = "Email field is required!"), EmailAddress(ErrorMessage = "Email is not valid")]
+    [Required(ErrorMessage = "Email field is required!")]
+    [EmailAddress(ErrorMessage = "Email is not valid")]
     public required string Email { get; set; }
 
     [Required(ErrorMessage = "UserName field is required!")]
@@ -21,6 +22,5 @@ public class CreateUserDto
     [Required(ErrorMessage = "Provider field is required!")]
     public required string Provider { get; set; }
 
-    [JsonIgnore]
-    public UserServiceProvider ServiceProvider => Enum.Parse<UserServiceProvider>(Provider, true);
+    [JsonIgnore] public UserServiceProvider ServiceProvider => Enum.Parse<UserServiceProvider>(Provider, true);
 }

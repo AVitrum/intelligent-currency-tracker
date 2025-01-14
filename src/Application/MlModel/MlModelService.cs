@@ -14,11 +14,11 @@ namespace Application.MlModel;
 public class MlModelService : IMlModelService
 {
     private readonly IAppSettings _appSettings;
-    private readonly ILogger<MlModelService> _logger;
     private readonly ICsvHelper _csvHelper;
-    private readonly IKafkaProducer _kafkaProducer;
     private readonly HttpClient _httpClient;
-    
+    private readonly IKafkaProducer _kafkaProducer;
+    private readonly ILogger<MlModelService> _logger;
+
     public MlModelService(
         IAppSettings appSettings,
         ILogger<MlModelService> logger,
@@ -35,18 +35,18 @@ public class MlModelService : IMlModelService
 
     public async Task<BaseResult> TrainModelAsync(ExchangeRateRequest request)
     {
-        (_, byte[] content) = await _csvHelper.ExportExchangeRateToCsvAsync(request);
-        
-        string csvContent = Encoding.UTF8.GetString(content);
+        var (_, content) = await _csvHelper.ExportExchangeRateToCsvAsync(request);
+
+        var csvContent = Encoding.UTF8.GetString(content);
         var message = new { content = csvContent };
-        string serializedMessage = JsonSerializer.Serialize(message);
-        int messageSize = Encoding.UTF8.GetByteCount(serializedMessage);
-        
+        var serializedMessage = JsonSerializer.Serialize(message);
+        var messageSize = Encoding.UTF8.GetByteCount(serializedMessage);
+
         _logger.LogInformation("Message size: {Size} bytes", messageSize);
-        
+
         await _kafkaProducer.ProduceAsync("train-model",
             new Message<string, string> { Value = serializedMessage });
-        
+
         _logger.LogInformation("Model training started successfully");
         return BaseResult.SuccessResult();
     }
@@ -58,12 +58,12 @@ public class MlModelService : IMlModelService
 
         try
         {
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             _logger.LogInformation("Successfully received prediction");
-            string prediction = await response.Content.ReadAsStringAsync();
-            
+            var prediction = await response.Content.ReadAsStringAsync();
+
             return ExchangeRatePredictionResult.SuccessResult(prediction);
         }
         catch (HttpRequestException ex)

@@ -18,7 +18,7 @@ public class CustomExceptionHandler : IExceptionHandler
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
         CancellationToken cancellationToken)
     {
-        string traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+        var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
 
         _logger.LogError(
             exception,
@@ -27,7 +27,7 @@ public class CustomExceptionHandler : IExceptionHandler
             traceId
         );
 
-        (int statusCode, string title) = MapException(exception);
+        var (statusCode, title) = MapException(exception);
 
         await Results.Problem(
             title: title,
@@ -48,10 +48,10 @@ public class CustomExceptionHandler : IExceptionHandler
             DbUpdateException { InnerException: PostgresException { SqlState: "23505" } } =>
                 (409, "Duplicate key value violates unique constraint"),
             DataNotFoundException ex => (404, ex.Message),
-            
+
             ImportCsvException ex => (400, ex.Message),
             ExportCsvException ex => (400, ex.Message),
-            
+
             IdentityException ex => (400, ex.Message),
             UserNotFoundException ex => (401, ex.Message),
             PasswordException ex => (400, ex.Message),

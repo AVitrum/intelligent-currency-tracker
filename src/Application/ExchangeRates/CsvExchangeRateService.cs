@@ -4,13 +4,12 @@ using Application.ExchangeRates.Results;
 using Domain.Common;
 using Microsoft.AspNetCore.Http;
 
-
 namespace Application.ExchangeRates;
 
 public class CsvExchangeRateService : ICsvExchangeRateService
 {
     private readonly ICsvHelper _csvHelper;
-    
+
     public CsvExchangeRateService(ICsvHelper csvHelper)
     {
         _csvHelper = csvHelper;
@@ -18,7 +17,7 @@ public class CsvExchangeRateService : ICsvExchangeRateService
 
     public async Task<BaseResult> GetExchangeRatesFromCsvAsync(IFormFile? file)
     {
-        bool success = await _csvHelper.ImportExchangeRateFromCsvAsync(file);
+        var success = await _csvHelper.ImportExchangeRateFromCsvAsync(file);
 
         return success
             ? BaseResult.SuccessResult()
@@ -27,7 +26,7 @@ public class CsvExchangeRateService : ICsvExchangeRateService
 
     public async Task<BaseResult> ExportExchangeRatesToCsvAsync(ExchangeRateRequest request)
     {
-        (string name, byte[] content) = await _csvHelper.ExportExchangeRateToCsvAsync(request);
+        var (name, content) = await _csvHelper.ExportExchangeRateToCsvAsync(request);
         return ExportExchangeRatesToCsvResult.SuccessResult(content, name);
     }
 }

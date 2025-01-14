@@ -6,7 +6,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)
     {
-        IAppSettings appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
+        var appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
 
         services.AddAuthentication(options =>
             {
