@@ -11,7 +11,6 @@ public interface IAppSettings
     string GmailEmail { get; }
     string GmailPassword { get; }
     string ModelUrl { get; }
-    string PrivateBankUrl { get; }
     string NbuUrl { get; }
     string KafkaHost { get; }
     bool IsDocker();

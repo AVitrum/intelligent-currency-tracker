@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-namespace WebApi;
+namespace WebApi.Configurations;
 
-public static class DependencyInjection
+public static class AuthenticationSetup
 {
     public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)
     {

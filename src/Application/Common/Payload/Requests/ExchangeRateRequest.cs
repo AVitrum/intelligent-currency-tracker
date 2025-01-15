@@ -1,15 +1,18 @@
 using System.Text.Json.Serialization;
 using Application.Common.Validation;
+using Domain.Constans;
 
 namespace Application.Common.Payload.Requests;
 
 public class ExchangeRateRequest
 {
     private DateTime _end;
-
     private DateTime _start;
+
     [DateFormat] public required string StartDateString { get; init; }
+
     [DateFormat] public required string EndDateString { get; init; }
+
     public string? Currency { get; init; }
 
     [JsonIgnore]
@@ -19,7 +22,7 @@ public class ExchangeRateRequest
         set
         {
             _start = value;
-            _start = DateTime.ParseExact(StartDateString, "dd.MM.yyyy", null);
+            _start = DateTime.ParseExact(StartDateString, DateConstants.DateFormat, null);
         }
     }
 
@@ -30,7 +33,7 @@ public class ExchangeRateRequest
         set
         {
             _end = value;
-            _end = DateTime.ParseExact(EndDateString, "dd.MM.yyyy", null);
+            _end = DateTime.ParseExact(EndDateString, DateConstants.DateFormat, null);
         }
     }
 }

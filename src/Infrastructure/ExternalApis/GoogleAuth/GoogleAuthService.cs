@@ -42,7 +42,7 @@ public class GoogleAuthService : IGoogleAuthService
         if (!result.Succeeded)
             return BaseResult.FailureResult(result.Errors.Select(error => error.Description).ToList());
 
-        var addToRoleResult = await _userManager.AddToRoleAsync(newUser, UserRole.User.ToString());
+        var addToRoleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
         if (!addToRoleResult.Succeeded)
             return BaseResult.FailureResult(addToRoleResult.Errors.Select(error => error.Description).ToList());
         return await LoginAsync(newUser);

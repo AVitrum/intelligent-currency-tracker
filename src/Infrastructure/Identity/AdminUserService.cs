@@ -32,7 +32,7 @@ public class AdminUserService : IUserService
         if (!passwordResult.Succeeded)
             return BaseResult.FailureResult(passwordResult.Errors.Select(error => error.Description).ToList());
 
-        var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.Admin.ToString());
+        var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.ADMIN.ToString());
         return roleResult.Succeeded
             ? BaseResult.SuccessResult()
             : BaseResult.FailureResult(roleResult.Errors.Select(error => error.Description).ToList());
@@ -52,10 +52,10 @@ public class AdminUserService : IUserService
 
         var user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
 
-        if (await _userManager.IsInRoleAsync(user, UserRole.Admin.ToString()))
+        if (await _userManager.IsInRoleAsync(user, UserRole.ADMIN.ToString()))
             return BaseResult.FailureResult(["User is already an admin"]);
 
-        return await AddUserToRoleAsync(user, UserRole.Admin.ToString());
+        return await AddUserToRoleAsync(user, UserRole.ADMIN.ToString());
     }
 
     private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, string role)
@@ -63,7 +63,7 @@ public class AdminUserService : IUserService
         var roleResult = await _userManager.AddToRoleAsync(user, role);
         if (roleResult.Succeeded)
         {
-            await _userManager.RemoveFromRoleAsync(user, UserRole.User.ToString());
+            await _userManager.RemoveFromRoleAsync(user, UserRole.USER.ToString());
             return BaseResult.SuccessResult();
         }
 

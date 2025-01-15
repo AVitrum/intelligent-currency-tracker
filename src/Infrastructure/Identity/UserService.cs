@@ -49,7 +49,7 @@ public class UserService : IUserService
         if (!passwordResult.Succeeded)
             return BaseResult.FailureResult(passwordResult.Errors.Select(e => e.Description).ToList());
 
-        var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.User.ToString());
+        var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
         return roleResult.Succeeded
             ? BaseResult.SuccessResult()
             : BaseResult.FailureResult(roleResult.Errors.Select(e => e.Description).ToList());

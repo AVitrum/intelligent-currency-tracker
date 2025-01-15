@@ -24,7 +24,6 @@ public class AppSettings : IAppSettings
     public string GmailEmail { get; private set; } = null!;
     public string GmailPassword { get; private set; } = null!;
     public string ModelUrl { get; private set; } = null!;
-    public string PrivateBankUrl { get; private set; } = null!;
     public string NbuUrl { get; private set; } = null!;
     public string KafkaHost { get; private set; } = null!;
 
@@ -44,7 +43,6 @@ public class AppSettings : IAppSettings
         GmailEmail = GetConfigurationValue("GMAIL_EMAIL");
         GmailPassword = GetConfigurationValue("GMAIL_PASSWORD");
         ModelUrl = GetConfigurationValue("MODEL_URL");
-        PrivateBankUrl = GetConfigurationValue("PRIVATE_BANK_URL");
         NbuUrl = GetConfigurationValue("NBU_URL");
         KafkaHost = GetConfigurationValue("KAFKA_HOST");
     }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-namespace WebApi.Infrastructure;
+namespace WebApi.Configurations;
 
 public class CustomExceptionHandler : IExceptionHandler
 {
@@ -49,7 +49,6 @@ public class CustomExceptionHandler : IExceptionHandler
                 (409, "Duplicate key value violates unique constraint"),
             DataNotFoundException ex => (404, ex.Message),
 
-            ImportCsvException ex => (400, ex.Message),
             ExportCsvException ex => (400, ex.Message),
 
             IdentityException ex => (400, ex.Message),

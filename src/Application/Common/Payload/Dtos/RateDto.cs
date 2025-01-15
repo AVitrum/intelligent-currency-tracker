@@ -1,4 +1,5 @@
 using AutoMapper;
+using Domain.Constans;
 using Domain.Entities;
 
 namespace Application.Common.Payload.Dtos;
@@ -18,7 +19,7 @@ public class RateDto
                 .ForMember(dest => dest.Currency, opt =>
                     opt.MapFrom(src => src.Currency))
                 .ForMember(dest => dest.Date, opt =>
-                    opt.MapFrom(src => src.Date.ToString("dd.MM.yyyy")));
+                    opt.MapFrom(src => src.Date.ToString(DateConstants.DateFormat)));
         }
     }
 }
