@@ -5,5 +5,5 @@ namespace Application.Common.Interfaces;
 
 public interface IJwtService
 {
-    JwtSecurityToken GenerateToken(List<Claim> claims);
+    JwtSecurityToken GenerateToken(ICollection<Claim> claims);
 }

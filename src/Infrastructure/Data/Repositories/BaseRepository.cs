@@ -28,7 +28,7 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync();
     }
-    
+
     public virtual async Task<T> GetByIdAsync(Guid id)
     {
         return await _dbSet.FindAsync(id) ?? throw new Exception("Entity not found");

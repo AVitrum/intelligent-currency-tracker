@@ -7,16 +7,16 @@ public class EmailSender : IEmailSender
 {
     private readonly string _email;
     private readonly string _password;
-    
+
     public EmailSender(IAppSettings appSettings)
     {
         _email = appSettings.GmailEmail;
         _password = appSettings.GmailPassword;
     }
-    
+
     public Task SendEmailAsync(string email, string subject, string message)
     {
-        SmtpClient client = GetSmtpClient();
+        var client = GetSmtpClient();
 
         var msg = new MailMessage
         {
@@ -38,13 +38,14 @@ public class EmailSender : IEmailSender
         };
         return client.SendMailAsync(msg);
     }
-    
-    private SmtpClient GetSmtpClient() =>
-        new("smtp.gmail.com")
+
+    private SmtpClient GetSmtpClient()
+    {
+        return new SmtpClient("smtp.gmail.com")
         {
             Port = 587,
             Credentials = new NetworkCredential(_email, _password),
             EnableSsl = true
         };
-    
+    }
 }

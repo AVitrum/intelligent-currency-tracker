@@ -4,11 +4,11 @@ USER $APP_UID
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["WebApi/WebApi.csproj", "WebApi/"]
-COPY ["Application/Application.csproj", "Application/"]
-COPY ["Domain/Domain.csproj", "Domain/"]
-COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+COPY ["src/WebApi/WebApi.csproj", "WebApi/"]
+COPY ["src/Application/Application.csproj", "Application/"]
+COPY ["src/Domain/Domain.csproj", "Domain/"]
+COPY ["src/Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+COPY ["src/Shared/Shared.csproj", "Shared/"]
 RUN dotnet restore "WebApi/WebApi.csproj"
 COPY . .
 WORKDIR "/src/WebApi"

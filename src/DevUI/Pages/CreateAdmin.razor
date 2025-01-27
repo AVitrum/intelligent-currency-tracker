@@ -1,0 +1,93 @@
+@page "/create-admin"
+@using System.Net.Http.Headers
+@using Domain.Enums
+@using Shared.Payload
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime Js
+@inject IToastService ToastService
+
+<div class="registration-container">
+    <div class="form-card">
+        <h3 class="form-title">Create your account</h3>
+        <p class="form-subtitle">Sign up and start collaborating in just a few seconds.</p>
+
+        <EditForm Model="@_request" OnValidSubmit="@HandleValidSubmit" class="registration-form">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <InputText id="email" @bind-Value="_request.Email" class="form-control" placeholder="Enter your email"/>
+                <ValidationMessage For="@(() => _request.Email)"/>
+            </div>
+
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <InputText id="username" @bind-Value="_request.UserName" class="form-control"
+                           placeholder="Choose a username"/>
+                <ValidationMessage For="@(() => _request.UserName)"/>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <InputText id="password" @bind-Value="_request.Password" type="password" class="form-control"
+                           placeholder="Create a password"/>
+                <ValidationMessage For="@(() => _request.Password)"/>
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber" class="form-label">Phone Number</label>
+                <InputText id="phoneNumber" @bind-Value="_request.PhoneNumber" class="form-control"
+                           placeholder="Optional"/>
+                <ValidationMessage For="@(() => _request.PhoneNumber)"/>
+            </div>
+
+            <button type="submit" class="btn-primary">Register</button>
+        </EditForm>
+
+    </div>
+</div>
+
+@code {
+    private readonly CreateUserDto _request = new();
+    private string? _token;
+
+    private async Task HandleValidSubmit()
+    {
+        _token = await Js.InvokeAsync<string?>("localStorage.getItem", "jwtToken");
+        if (string.IsNullOrEmpty(_token))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        _request.Provider = UserServiceProvider.ADMIN.ToString();
+
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+        //TODO: Add the API URL to the .env file
+        var response = await Http.PostAsJsonAsync("https://localhost:8001/api/Identity/register", _request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("User successfully registered!");
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            var errorMessage = !string.IsNullOrEmpty(errorResponse)
+                ? errorResponse
+                : "Registration failed. Please try again.";
+
+            ToastService.ShowError(errorMessage);
+
+            await Task.Delay(3000);
+            _request.Email = string.Empty;
+            _request.UserName = string.Empty;
+            _request.Password = string.Empty;
+            _request.PhoneNumber = string.Empty;
+        }
+    }
+
+}

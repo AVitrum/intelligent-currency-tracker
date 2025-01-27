@@ -1,7 +1,8 @@
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.ExchangeRates;
 using Application.Kafka;
-using Application.MlModel;
+using Application.Rates;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
@@ -13,15 +14,11 @@ public static class DependencyInjection
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
 
         services.AddHttpClient();
+        // services.AddScoped<IMlModelService, MlModelService>();
+        services.AddScoped<ICsvService, CsvService>();
+        services.AddScoped<IRateService, RateService>();
+        services.AddScoped<IRateHelper, RateHelper>();
 
-        services.AddScoped<IExchangeRateFactory, ExchangeRateFactory>();
-        
-        services.AddScoped<IExchangeRateService, ExchangeRateService>();
-        services.AddScoped<ICsvExchangeRateService, CsvExchangeRateService>();
-        services.AddScoped<IMlModelService, MlModelService>();
-        
         services.AddScoped<IKafkaProducer, KafkaProducer>();
-
-        services.AddScoped<ICsvHelper, Common.Helpers.CsvHelper>();
     }
 }

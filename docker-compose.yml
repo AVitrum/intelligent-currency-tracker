@@ -9,6 +9,8 @@
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - test-network
 
   backup:
     image: postgres:alpine
@@ -22,6 +24,8 @@
       - ./backups:/backups
     depends_on:
       - db
+    networks:
+      - test-network
     entrypoint: >
       /bin/sh -c "
       sleep 10;
@@ -36,10 +40,10 @@
       context: .
       dockerfile: src/WebApi/Dockerfile
     ports:
+      - "8000:80"
       - "8001:443"
     environment:
-      ASPNETCORE_HTTPS_PORTS: "8001"
-      ASPNETCORE_URLS: "https://+"
+      ASPNETCORE_URLS: "https://+;http://+"
       ASPNETCORE_ENVIRONMENT: "Development"
       ASPNETCORE_Kestrel__Certificates__Default__Password: ${KESTREL_CERTIFICATES_DEFAULT_PASSWORD}
       ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/cleantest.pfx"
@@ -57,19 +61,27 @@
       GMAIL_PASSWORD: ${GMAIL_PASSWORD}
       MODEL_URL: ${MODEL_URL}
       PRIVATE_BANK_URL: ${PRIVATE_BANK_URL}
+      NBU_URL: ${NBU_URL}
       KAFKA_HOST: ${KAFKA_HOST}
     volumes:
       - ${HOME}/.aspnet/https:/https/
+      - ./logs:/app/logs
     depends_on:
       - db
       - kafka
+    networks:
+      - test-network
   
-  model:
+  nginx:
     build:
       context: .
-      dockerfile: Model/Dockerfile
+      dockerfile: Dockerfile.nginx
     ports:
-      - "8050:8050"
+      - "443:443"
+    depends_on:
+      - webapi
+    networks:
+      - test-network
 
   zoo:
     image: confluentinc/cp-zookeeper:latest
@@ -81,7 +93,9 @@
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_SERVERS: zoo:2888:3888
-      
+    networks:
+      - test-network
+  
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
@@ -99,6 +113,11 @@
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_MESSAGE_MAX_BYTES=10485760
+    networks:
+      - test-network
     entrypoint: /bin/sh -c "sleep 30 && /etc/confluent/docker/run"
 volumes:
   pgdata:
+
+networks:
+  test-network:

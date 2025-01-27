@@ -1,4 +1,3 @@
-using Domain.Common;
 using Infrastructure.ExternalApis.GoogleAuth.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -10,7 +9,7 @@ namespace WebApi.Controllers;
 public class GoogleAuthController : ControllerBase
 {
     private readonly IGoogleAuthService _service;
-    
+
     public GoogleAuthController(IGoogleAuthService service)
     {
         _service = service;
@@ -33,13 +32,9 @@ public class GoogleAuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> GoogleResponse()
     {
-        
-        AuthenticateResult authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-        BaseResult result = await _service.HandleGoogleResponse(authResult);
-        if (result is not GoogleAuthResult googleAuthResult)
-        {
-            return Unauthorized();
-        }
+        var authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        var result = await _service.HandleGoogleResponse(authResult);
+        if (result is not GoogleAuthResult googleAuthResult) return Unauthorized();
 
         Response.Cookies.Append("jwt", googleAuthResult.Token, new CookieOptions
         {
