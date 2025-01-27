@@ -1,7 +1,8 @@
 using Application.Common.Interfaces;
-using Application.Common.Payload.Requests;
+using Application.Common.Payload.Dtos;
 using Application.Rates.Results;
 using Domain.Common;
+using Shared.Payload;
 
 namespace Application.Rates;
 

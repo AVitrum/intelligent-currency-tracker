@@ -1,10 +1,9 @@
 using Application.Common.Exceptions;
-using Application.Common.Payload.Dtos;
-using Application.Common.Payload.Requests;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
+using Shared.Payload;
 
 namespace Infrastructure.Identity;
 

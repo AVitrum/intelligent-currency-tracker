@@ -1,8 +1,7 @@
-using Application.Common.Payload.Dtos;
-using Application.Common.Payload.Requests;
 using Domain.Enums;
 using Infrastructure.Identity.Results;
 using Microsoft.AspNetCore.Authorization;
+using Shared.Payload;
 
 namespace WebApi.Controllers;
 

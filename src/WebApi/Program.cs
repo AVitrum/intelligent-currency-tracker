@@ -18,6 +18,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSession();
 builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddCustomCorsPolicy();
 
 builder.Services
     .AddInfrastructure()
@@ -30,7 +31,7 @@ var app = builder.Build();
 
 if (args.Length == 1 && args[0].Equals("seeddata", StringComparison.CurrentCultureIgnoreCase))
     // await CurrencySeeder.SeedCurrenciesAsync(app);
-    await RoleSeeder.SeedRolesAsync(app);
+    await UserSeeder.SeedRolesAsync(app);
 
 app.UseCustomMiddlewares();
 app.Run();

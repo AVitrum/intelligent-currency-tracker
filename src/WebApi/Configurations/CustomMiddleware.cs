@@ -13,9 +13,10 @@ public static class CustomMiddleware
             app.UseSwaggerUI();
         }
 
+        app.UseStaticFiles();
+        app.UseCors("DevUI");
         app.UseSerilogRequestLogging();
         app.UseExceptionHandler("/error");
-        app.UseHttpsRedirection();
         app.UseRouting();
         app.UseCookiePolicy();
         app.UseSession();

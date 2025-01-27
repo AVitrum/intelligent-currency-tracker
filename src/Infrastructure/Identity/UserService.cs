@@ -1,14 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Common.Exceptions;
-using Application.Common.Payload.Dtos;
-using Application.Common.Payload.Requests;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Identity.Results;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Shared.Payload;
 
 namespace Infrastructure.Identity;
 
@@ -74,7 +73,6 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    // Збережений закоментований метод
     // public async Task<bool> AuthorizeAsync(string userId, string policyName)
     // {
     //     ApplicationUser? user = await _userManager.FindByIdAsync(userId);

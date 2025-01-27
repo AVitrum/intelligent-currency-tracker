@@ -94,7 +94,8 @@ public static class CurrencySeeder
 
         foreach (var currency in currencies)
         {
-            var existingCurrency = await dbContext.Set<Currency>().FirstOrDefaultAsync(c => c.R030 == currency.R030);
+            var existingCurrency =
+                await dbContext.Set<Currency>().FirstOrDefaultAsync(c => c.R030 == currency.R030);
             if (existingCurrency == null) await dbContext.Set<Currency>().AddAsync(currency);
         }
 

@@ -8,7 +8,8 @@ public class RateConfiguration : IEntityTypeConfiguration<Rate>
     {
         builder.HasOne(e => e.Currency)
             .WithMany()
-            .HasForeignKey(e => e.CurrencyId);
+            .HasForeignKey(e => e.CurrencyId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(e => new { e.CurrencyId, e.Date }).IsUnique();
     }
