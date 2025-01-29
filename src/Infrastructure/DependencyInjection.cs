@@ -4,6 +4,7 @@ using Infrastructure.Data.Repositories;
 using Infrastructure.Email;
 using Infrastructure.ExternalApis.GoogleAuth;
 using Infrastructure.Identity;
+using Infrastructure.Identity.Factories;
 using Infrastructure.Identity.Jwt;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
@@ -27,10 +28,15 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
         services.AddScoped<IEmailSender, EmailSender>();
+        services.AddScoped<IUserHelper, UserHelper>();
 
         services.AddScoped<UserService>();
         services.AddScoped<AdminUserService>();
+        services.AddScoped<DefaultLoginManager>();
+        services.AddScoped<DevUILoginManager>();
+
         services.AddScoped<IUserFactory, UserFactory>();
+        services.AddScoped<ILoginManagerFactory, LoginManagerFactory>();
 
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();

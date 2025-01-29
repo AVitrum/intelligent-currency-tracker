@@ -141,7 +141,7 @@ public class ExchangeRateSyncService : BackgroundService
         ICurrencyRepository currencyRepository)
     {
         var currency = await currencyRepository.GetByCodeAsync(currencyCode);
-        if (currency != null) return currency;
+        if (currency is not null) return currency;
 
         var currencyName = rateToken["txt"]?.Value<string>() ?? "Unknown";
         var r030 = rateToken["r030"]?.Value<int>() ?? 0;

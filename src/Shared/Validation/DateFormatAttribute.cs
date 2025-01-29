@@ -14,7 +14,9 @@ public class DateFormatAttribute : ValidationAttribute
         if (!DateTime.TryParseExact(dto.StartDateString, DateFormat, null, DateTimeStyles.None,
                 out var startDate) ||
             !DateTime.TryParseExact(dto.EndDateString, DateFormat, null, DateTimeStyles.None,
-                out var endDate)) return new ValidationResult("Invalid date range or format");
+                out var endDate))
+            return new ValidationResult("Invalid date range or format");
+
         if (startDate <= endDate)
         {
             dto.Start = startDate;

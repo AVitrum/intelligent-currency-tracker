@@ -34,6 +34,7 @@ public class GoogleAuthController : ControllerBase
     {
         var authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
         var result = await _service.HandleGoogleResponse(authResult);
+
         if (result is not GoogleAuthResult googleAuthResult) return Unauthorized();
 
         Response.Cookies.Append("jwt", googleAuthResult.Token, new CookieOptions

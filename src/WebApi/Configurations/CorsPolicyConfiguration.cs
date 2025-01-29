@@ -9,8 +9,7 @@ public static class CorsPolicyConfiguration
             options.AddPolicy("DevUI", builder =>
             {
                 builder
-                    .WithOrigins("https://localhost:8003", "https://host.docker.internal:8003", "http://localhost:5062",
-                        "http://host.docker.internal:5062")
+                    .WithOrigins("http://localhost")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

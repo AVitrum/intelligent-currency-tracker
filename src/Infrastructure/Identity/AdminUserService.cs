@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Domain.Common;
 using Domain.Enums;
+using Infrastructure.Identity.Results;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
 using Shared.Payload;
@@ -16,7 +17,7 @@ public class AdminUserService : IUserService
         _userManager = userManager;
     }
 
-    public async Task<BaseResult> CreateUserAsync(CreateUserDto dto)
+    public async Task<BaseResult> CreateAsync(CreateUserDto dto)
     {
         var newUser = new ApplicationUser
         {
@@ -25,6 +26,7 @@ public class AdminUserService : IUserService
             PhoneNumber = dto.PhoneNumber ?? string.Empty,
             CreationMethod = UserCreationMethod.EMAIL
         };
+
         await _userManager.CreateAsync(newUser);
 
         var passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
@@ -32,6 +34,7 @@ public class AdminUserService : IUserService
             return BaseResult.FailureResult(passwordResult.Errors.Select(error => error.Description).ToList());
 
         var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.ADMIN.ToString());
+
         return roleResult.Succeeded
             ? BaseResult.SuccessResult()
             : BaseResult.FailureResult(roleResult.Errors.Select(error => error.Description).ToList());
@@ -42,7 +45,7 @@ public class AdminUserService : IUserService
         throw new NotImplementedException();
     }
 
-    public async Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request)
+    public async Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request)
     {
         var lookupDelegate = GetUserLookupDelegate(request);
 
@@ -51,26 +54,55 @@ public class AdminUserService : IUserService
 
         var user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
 
-        if (await _userManager.IsInRoleAsync(user, UserRole.ADMIN.ToString()))
-            return BaseResult.FailureResult(["User is already an admin"]);
+        if (await _userManager.IsInRoleAsync(user, request.Role.ToString()))
+            return BaseResult.FailureResult([$"User is already an {request.Role}"]);
 
-        return await AddUserToRoleAsync(user, UserRole.ADMIN.ToString());
+        return await AddUserToRoleAsync(user, request.Role);
     }
 
-    private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, string role)
+    public async Task<BaseResult> GetAllAsync()
     {
-        var roleResult = await _userManager.AddToRoleAsync(user, role);
-        if (roleResult.Succeeded)
+        var users = await _userManager.Users.ToListAsync();
+
+        if (users.Count == 0) return BaseResult.FailureResult(["No users found"]);
+
+        return GetUserResult.SuccessResult(users.Select(user => new UserDto
         {
-            await _userManager.RemoveFromRoleAsync(user, UserRole.USER.ToString());
-            return BaseResult.SuccessResult();
+            UserName = user.UserName ?? throw new UserNotFoundException("User not found"),
+            Email = user.Email ?? throw new UserNotFoundException("User not found"),
+            PhoneNumber = user.PhoneNumber,
+            Roles = _userManager.GetRolesAsync(user).Result
+        }));
+    }
+
+    private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, UserRole role)
+    {
+        var errors = new List<string>();
+        var currentRoles = await _userManager.GetRolesAsync(user);
+
+        foreach (var userRole in currentRoles)
+        {
+            var removeResult = await _userManager.RemoveFromRoleAsync(user, userRole);
+
+            if (!removeResult.Succeeded)
+            {
+                errors.AddRange(removeResult.Errors.Select(e => e.Description));
+                return BaseResult.FailureResult(errors);
+            }
         }
 
-        var errors = roleResult.Errors.Select(error => error.Description).ToList();
-        return BaseResult.FailureResult(errors);
+        var addRoleResult = await _userManager.AddToRoleAsync(user, role.ToString());
+
+        if (!addRoleResult.Succeeded)
+        {
+            errors.AddRange(addRoleResult.Errors.Select(e => e.Description));
+            return BaseResult.FailureResult(errors);
+        }
+
+        return BaseResult.SuccessResult();
     }
 
-    private UserLookupDelegate GetUserLookupDelegate(ProvideAdminFunctionalityRequest request)
+    private UserLookupDelegate GetUserLookupDelegate(ChangeRoleRequest request)
     {
         if (request.UserName is not null) return _userManager.FindByNameAsync;
 

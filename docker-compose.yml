@@ -11,7 +11,7 @@
       - pgdata:/var/lib/postgresql/data
     networks:
       - test-network
-
+      
   backup:
     image: postgres:alpine
     environment:
@@ -33,20 +33,15 @@
         pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER $DB_NAME > /backups/backup_$(date +%Y%m%d%H%M%S).sql;
         sleep 3600;
       done"
-
+      
   webapi:
     image: webapi
     build:
       context: .
       dockerfile: src/WebApi/Dockerfile
-    ports:
-      - "8000:80"
-      - "8001:443"
     environment:
-      ASPNETCORE_URLS: "https://+;http://+"
       ASPNETCORE_ENVIRONMENT: "Development"
-      ASPNETCORE_Kestrel__Certificates__Default__Password: ${KESTREL_CERTIFICATES_DEFAULT_PASSWORD}
-      ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/cleantest.pfx"
+      ASPNETCORE_URLS: "http://+:5001"
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
@@ -63,12 +58,24 @@
       PRIVATE_BANK_URL: ${PRIVATE_BANK_URL}
       NBU_URL: ${NBU_URL}
       KAFKA_HOST: ${KAFKA_HOST}
+    ports:
+      - "5001:5001"
     volumes:
-      - ${HOME}/.aspnet/https:/https/
+      - ~/.aspnet/https:/https:ro
       - ./logs:/app/logs
     depends_on:
       - db
       - kafka
+    networks:
+      - test-network
+        
+  devui:
+    image: devui
+    build:
+      context: .
+      dockerfile: src/DevUI/Dockerfile
+    ports:
+      - "8003:80"
     networks:
       - test-network
   
@@ -78,6 +85,7 @@
       dockerfile: Dockerfile.nginx
     ports:
       - "443:443"
+      - "80:80"
     depends_on:
       - webapi
     networks:

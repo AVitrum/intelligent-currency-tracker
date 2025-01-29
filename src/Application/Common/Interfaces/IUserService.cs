@@ -5,7 +5,8 @@ namespace Application.Common.Interfaces;
 
 public interface IUserService
 {
-    Task<BaseResult> CreateUserAsync(CreateUserDto dto);
+    Task<BaseResult> CreateAsync(CreateUserDto dto);
     Task<BaseResult> LoginAsync(LoginRequest request);
-    Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request);
+    Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request);
+    Task<BaseResult> GetAllAsync();
 }

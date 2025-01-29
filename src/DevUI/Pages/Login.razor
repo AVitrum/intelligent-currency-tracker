@@ -1,4 +1,5 @@
 @page "/login"
+@using Domain.Enums
 @using Shared.Payload
 @inject HttpClient Http
 @inject NavigationManager Navigation
@@ -38,7 +39,7 @@
 }
 
 @code {
-    private readonly LoginRequest _request = new();
+    private readonly LoginRequest _request = new() { Provider = LoginManagerProvider.DevUI.ToString() };
 
     [Inject] private IJSRuntime Js { get; set; } = null!;
     private string? _errorMessage;
@@ -53,7 +54,7 @@
             _request.Email = string.Empty;
         }
 
-        var response = await Http.PostAsJsonAsync("https://localhost:8001/api/Identity/login", _request);
+        var response = await Http.PostAsJsonAsync("/api/Identity/login", _request);
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();

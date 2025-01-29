@@ -25,7 +25,8 @@ public class IdentityController : ControllerBase
             return Unauthorized("You are not authorized to create an admin user");
 
         var service = _userFactory.Create(dto.ServiceProvider);
-        var result = await service.CreateUserAsync(dto);
+        var result = await service.CreateAsync(dto);
+
         if (result.Success) return CreatedAtAction(nameof(Register), new { dto.UserName }, null);
 
         return BadRequest(result.Errors);
@@ -38,22 +39,38 @@ public class IdentityController : ControllerBase
     {
         var service = _userFactory.Create(UserServiceProvider.DEFAULT);
         var result = await service.LoginAsync(request);
-        if (result is IdentityServiceResult identityServiceResult) return Ok(new { identityServiceResult.Token });
+
+        if (result is UserServiceResult identityServiceResult) return Ok(new { identityServiceResult.Token });
 
         return Unauthorized();
     }
 
-    //TODO: Add more roles
-    [HttpPost("add-role")]
-    [Authorize(Roles = "Admin")]
+    [HttpPost("change-role")]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AddRole(ProvideAdminFunctionalityRequest request)
+    public async Task<IActionResult> AddRole(ChangeRoleRequest request)
     {
         var service = _userFactory.Create(UserServiceProvider.ADMIN);
-        var result = await service.ProvideAdminFunctionality(request);
+        var result = await service.ChangeRoleAsync(request);
+
         if (result.Success) return Ok();
+
+        return NotFound(result.Errors);
+    }
+
+    [HttpGet("get-all-users")]
+    [Authorize(Roles = "ADMIN")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var service = _userFactory.Create(UserServiceProvider.ADMIN);
+        var result = await service.GetAllAsync();
+
+        if (result is GetUserResult getUserResult) return Ok(getUserResult.Data);
 
         return NotFound(result.Errors);
     }

@@ -1,0 +1,97 @@
+@page "/role-manager"
+@using System.Net
+@using System.Net.Http.Headers
+@using Domain.Enums
+@using Shared.Payload
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime Js
+@inject IToastService ToastService
+
+<div class="registration-container">
+    <div class="form-card">
+        <h3 class="form-title">Provide Admin Functionality</h3>
+
+        <EditForm Model="@_request" OnValidSubmit="@HandleValidSubmit" class="registration-form">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Identifier</label>
+                <InputText id="email" @bind-Value="_request.Email" class="form-control"
+                           placeholder="Enter user identifier"/>
+                <ValidationMessage For="@(() => _request.Email)"/>
+            </div>
+
+            <div class="form-group">
+                <label for="roleString" class="form-label">Role</label>
+                <InputSelect id="roleString" @bind-Value="_request.RoleString" class="form-control">
+                    @foreach (var role in Enum.GetValues(typeof(UserRole)).Cast<UserRole>())
+                    {
+                        <option value="@role.ToString()">@role.ToString()</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => _request.RoleString)"/>
+            </div>
+
+            <button type="submit" class="btn-primary">Submit</button>
+        </EditForm>
+
+    </div>
+</div>
+
+@code {
+    private readonly ChangeRoleRequest _request = new() { RoleString = UserRole.USER.ToString() };
+    private string? _token;
+
+    private async Task HandleValidSubmit()
+    {
+        if (_request.Email is not null && !_request.Email.Contains("@"))
+        {
+            _request.UserName = _request.Email;
+            _request.Email = string.Empty;
+        }
+
+        _token = await Js.InvokeAsync<string?>("localStorage.getItem", "jwtToken");
+        if (string.IsNullOrEmpty(_token))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+        //TODO: Add the API URL to the .env file
+        var response = await Http.PostAsJsonAsync("/api/Identity/change-role", _request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("Role assigned successfully");
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            ToastService.ShowError("You have no rights to perform this request!");
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            var errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
+
+            await foreach (var error in errorResponse)
+            {
+                var errorMessage = !string.IsNullOrEmpty(error)
+                    ? error
+                    : "Request failed. Please try again later!";
+
+                ToastService.ShowError(errorMessage);
+            }
+        }
+
+        await Task.Delay(3000);
+        _request.Email = string.Empty;
+        _request.UserName = string.Empty;
+    }
+
+}

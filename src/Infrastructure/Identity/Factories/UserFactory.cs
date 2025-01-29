@@ -1,8 +1,7 @@
 using Domain.Enums;
-using Infrastructure.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Utils;
+namespace Infrastructure.Identity.Factories;
 
 public class UserFactory : IUserFactory
 {

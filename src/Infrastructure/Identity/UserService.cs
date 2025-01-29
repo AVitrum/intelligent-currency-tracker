@@ -1,11 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Application.Common.Exceptions;
 using Domain.Common;
 using Domain.Enums;
-using Infrastructure.Identity.Results;
-using Infrastructure.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Shared.Payload;
 
@@ -13,24 +7,18 @@ namespace Infrastructure.Identity;
 
 public class UserService : IUserService
 {
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IJwtService _jwtService;
-    private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ILoginManagerFactory _loginManagerFactory;
 
     public UserService(
         UserManager<ApplicationUser> userManager,
-        IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-        IAuthorizationService authorizationService,
-        IJwtService jwtService)
+        ILoginManagerFactory loginManagerFactory)
     {
         _userManager = userManager;
-        _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
-        _authorizationService = authorizationService;
-        _jwtService = jwtService;
+        _loginManagerFactory = loginManagerFactory;
     }
 
-    public async Task<BaseResult> CreateUserAsync(CreateUserDto dto)
+    public async Task<BaseResult> CreateAsync(CreateUserDto dto)
     {
         var newUser = new ApplicationUser
         {
@@ -56,64 +44,17 @@ public class UserService : IUserService
 
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        var lookupDelegate = GetUserLookupDelegate(request);
-        var identifier = request.UserName ?? request.Email
-            ?? throw new ArgumentException("Username or Email must be provided");
-
-        var user = await lookupDelegate(identifier)
-                   ?? throw new UserNotFoundException("User not found");
-
-        await ValidatePasswordAsync(user, request.Password);
-
-        return await GenerateTokenResultAsync(user);
+        var manager = _loginManagerFactory.Create(request.LoginProvider);
+        return await manager.LoginAsync(request);
     }
 
-    public Task<BaseResult> ProvideAdminFunctionality(ProvideAdminFunctionalityRequest request)
+    public Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request)
     {
         throw new NotImplementedException();
     }
 
-    // public async Task<bool> AuthorizeAsync(string userId, string policyName)
-    // {
-    //     ApplicationUser? user = await _userManager.FindByIdAsync(userId);
-    //     if (user is null)
-    //     {
-    //         return false;
-    //     }
-    //
-    //     ClaimsPrincipal principal = await _userClaimsPrincipalFactory.CreateAsync(user);
-    //     AuthorizationResult result = await _authorizationService.AuthorizeAsync(principal, policyName);
-    //
-    //     return result.Succeeded;
-    // }
-
-    private UserLookupDelegate GetUserLookupDelegate(LoginRequest request)
+    public Task<BaseResult> GetAllAsync()
     {
-        return request.UserName is not null
-            ? _userManager.FindByNameAsync
-            : request.Email is not null
-                ? _userManager.FindByEmailAsync
-                : throw new ArgumentException("Username or Email must be provided");
-    }
-
-    private async Task ValidatePasswordAsync(ApplicationUser user, string password)
-    {
-        if (!await _userManager.CheckPasswordAsync(user, password)) throw new PasswordException();
-    }
-
-    private async Task<IdentityServiceResult> GenerateTokenResultAsync(ApplicationUser user)
-    {
-        var roles = await _userManager.GetRolesAsync(user);
-        var claims = new List<Claim>
-        {
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-        var token = _jwtService.GenerateToken(claims);
-
-        return IdentityServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token));
+        throw new NotImplementedException();
     }
 }
