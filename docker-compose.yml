@@ -11,7 +11,7 @@
       - pgdata:/var/lib/postgresql/data
     networks:
       - test-network
-      
+  
   backup:
     image: postgres:alpine
     environment:
@@ -33,7 +33,7 @@
         pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER $DB_NAME > /backups/backup_$(date +%Y%m%d%H%M%S).sql;
         sleep 3600;
       done"
-      
+  
   webapi:
     image: webapi
     build:
@@ -68,7 +68,7 @@
       - kafka
     networks:
       - test-network
-        
+  
   devui:
     image: devui
     build:

@@ -1,5 +1,5 @@
-using Application.Common.Payload.Dtos;
 using Domain.Common;
+using Shared.Dtos;
 
 namespace Application.Rates.Results;
 

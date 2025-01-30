@@ -1,14 +1,15 @@
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
-using Shared.Payload;
+using Shared.Dtos;
+using Shared.Payload.Requests;
 
 namespace Infrastructure.Identity;
 
 public class UserService : IUserService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILoginManagerFactory _loginManagerFactory;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public UserService(
         UserManager<ApplicationUser> userManager,
@@ -53,7 +54,7 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public Task<BaseResult> GetAllAsync()
+    public Task<BaseResult> GetAllAsync(int page, int pageSize)
     {
         throw new NotImplementedException();
     }

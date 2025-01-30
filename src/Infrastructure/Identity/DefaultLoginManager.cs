@@ -1,7 +1,7 @@
 using Application.Common.Exceptions;
 using Domain.Common;
 using Infrastructure.Utils;
-using Shared.Payload;
+using Shared.Payload.Requests;
 
 namespace Infrastructure.Identity;
 

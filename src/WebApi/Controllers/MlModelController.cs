@@ -1,7 +1,7 @@
 using Application.Common.Payload.Dtos;
 using Application.ExchangeRates.Results;
 using Microsoft.AspNetCore.Authorization;
-using Shared.Payload;
+using Shared.Payload.Requests;
 
 namespace WebApi.Controllers;
 

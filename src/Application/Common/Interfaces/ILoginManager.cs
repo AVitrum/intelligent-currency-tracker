@@ -1,5 +1,5 @@
 using Domain.Common;
-using Shared.Payload;
+using Shared.Payload.Requests;
 
 namespace Application.Common.Interfaces;
 

@@ -1,6 +1,6 @@
-using Application.Common.Payload.Dtos;
 using Domain.Entities;
-using Shared.Payload;
+using Shared.Dtos;
+using Shared.Payload.Requests;
 
 namespace Application.Common.Interfaces;
 

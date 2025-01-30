@@ -1,9 +1,11 @@
 @page "/create-admin"
 @using System.Net.Http.Headers
+@using DevUI.Configurations
 @using Domain.Enums
-@using Shared.Payload
+@using Shared.Dtos
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IDevUISettings DevUISettings
 @inject IJSRuntime Js
 @inject IToastService ToastService
 
@@ -66,7 +68,7 @@
 
         Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         //TODO: Add the API URL to the .env file
-        var response = await Http.PostAsJsonAsync("https://localhost:8001/api/Identity/register", _request);
+        var response = await Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/register", _request);
 
         if (response.IsSuccessStatusCode)
         {

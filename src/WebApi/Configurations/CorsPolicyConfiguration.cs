@@ -9,7 +9,7 @@ public static class CorsPolicyConfiguration
             options.AddPolicy("DevUI", builder =>
             {
                 builder
-                    .WithOrigins("http://localhost")
+                    .WithOrigins("http://localhost", "https://localhost:8003")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

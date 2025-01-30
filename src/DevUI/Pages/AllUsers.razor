@@ -1,0 +1,107 @@
+@page "/all-users"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IDevUISettings DevUISettings
+@inject IJSRuntime Js
+@inject IToastService ToastService
+@using System.Net
+@using System.Net.Http.Headers
+@using DevUI.Configurations
+@using Shared.Dtos
+@implements IDisposable
+
+<h3 class="text-center my-4">All Users</h3>
+<div class="container">
+    <table class="table table-striped table-hover">
+        <thead class="thead-dark">
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Roles</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in _users)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@string.Join(", ", user.Roles)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="text-center my-4">
+        <button class="btn btn-primary" @onclick="LoadMoreUsers" disabled="@_isLoading">Load More</button>
+    </div>
+</div>
+
+@code {
+    private readonly List<UserDto> _users = new();
+    private string? _token;
+    private int _currentPage = 1;
+    private const int PageSize = 25;
+    private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        _isLoading = true;
+
+        _token = await Js.InvokeAsync<string?>("localStorage.getItem", "jwtToken");
+        if (string.IsNullOrEmpty(_token))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+        var response = await Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-all-users?page={_currentPage}&pageSize={PageSize}");
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            ToastService.ShowError("You have no rights to perform this request!");
+            Navigation.NavigateTo("/");
+        }
+        else if (response.IsSuccessStatusCode)
+        {
+            var users = await response.Content.ReadFromJsonAsync<List<UserDto>>();
+            if (users is not null)
+            {
+                _users.AddRange(users);
+                _currentPage++;
+            }
+        }
+        else
+        {
+            var errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
+
+            await foreach (var error in errorResponse)
+            {
+                var errorMessage = !string.IsNullOrEmpty(error)
+                    ? error
+                    : "Request failed. Please try again later!";
+
+                ToastService.ShowError(errorMessage);
+            }
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task LoadMoreUsers()
+    {
+        await LoadUsers();
+    }
+
+    public void Dispose()
+    {
+        // Dispose resources if needed
+    }
+
+}

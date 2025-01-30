@@ -1,4 +1,4 @@
-namespace Shared.Payload;
+namespace Shared.Dtos;
 
 public class UserDto
 {

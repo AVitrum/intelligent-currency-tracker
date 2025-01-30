@@ -1,6 +1,6 @@
 using Infrastructure.Identity;
 using Infrastructure.Identity.Results;
-using Shared.Payload;
+using Shared.Payload.Requests;
 
 namespace Infrastructure.Utils;
 

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 using Domain.Constans;
 using Shared.Validation;
 
-namespace Shared.Payload;
+namespace Shared.Payload.Requests;
 
 public class ExchangeRateRequest
 {

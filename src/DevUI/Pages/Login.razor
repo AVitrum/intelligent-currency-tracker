@@ -1,7 +1,10 @@
 @page "/login"
+@using DevUI.Configurations
 @using Domain.Enums
-@using Shared.Payload
+@using Shared.Payload.Requests
+@using Shared.Payload.Responses
 @inject HttpClient Http
+@inject IDevUISettings DevUISettings
 @inject NavigationManager Navigation
 @inject IToastService ToastService
 
@@ -54,7 +57,7 @@
             _request.Email = string.Empty;
         }
 
-        var response = await Http.PostAsJsonAsync("/api/Identity/login", _request);
+        var response = await Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/login", _request);
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
@@ -81,7 +84,5 @@
             _request.Password = string.Empty;
         }
     }
-
-    private record LoginResponse(string Token);
 
 }

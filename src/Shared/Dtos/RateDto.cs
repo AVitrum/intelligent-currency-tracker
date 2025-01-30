@@ -2,7 +2,7 @@ using AutoMapper;
 using Domain.Constans;
 using Domain.Entities;
 
-namespace Application.Common.Payload.Dtos;
+namespace Shared.Dtos;
 
 public class RateDto
 {

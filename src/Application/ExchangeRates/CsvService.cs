@@ -2,13 +2,13 @@ using System.Globalization;
 using System.Text;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Common.Payload.Dtos;
 using Application.ExchangeRates.Results;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Domain.Common;
 using Microsoft.Extensions.Logging;
-using Shared.Payload;
+using Shared.Dtos;
+using Shared.Payload.Requests;
 
 namespace Application.ExchangeRates;
 

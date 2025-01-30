@@ -4,7 +4,8 @@ using Domain.Enums;
 using Infrastructure.Identity.Results;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
-using Shared.Payload;
+using Shared.Dtos;
+using Shared.Payload.Requests;
 
 namespace Infrastructure.Identity;
 
@@ -60,11 +61,12 @@ public class AdminUserService : IUserService
         return await AddUserToRoleAsync(user, request.Role);
     }
 
-    public async Task<BaseResult> GetAllAsync()
+    //TODO: Test this method
+    public async Task<BaseResult> GetAllAsync(int page, int pageSize)
     {
-        var users = await _userManager.Users.ToListAsync();
+        var users = await _userManager.Users.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-        if (users.Count == 0) return BaseResult.FailureResult(["No users found"]);
+        if (users.Count == 0) return BaseResult.FailureResult(["No more users found"]);
 
         return GetUserResult.SuccessResult(users.Select(user => new UserDto
         {

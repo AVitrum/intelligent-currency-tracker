@@ -1,7 +1,9 @@
 using Domain.Enums;
 using Infrastructure.Identity.Results;
 using Microsoft.AspNetCore.Authorization;
-using Shared.Payload;
+using Shared.Dtos;
+using Shared.Payload.Requests;
+using Shared.Payload.Responses;
 
 namespace WebApi.Controllers;
 
@@ -40,7 +42,8 @@ public class IdentityController : ControllerBase
         var service = _userFactory.Create(UserServiceProvider.DEFAULT);
         var result = await service.LoginAsync(request);
 
-        if (result is UserServiceResult identityServiceResult) return Ok(new { identityServiceResult.Token });
+        if (result is UserServiceResult identityServiceResult)
+            return Ok(new LoginResponse(identityServiceResult.Token));
 
         return Unauthorized();
     }
@@ -65,10 +68,10 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 25)
     {
         var service = _userFactory.Create(UserServiceProvider.ADMIN);
-        var result = await service.GetAllAsync();
+        var result = await service.GetAllAsync(page, pageSize);
 
         if (result is GetUserResult getUserResult) return Ok(getUserResult.Data);
 

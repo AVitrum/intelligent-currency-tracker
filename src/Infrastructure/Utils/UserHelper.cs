@@ -4,14 +4,14 @@ using Application.Common.Exceptions;
 using Infrastructure.Identity;
 using Infrastructure.Identity.Results;
 using Microsoft.AspNetCore.Identity;
-using Shared.Payload;
+using Shared.Payload.Requests;
 
 namespace Infrastructure.Utils;
 
 public class UserHelper : IUserHelper
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IJwtService _jwtService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public UserHelper(UserManager<ApplicationUser> userManager, IJwtService jwtService)
     {

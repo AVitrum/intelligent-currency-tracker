@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using Shared.Payload;
+using Shared.Payload.Requests;
 
 namespace Shared.Validation;
 

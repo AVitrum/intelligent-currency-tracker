@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Domain.Enums;
 
-namespace Shared.Payload;
+namespace Shared.Dtos;
 
-public class CreateUserDto : IValidatableObject
+public class CreateUserDto
 {
     [Required(ErrorMessage = "Email field is required!")]
     [EmailAddress(ErrorMessage = "Email is not valid")]
@@ -21,10 +21,4 @@ public class CreateUserDto : IValidatableObject
     public string Provider { get; set; } = null!;
 
     [JsonIgnore] public UserServiceProvider ServiceProvider => Enum.Parse<UserServiceProvider>(Provider, true);
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (!string.IsNullOrWhiteSpace(PhoneNumber) && !new PhoneAttribute().IsValid(PhoneNumber))
-            yield return new ValidationResult("Phone number is not valid", [nameof(PhoneNumber)]);
-    }
 }

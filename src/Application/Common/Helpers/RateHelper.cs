@@ -1,10 +1,10 @@
 using Application.Common.Interfaces;
-using Application.Common.Payload.Dtos;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;
 using Microsoft.Extensions.Logging;
-using Shared.Payload;
+using Shared.Dtos;
+using Shared.Payload.Requests;
 
 namespace Application.Common.Helpers;
 

@@ -1,7 +1,7 @@
 using AutoMapper;
 using Domain.Entities;
 
-namespace Application.Common.Payload.Dtos;
+namespace Shared.Dtos;
 
 public class CurrencyDto
 {

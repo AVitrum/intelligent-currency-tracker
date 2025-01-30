@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
 
-namespace Shared.Payload;
+namespace Shared.Payload.Requests;
 
 public class LoginRequest
 {

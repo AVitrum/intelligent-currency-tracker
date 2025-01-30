@@ -1,10 +1,12 @@
 @page "/role-manager"
 @using System.Net
 @using System.Net.Http.Headers
+@using DevUI.Configurations
 @using Domain.Enums
-@using Shared.Payload
+@using Shared.Payload.Requests
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IDevUISettings DevUISettings
 @inject IJSRuntime Js
 @inject IToastService ToastService
 
@@ -61,7 +63,7 @@
 
         Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         //TODO: Add the API URL to the .env file
-        var response = await Http.PostAsJsonAsync("/api/Identity/change-role", _request);
+        var response = await Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/change-role", _request);
 
         if (response.IsSuccessStatusCode)
         {
