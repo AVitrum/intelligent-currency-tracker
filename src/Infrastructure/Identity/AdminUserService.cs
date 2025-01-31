@@ -73,7 +73,8 @@ public class AdminUserService : IUserService
             UserName = user.UserName ?? throw new UserNotFoundException("User not found"),
             Email = user.Email ?? throw new UserNotFoundException("User not found"),
             PhoneNumber = user.PhoneNumber,
-            Roles = _userManager.GetRolesAsync(user).Result
+            Roles = _userManager.GetRolesAsync(user).Result,
+            CreationMethod = user.CreationMethod.ToString()
         }));
     }
 

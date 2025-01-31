@@ -1,5 +1,6 @@
 using Domain.Enums;
 using Infrastructure.Identity.Results;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Dtos;
 using Shared.Payload.Requests;
@@ -64,7 +65,9 @@ public class IdentityController : ControllerBase
     }
 
     [HttpGet("get-all-users")]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN",
+        AuthenticationSchemes =
+            $"{JwtBearerDefaults.AuthenticationScheme},{CookieAuthenticationDefaults.AuthenticationScheme}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

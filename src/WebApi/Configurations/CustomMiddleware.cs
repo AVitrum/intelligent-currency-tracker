@@ -22,6 +22,7 @@ public static class CustomMiddleware
         app.UseSession();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<RequestLoggingMiddleware>();
         app.MapControllers();
 
         app.Map("/error", async (HttpContext context, IExceptionHandler exceptionHandler) =>
