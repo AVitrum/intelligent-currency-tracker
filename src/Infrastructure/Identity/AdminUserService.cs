@@ -3,6 +3,7 @@ using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Identity.Results;
 using Infrastructure.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Shared.Dtos;
 using Shared.Payload.Requests;
@@ -12,10 +13,12 @@ namespace Infrastructure.Identity;
 public class AdminUserService : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AdminUserService(UserManager<ApplicationUser> userManager)
+    public AdminUserService(UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<BaseResult> CreateAsync(CreateUserDto dto)
@@ -41,19 +44,17 @@ public class AdminUserService : IUserService
             : BaseResult.FailureResult(roleResult.Errors.Select(error => error.Description).ToList());
     }
 
-    public Task<BaseResult> LoginAsync(LoginRequest request)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request)
     {
-        var lookupDelegate = GetUserLookupDelegate(request);
+        var user = await _userManager.FindByEmailAsync(request.Email) 
+                   ?? throw new UserNotFoundException("User not found");
 
-        var identifier = request.UserName ?? request.Email
-            ?? throw new ArgumentException("Username or Email must be provided");
+        if (_httpContextAccessor.HttpContext == null)
+            return BaseResult.FailureResult(["Can't get user from context"]);
 
-        var user = await lookupDelegate(identifier) ?? throw new UserNotFoundException("User not found");
+        var currentUser = await _userManager.FindByIdAsync(_httpContextAccessor.HttpContext.User.GetUserId()!);
+        if (currentUser == user)
+            return BaseResult.FailureResult(["You cannot change your own role"]);
 
         if (await _userManager.IsInRoleAsync(user, request.Role.ToString()))
             return BaseResult.FailureResult([$"User is already an {request.Role}"]);
@@ -61,7 +62,6 @@ public class AdminUserService : IUserService
         return await AddUserToRoleAsync(user, request.Role);
     }
 
-    //TODO: Test this method
     public async Task<BaseResult> GetAllAsync(int page, int pageSize)
     {
         var users = await _userManager.Users.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
@@ -76,6 +76,23 @@ public class AdminUserService : IUserService
             Roles = _userManager.GetRolesAsync(user).Result,
             CreationMethod = user.CreationMethod.ToString()
         }));
+    }
+
+    public async Task<BaseResult> SearchEmailsAsync(string query)
+    {
+        var emails = await _userManager.Users
+            .Where(user => user.Email != null && user.Email.Contains(query))
+            .Select(user => user.Email!)
+            .ToListAsync();
+        
+        return emails.Count == 0
+            ? BaseResult.FailureResult(["No users found"]) 
+            : SearchEmailsResult.SuccessResult(emails);
+    }
+
+    public Task<BaseResult> LoginAsync(LoginRequest request)
+    {
+        return Task.FromResult(BaseResult.FailureResult(["Method is not allowed from this service"]));
     }
 
     private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, UserRole role)
@@ -103,14 +120,5 @@ public class AdminUserService : IUserService
         }
 
         return BaseResult.SuccessResult();
-    }
-
-    private UserLookupDelegate GetUserLookupDelegate(ChangeRoleRequest request)
-    {
-        if (request.UserName is not null) return _userManager.FindByNameAsync;
-
-        if (request.Email is not null) return _userManager.FindByEmailAsync;
-
-        throw new ArgumentException("Username or Email must be provided");
     }
 }

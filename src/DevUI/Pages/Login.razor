@@ -1,5 +1,6 @@
 @page "/login"
 @using DevUI.Configurations
+@using DevUI.Helpers
 @using Domain.Enums
 @using Shared.Payload.Requests
 @using Shared.Payload.Responses
@@ -30,7 +31,7 @@
                            placeholder="Enter your password"/>
                 <ValidationMessage For="@(() => _request.Password)"/>
             </div>
-
+            
             <button type="submit" class="btn-primary">Login</button>
         </EditForm>
     </div>
@@ -63,7 +64,7 @@
             var responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
             if (responseContent?.Token is not null)
             {
-                await Js.InvokeVoidAsync("localStorage.setItem", "jwtToken", responseContent.Token);
+                await JwtTokenHelper.SetJwtTokenInLocalStorageAsync(responseContent.Token, Js);
                 ToastService.ShowSuccess("User successfully login!");
                 Navigation.NavigateTo("/", true);
             }

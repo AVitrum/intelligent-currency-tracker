@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Domain.Enums;
 
@@ -5,8 +6,8 @@ namespace Shared.Payload.Requests;
 
 public class ChangeRoleRequest
 {
-    public string? UserName { get; set; }
-    public string? Email { get; set; }
+    [Required(ErrorMessage = "Email is required!"), EmailAddress(ErrorMessage = "Wrong format!")]
+    public string Email { get; set; } = null!;
 
     public string RoleString { get; set; } = "User";
 

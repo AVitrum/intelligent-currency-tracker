@@ -1,6 +1,5 @@
 using Domain.Enums;
 using Infrastructure.Identity.Results;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Dtos;
 using Shared.Payload.Requests;
@@ -65,9 +64,7 @@ public class IdentityController : ControllerBase
     }
 
     [HttpGet("get-all-users")]
-    [Authorize(Roles = "ADMIN",
-        AuthenticationSchemes =
-            $"{JwtBearerDefaults.AuthenticationScheme},{CookieAuthenticationDefaults.AuthenticationScheme}")]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -78,6 +75,21 @@ public class IdentityController : ControllerBase
 
         if (result is GetUserResult getUserResult) return Ok(getUserResult.Data);
 
+        return NotFound(result.Errors);
+    }
+    
+    [HttpGet("search-emails")]
+    [Authorize(Roles = "ADMIN")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SearchEmails([FromQuery] string query)
+    {
+        var service = _userFactory.Create(UserServiceProvider.ADMIN);
+        var result = await service.SearchEmailsAsync(query);
+
+        if (result is SearchEmailsResult searchEmailsResult) return Ok(searchEmailsResult.Data);
+        
         return NotFound(result.Errors);
     }
 }

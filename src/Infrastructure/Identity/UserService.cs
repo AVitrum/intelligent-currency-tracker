@@ -51,11 +51,16 @@ public class UserService : IUserService
 
     public Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to change roles"]));
     }
 
     public Task<BaseResult> GetAllAsync(int page, int pageSize)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to perform this action"]));
+    }
+
+    public Task<BaseResult> SearchEmailsAsync(string query)
+    {
+        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to perform this action"]));
     }
 }

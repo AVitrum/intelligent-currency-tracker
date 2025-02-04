@@ -17,13 +17,20 @@ public class RequestLoggingMiddleware
     {
         var request = context.Request;
         var userId = context.User.GetUserId();
-
-        var referer = request.Headers["Referer"].ToString();
+        var referer = request.Headers.Referer;
 
         request.EnableBuffering();
-        using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
-        var body = await reader.ReadToEndAsync();
-        request.Body.Position = 0;
+        string body;
+        if (request is { HasFormContentType: true, Form.Files.Count: > 0 })
+        {
+            body = "file";
+        }
+        else
+        {
+            using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
+            body = await reader.ReadToEndAsync();
+            request.Body.Position = 0;
+        }
 
         var logEntry = new ApiRequestLog
         {

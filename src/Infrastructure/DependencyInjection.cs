@@ -22,10 +22,12 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(appSettings.DbConnectionString));
-
+        
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
+        
+        services.AddHttpContextAccessor();
 
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IUserHelper, UserHelper>();
