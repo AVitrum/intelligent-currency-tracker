@@ -12,8 +12,8 @@ namespace Infrastructure.Identity;
 
 public class AdminUserService : IUserService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public AdminUserService(UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
     {
@@ -46,7 +46,7 @@ public class AdminUserService : IUserService
 
     public async Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email) 
+        var user = await _userManager.FindByEmailAsync(request.Email)
                    ?? throw new UserNotFoundException("User not found");
 
         if (_httpContextAccessor.HttpContext == null)
@@ -68,8 +68,9 @@ public class AdminUserService : IUserService
 
         if (users.Count == 0) return BaseResult.FailureResult(["No more users found"]);
 
-        return GetUserResult.SuccessResult(users.Select(user => new UserDto
+        return GetAllUsersResult.SuccessResult(users.Select(user => new UserDto
         {
+            Id = user.Id,
             UserName = user.UserName ?? throw new UserNotFoundException("User not found"),
             Email = user.Email ?? throw new UserNotFoundException("User not found"),
             PhoneNumber = user.PhoneNumber,
@@ -84,10 +85,27 @@ public class AdminUserService : IUserService
             .Where(user => user.Email != null && user.Email.Contains(query))
             .Select(user => user.Email!)
             .ToListAsync();
-        
+
         return emails.Count == 0
-            ? BaseResult.FailureResult(["No users found"]) 
+            ? BaseResult.FailureResult(["No users found"])
             : SearchEmailsResult.SuccessResult(emails);
+    }
+
+    public async Task<BaseResult> GetByIdAsync(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null) return BaseResult.FailureResult(["User not found"]);
+
+        return GetUserResult.SuccessResult(new UserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName ?? throw new UserNotFoundException("User not found"),
+            Email = user.Email ?? throw new UserNotFoundException("User not found"),
+            PhoneNumber = user.PhoneNumber,
+            Roles = _userManager.GetRolesAsync(user).Result,
+            CreationMethod = user.CreationMethod.ToString()
+        });
     }
 
     public Task<BaseResult> LoginAsync(LoginRequest request)

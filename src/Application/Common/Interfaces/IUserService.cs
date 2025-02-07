@@ -11,4 +11,5 @@ public interface IUserService
     Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request);
     Task<BaseResult> GetAllAsync(int page, int pageSize);
     Task<BaseResult> SearchEmailsAsync(string query);
+    Task<BaseResult> GetByIdAsync(string id);
 }

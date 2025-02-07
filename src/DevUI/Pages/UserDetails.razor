@@ -1,0 +1,82 @@
+@page "/user-details/{userId}"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime Js
+@inject IToastService ToastService
+@inject IDevUISettings DevUISettings
+@using System.Net
+@using DevUI.Configurations
+@using DevUI.Helpers
+@using Shared.Dtos
+
+<h3 class="page-title">User Details</h3>
+<div class="container">
+    @if (_isLoading)
+    {
+        <div class="loading-container">
+            <div class="custom-spinner"></div>
+        </div>
+    }
+    else if (_user != null)
+    {
+        <div class="card">
+            <div class="card-body">
+                <p class="card-text"><strong>Username:</strong> @_user.UserName</p>
+                <p class="card-text"><strong>Email:</strong> @_user.Email</p>
+                <p class="card-text"><strong>Roles:</strong> @string.Join(", ", _user.Roles)</p>
+                <p class="card-text"><strong>Creation Method:</strong> @_user.CreationMethod</p>
+                @if (_user.PhoneNumber is not null)
+                {
+                    <p class="card-text"><strong>Phone Number:</strong> @_user.PhoneNumber</p>
+                }
+                <button class="btn btn-primary" @onclick="NavigateBack">Back</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert" role="alert">
+            User not found.
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? UserId { get; set; }
+    private UserDto? _user;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserDetails();
+    }
+
+    private async Task LoadUserDetails()
+    {
+        _isLoading = true;
+        await JwtTokenHelper.SetJwtTokenInHeaderAsync(Http, Js, Navigation);
+
+        var response = await Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-user-by-id?id={UserId}");
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            ToastService.ShowError("You have no rights to perform this request!");
+            Navigation.NavigateTo("/");
+        }
+        else if (response.IsSuccessStatusCode)
+        {
+            _user = await response.Content.ReadFromJsonAsync<UserDto>();
+        }
+        else
+        {
+            ToastService.ShowError("Failed to load user details.");
+        }
+
+        _isLoading = false;
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/all-users");
+    }
+}

@@ -42,8 +42,8 @@ public class IdentityController : ControllerBase
         var service = _userFactory.Create(UserServiceProvider.DEFAULT);
         var result = await service.LoginAsync(request);
 
-        if (result is UserServiceResult identityServiceResult)
-            return Ok(new LoginResponse(identityServiceResult.Token));
+        if (result is UserServiceResult extendedResult)
+            return Ok(new LoginResponse(extendedResult.Token));
 
         return Unauthorized();
     }
@@ -73,11 +73,11 @@ public class IdentityController : ControllerBase
         var service = _userFactory.Create(UserServiceProvider.ADMIN);
         var result = await service.GetAllAsync(page, pageSize);
 
-        if (result is GetUserResult getUserResult) return Ok(getUserResult.Data);
+        if (result is GetAllUsersResult extendedResult) return Ok(extendedResult.Data);
 
         return NotFound(result.Errors);
     }
-    
+
     [HttpGet("search-emails")]
     [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -89,7 +89,22 @@ public class IdentityController : ControllerBase
         var result = await service.SearchEmailsAsync(query);
 
         if (result is SearchEmailsResult searchEmailsResult) return Ok(searchEmailsResult.Data);
-        
+
+        return NotFound(result.Errors);
+    }
+    
+    [HttpGet("get-user-by-id")]
+    [Authorize(Roles = "ADMIN")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUserById([FromQuery] string id)
+    {
+        var service = _userFactory.Create(UserServiceProvider.ADMIN);
+        var result = await service.GetByIdAsync(id);
+
+        if (result is GetUserResult getUserResult) return Ok(getUserResult.Data);
+
         return NotFound(result.Errors);
     }
 }

@@ -10,19 +10,19 @@
 @inject IJSRuntime Js
 @inject IToastService ToastService
 
-<div class="registration-container">
+<div class="container">
     <div class="form-card">
         <h3 class="form-title">Provide Admin Functionality</h3>
 
         <EditForm Model="@_roleChangeRequest" OnValidSubmit="@HandleRoleChange" class="registration-form">
-            <DataAnnotationsValidator/>
-            <ValidationSummary/>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
             <div class="form-group">
                 <label for="email" class="form-label">Identifier</label>
                 <InputText id="email" @bind-Value="_roleChangeRequest.Email" class="form-control"
-                           placeholder="Enter user identifier" @oninput="SearchEmailSuggestions"/>
-                <ValidationMessage For="@(() => _roleChangeRequest.Email)"/>
+                           placeholder="Enter user identifier" @oninput="SearchEmailSuggestions" />
+                <ValidationMessage For="@(() => _roleChangeRequest.Email)" />
                 @if (_emailSuggestions.Any())
                 {
                     <ul class="suggestions-list">
@@ -42,19 +42,17 @@
                         <option value="@role.ToString()">@role.ToString()</option>
                     }
                 </InputSelect>
-                <ValidationMessage For="@(() => _roleChangeRequest.RoleString)"/>
+                <ValidationMessage For="@(() => _roleChangeRequest.RoleString)" />
             </div>
 
             <button type="submit" class="btn-primary">Submit</button>
         </EditForm>
-
     </div>
 </div>
 
 @code {
     private readonly ChangeRoleRequest _roleChangeRequest = new() { RoleString = UserRole.USER.ToString() };
-    private string? _jwtToken;
-    private List<string> _emailSuggestions = [];
+    private List<string> _emailSuggestions = new();
 
     private async Task HandleRoleChange()
     {
@@ -69,14 +67,13 @@
         }
 
         HandleUnauthorizedResponse(response.StatusCode);
-        
+
         var errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
         await foreach (var error in errorResponse)
         {
             var errorMessage = !string.IsNullOrEmpty(error)
                 ? error
                 : "Request failed. Please try again later!";
-
             ToastService.ShowError(errorMessage);
         }
 
@@ -96,13 +93,13 @@
         await JwtTokenHelper.SetJwtTokenInHeaderAsync(Http, Js, Navigation);
         var response = await Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/search-emails?query={searchTerm}");
         HandleUnauthorizedResponse(response.StatusCode);
-        
+
         if (response.IsSuccessStatusCode)
         {
             _emailSuggestions = await response.Content.ReadFromJsonAsync<List<string>>() ?? [];
         }
     }
-    
+
     private void SelectSuggestedEmail(string email)
     {
         _roleChangeRequest.Email = email;
@@ -121,5 +118,4 @@
             Navigation.NavigateTo("/login");
         }
     }
-
 }

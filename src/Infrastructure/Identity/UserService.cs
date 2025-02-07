@@ -63,4 +63,9 @@ public class UserService : IUserService
     {
         return Task.FromResult(BaseResult.FailureResult(["You don't have permission to perform this action"]));
     }
+
+    public Task<BaseResult> GetByIdAsync(string id)
+    {
+        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to perform this action"]));
+    }
 }

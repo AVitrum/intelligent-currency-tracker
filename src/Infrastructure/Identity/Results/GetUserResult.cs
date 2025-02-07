@@ -5,15 +5,12 @@ namespace Infrastructure.Identity.Results;
 
 public class GetUserResult : BaseResult
 {
-    private GetUserResult(bool success, IEnumerable<string> errors, IEnumerable<UserDto> data) : base(success, errors)
+    public UserDto Data { get; private set; }
+    
+    private GetUserResult(bool success, IEnumerable<string> errors, UserDto data) : base(success, errors)
     {
         Data = data;
     }
-
-    public IEnumerable<UserDto> Data { get; }
-
-    public static GetUserResult SuccessResult(IEnumerable<UserDto> users)
-    {
-        return new GetUserResult(true, [], users);
-    }
+    
+    public static GetUserResult SuccessResult(UserDto user) => new(true, [], user);
 }

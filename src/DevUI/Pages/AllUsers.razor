@@ -10,29 +10,33 @@
 @using Shared.Dtos
 @implements IDisposable
 
-<h3 class="text-center my-4">All Users</h3>
+<h3 class="page-title">All Users</h3>
 <div class="container">
-    <table class="table table-striped table-hover">
-        <thead class="thead-dark">
-        <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Roles</th>
-        </tr>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var user in _users)
-        {
-            <tr>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
-                <td>@string.Join(", ", user.Roles)</td>
-            </tr>
-        }
+            @foreach (var user in _users)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@string.Join(", ", user.Roles)</td>
+                    <td>
+                        <button class="btn btn-info" @onclick="() => NavigateToUserDetails(user.Id)">View Details</button>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 
-    <div class="text-center my-4">
+    <div class="load-more-container">
         <button class="btn btn-primary" @onclick="LoadMoreUsers" disabled="@_isLoading">Load More</button>
     </div>
 </div>
@@ -86,7 +90,6 @@
                 var errorMessage = !string.IsNullOrEmpty(error)
                     ? error
                     : "Request failed. Please try again later!";
-
                 ToastService.ShowError(errorMessage);
             }
         }
@@ -99,9 +102,13 @@
         await LoadUsers();
     }
 
-    public void Dispose()
+    private void NavigateToUserDetails(string userId)
     {
-        // Dispose resources if needed
+        Navigation.NavigateTo($"/user-details/{userId}");
     }
 
+    public void Dispose()
+    {
+        
+    }
 }

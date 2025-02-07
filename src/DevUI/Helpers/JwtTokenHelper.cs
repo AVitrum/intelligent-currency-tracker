@@ -6,9 +6,11 @@ namespace DevUI.Helpers;
 
 public static class JwtTokenHelper
 {
-    public static async Task SetJwtTokenInLocalStorageAsync(string jwtToken, IJSRuntime js) =>
+    public static async Task SetJwtTokenInLocalStorageAsync(string jwtToken, IJSRuntime js)
+    {
         await js.InvokeVoidAsync("localStorage.setItem", "jwtToken", jwtToken);
-    
+    }
+
     public static async Task SetJwtTokenInHeaderAsync(HttpClient http, IJSRuntime js, NavigationManager navigation)
     {
         var jwtToken = await js.InvokeAsync<string?>("localStorage.getItem", "jwtToken");

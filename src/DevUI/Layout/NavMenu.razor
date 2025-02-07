@@ -12,39 +12,45 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
+                Home
             </NavLink>
         </div>
         @if (!_isTokenPresent)
         {
-            <div class="nav-item px-3">
+            <div class="nav-item">
                 <NavLink class="nav-link" href="login">
-                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Login
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
+                    Login
                 </NavLink>
             </div>
         }
         else
         {
-            <div class="nav-item px-3">
+            <div class="nav-item">
                 <NavLink class="nav-link" href="create-admin">
-                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span> Create Admin
+                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span>
+                    Create Admin
                 </NavLink>
             </div>
-            <div class="nav-item px-3">
+            <div class="nav-item">
                 <NavLink class="nav-link" href="role-manager">
-                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span> Role Manager
+                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span>
+                    Role Manager
                 </NavLink>
             </div>
-            <div class="nav-item px-3">
+            <div class="nav-item">
                 <NavLink class="nav-link" href="all-users">
-                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span> User List
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
+                    User List
                 </NavLink>
             </div>
-            <div class="nav-item px-3">
+            <div class="nav-item">
                 <button class="nav-link" @onclick="Logout">
-                    <span class="bi bi-logout-nav-menu" aria-hidden="true"></span> Logout
+                    <span class="bi bi-logout-nav-menu" aria-hidden="true"></span>
+                    Logout
                 </button>
             </div>
         }
@@ -73,5 +79,4 @@
         _isTokenPresent = false;
         Navigation.NavigateTo("/");
     }
-
 }
