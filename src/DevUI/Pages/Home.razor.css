@@ -1,5 +1,4 @@
-
-.container {
+.login-container {
     max-width: 400px;
     margin: 4rem auto;
     padding: 20px;
@@ -19,6 +18,7 @@
     font-size: 1.75rem;
     margin-bottom: 0.5rem;
     font-weight: 300;
+    color: #172b4d;
 }
 
 .form-subtitle {
@@ -32,17 +32,16 @@
 }
 
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
 }
 
 .form-label {
     display: block;
+    font-weight: 500;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: #333;
+    color: #172b4d;
 }
 
-/* Стилізація інпутів */
 .form-control {
     width: 100%;
     padding: 0.75rem;
@@ -50,13 +49,13 @@
     border: 1px solid #dfe1e6;
     border-radius: 4px;
     background-color: #f4f5f7;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-control:focus {
     border-color: #0079bf;
+    box-shadow: 0 0 8px rgba(0, 121, 191, 0.3);
     outline: none;
-    box-shadow: 0 0 8px rgba(0, 121, 191, 0.5);
 }
 
 .btn-primary {
@@ -74,11 +73,22 @@
 
 .btn-primary:hover {
     background-color: #005f99;
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .btn-primary:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
+}
+
+.alert.error-alert {
+    margin: 1rem auto;
+    padding: 1rem;
+    max-width: 400px;
+    border-radius: 4px;
+    background-color: #e63946;
+    color: white;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
 }
 
 @keyframes fadeIn {

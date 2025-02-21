@@ -2,11 +2,9 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IDevUISettings DevUISettings
-@inject IJSRuntime Js
 @inject IToastService ToastService
-@using System.Net
-@using System.Net.Http.Headers
-@using DevUI.Configurations
+@inject IHttpClientService HttpClientService
+@using DevUI.Interfaces
 @using Shared.Dtos
 @implements IDisposable
 
@@ -14,25 +12,25 @@
 <div class="container">
     <table class="user-table">
         <thead>
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var user in _users)
-            {
-                <tr>
-                    <td>@user.UserName</td>
-                    <td>@user.Email</td>
-                    <td>@string.Join(", ", user.Roles)</td>
-                    <td>
-                        <button class="btn btn-info" @onclick="() => NavigateToUserDetails(user.Id)">View Details</button>
-                    </td>
-                </tr>
-            }
+        @foreach (var user in _users)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@string.Join(", ", user.Roles)</td>
+                <td>
+                    <button class="btn btn-info" @onclick="() => NavigateToUserDetails(user.Id)">View Details</button>
+                </td>
+            </tr>
+        }
         </tbody>
     </table>
 
@@ -42,8 +40,7 @@
 </div>
 
 @code {
-    private readonly List<UserDto> _users = new();
-    private string? _token;
+    private readonly List<UserDto> _users = [];
     private int _currentPage = 1;
     private const int PageSize = 25;
     private bool _isLoading;
@@ -57,22 +54,11 @@
     {
         _isLoading = true;
 
-        _token = await Js.InvokeAsync<string?>("localStorage.getItem", "jwtToken");
-        if (string.IsNullOrEmpty(_token))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
+        var response = await HttpClientService.SendRequestAsync(() =>
+            Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-all-users?page={_currentPage}&pageSize={PageSize}")
+        );
 
-        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
-        var response = await Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-all-users?page={_currentPage}&pageSize={PageSize}");
-
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            ToastService.ShowError("You have no rights to perform this request!");
-            Navigation.NavigateTo("/");
-        }
-        else if (response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
             var users = await response.Content.ReadFromJsonAsync<List<UserDto>>();
             if (users is not null)
@@ -109,6 +95,6 @@
 
     public void Dispose()
     {
-        
     }
+
 }

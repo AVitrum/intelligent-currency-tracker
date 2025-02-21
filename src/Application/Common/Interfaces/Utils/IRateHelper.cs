@@ -2,7 +2,7 @@ using Domain.Entities;
 using Shared.Dtos;
 using Shared.Payload.Requests;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Utils;
 
 public interface IRateHelper
 {

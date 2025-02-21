@@ -1,13 +1,11 @@
 @page "/user-details/{userId}"
+@using DevUI.Interfaces
+@using Shared.Dtos
 @inject HttpClient Http
 @inject NavigationManager Navigation
-@inject IJSRuntime Js
-@inject IToastService ToastService
 @inject IDevUISettings DevUISettings
-@using System.Net
-@using DevUI.Configurations
-@using DevUI.Helpers
-@using Shared.Dtos
+@inject IToastService ToastService
+@inject IHttpClientService HttpClientService
 
 <h3 class="page-title">User Details</h3>
 <div class="container">
@@ -54,16 +52,11 @@
     private async Task LoadUserDetails()
     {
         _isLoading = true;
-        await JwtTokenHelper.SetJwtTokenInHeaderAsync(Http, Js, Navigation);
 
-        var response = await Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-user-by-id?id={UserId}");
+        var response = await HttpClientService.SendRequestAsync(() =>
+            Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-user-by-id?id={UserId}"));
 
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            ToastService.ShowError("You have no rights to perform this request!");
-            Navigation.NavigateTo("/");
-        }
-        else if (response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
             _user = await response.Content.ReadFromJsonAsync<UserDto>();
         }
@@ -79,4 +72,5 @@
     {
         Navigation.NavigateTo("/all-users");
     }
+
 }

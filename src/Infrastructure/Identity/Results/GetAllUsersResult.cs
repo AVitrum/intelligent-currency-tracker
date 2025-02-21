@@ -5,7 +5,8 @@ namespace Infrastructure.Identity.Results;
 
 public class GetAllUsersResult : BaseResult
 {
-    private GetAllUsersResult(bool success, IEnumerable<string> errors, IEnumerable<UserDto> data) : base(success, errors)
+    private GetAllUsersResult(bool success, IEnumerable<string> errors, IEnumerable<UserDto> data) : base(success,
+        errors)
     {
         Data = data;
     }

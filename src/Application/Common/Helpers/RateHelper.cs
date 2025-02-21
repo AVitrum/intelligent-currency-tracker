@@ -1,4 +1,5 @@
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Utils;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;

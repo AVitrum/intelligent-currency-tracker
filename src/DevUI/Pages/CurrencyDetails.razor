@@ -1,0 +1,170 @@
+@page "/currency-details"
+@using System.Globalization
+@using System.Text.Json
+@using DevUI.Interfaces
+@using Shared.Dtos
+@inject HttpClient Http
+@inject IDevUISettings DevUISettings
+@inject IToastService ToastService
+@inject IHttpClientService HttpClientService
+
+<div class="container">
+    <!-- Фільтри в одному рядку -->
+    <div class="filters"
+         style="margin-bottom:20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: flex-end;">
+        <div class="form-group" style="flex: 1; min-width: 120px;">
+            <label class="form-label" for="startDate">Start Date</label>
+            <InputText id="startDate" class="form-control"
+                       @bind-Value="_searchModel.StartDateString"/>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 120px;">
+            <label class="form-label" for="endDate">End Date</label>
+            <InputText id="endDate" class="form-control"
+                       @bind-Value="_searchModel.EndDateString"/>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 120px;">
+            <label class="form-label" for="currency">Currency</label>
+            <InputText id="currency" class="form-control"
+                       @bind-Value="_searchModel.Currency"/>
+        </div>
+        <div class="form-group">
+            <button class="btn-primary" @onclick="FetchRates" style="height: 38px;">Search</button>
+        </div>
+    </div>
+
+    <div class="form-card" style="margin-top:20px; width: 100%; overflow-x: auto;">
+        <h3 class="form-title">Results</h3>
+        <table class="table" style="min-width: 600px;">
+            <thead>
+            <tr>
+                <th @onclick="@(() => SortBy(nameof(RateDto.Date)))" style="cursor: pointer;">
+                    Date @DisplaySortIcon(nameof(RateDto.Date))
+                </th>
+                <th @onclick="@(() => SortBy(nameof(RateDto.Value)))" style="cursor: pointer;">
+                    Value @DisplaySortIcon(nameof(RateDto.Value))
+                </th>
+                <th @onclick='() => SortBy("Code")' style="cursor: pointer;">
+                    Code @DisplaySortIcon("Code")
+                </th>
+                <th @onclick='() => SortBy("CurrencyName")' style="cursor: pointer;">
+                    Currency Name @DisplaySortIcon("CurrencyName")
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (SortedRates.Any())
+            {
+                foreach (var rate in SortedRates)
+                {
+                    <tr>
+                        <td>@rate.Date</td>
+                        <td>@rate.Value</td>
+                        <td>@rate.Currency.Code</td>
+                        <td>@rate.Currency.Name</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4">No data available</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private readonly SearchModel _searchModel = new();
+
+    private IEnumerable<RateDto>? _rates;
+    private IEnumerable<RateDto> SortedRates => ApplySorting(_rates);
+
+    private string _currentSortColumn = "";
+    private bool _currentSortAscending = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchRates();
+    }
+
+    private async Task FetchRates()
+    {
+        var url = $"{DevUISettings.ApiUrl}/Rate/get-range?StartDateString={_searchModel.StartDateString}&EndDateString={_searchModel.EndDateString}&Currency={_searchModel.Currency}";
+        var response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var data = await response.Content.ReadFromJsonAsync<IEnumerable<RateDto>>(options);
+            if (data is null)
+            {
+                ToastService.ShowError("No data found");
+                _rates = Array.Empty<RateDto>();
+            }
+            else
+            {
+                _rates = data;
+            }
+        }
+        else
+        {
+            ToastService.ShowError("Request failed: " + response.StatusCode);
+        }
+
+        StateHasChanged();
+    }
+
+    private IEnumerable<RateDto> ApplySorting(IEnumerable<RateDto>? rates)
+    {
+        if (rates == null) return Array.Empty<RateDto>();
+
+        return _currentSortColumn switch
+        {
+            nameof(RateDto.Date) => _currentSortAscending
+                ? rates.OrderBy(r => DateTime.ParseExact(r.Date, "dd.MM.yyyy", CultureInfo.InvariantCulture))
+                : rates.OrderByDescending(r => DateTime.ParseExact(r.Date, "dd.MM.yyyy", CultureInfo.InvariantCulture)),
+            nameof(RateDto.Value) => _currentSortAscending
+                ? rates.OrderBy(r => r.Value)
+                : rates.OrderByDescending(r => r.Value),
+            "Code" => _currentSortAscending
+                ? rates.OrderBy(r => r.Currency.Code)
+                : rates.OrderByDescending(r => r.Currency.Code),
+            "CurrencyName" => _currentSortAscending
+                ? rates.OrderBy(r => r.Currency.Name)
+                : rates.OrderByDescending(r => r.Currency.Name),
+            _ => rates
+        };
+    }
+
+    private void SortBy(string column)
+    {
+        if (_currentSortColumn == column)
+        {
+            _currentSortAscending = !_currentSortAscending;
+        }
+        else
+        {
+            _currentSortColumn = column;
+            _currentSortAscending = true;
+        }
+    }
+
+    private MarkupString DisplaySortIcon(string column)
+    {
+        if (_currentSortColumn != column)
+            return new MarkupString(string.Empty);
+
+        var icon = _currentSortAscending ? "▲" : "▼";
+        return new MarkupString(icon);
+    }
+
+    public class SearchModel
+    {
+        public string StartDateString { get; set; } = "01.01.2016";
+        public string EndDateString { get; set; } = "31.12.2024";
+        public string Currency { get; set; } = "USD";
+    }
+
+}

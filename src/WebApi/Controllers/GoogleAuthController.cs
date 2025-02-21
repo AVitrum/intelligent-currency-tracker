@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Services;
 using Infrastructure.ExternalApis.GoogleAuth.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -45,6 +46,6 @@ public class GoogleAuthController : ControllerBase
             Secure = true
         });
 
-        return Ok(new LoginResponse(googleAuthResult.Token));
+        return Ok(new LoginResponse(googleAuthResult.Token, ""));
     }
 }

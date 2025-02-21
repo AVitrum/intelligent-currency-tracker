@@ -1,4 +1,4 @@
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Utils;
 using Confluent.Kafka;
 
 namespace Application.Kafka;

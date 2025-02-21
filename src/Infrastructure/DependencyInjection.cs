@@ -1,3 +1,6 @@
+using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Utils;
 using Infrastructure.BackgroundServices;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Repositories;
@@ -29,23 +32,29 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
 
+        //Utils
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IUserHelper, UserHelper>();
 
-        services.AddScoped<UserService>();
-        services.AddScoped<AdminUserService>();
+        //No Interface
         services.AddScoped<DefaultLoginManager>();
         services.AddScoped<DevUILoginManager>();
 
-        services.AddScoped<IUserFactory, UserFactory>();
+        //Factories
         services.AddScoped<ILoginManagerFactory, LoginManagerFactory>();
 
+        //Services
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
 
+        //Repositories
         services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         services.AddScoped<IRateRepository, RateRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
+        //Background Services
         services.AddHostedService<ExchangeRateSyncService>();
 
         if (appSettings.IsDocker()) EnsureDatabaseCreated(services);

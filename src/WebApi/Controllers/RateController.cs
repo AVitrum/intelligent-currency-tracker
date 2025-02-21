@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Services;
 using Application.ExchangeRates.Results;
 using Application.Rates.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +19,7 @@ public class RateController : ControllerBase
         _csvService = csvService;
     }
 
-    [Authorize]
+    [Authorize(Roles = "ADMIN")]
     [HttpGet("get-range")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

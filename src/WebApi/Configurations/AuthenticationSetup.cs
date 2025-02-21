@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Utils;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace WebApi.Configurations;
@@ -22,6 +23,7 @@ public static class AuthenticationSetup
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = appSettings.JwtIssuer,
                     ValidAudience = appSettings.JwtAudience,

@@ -1,3 +1,5 @@
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Utils;
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -49,23 +51,9 @@ public class UserService : IUserService
         return await manager.LoginAsync(request);
     }
 
-    public Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request)
+    public async Task<BaseResult> LoginWithRefreshTokenAsync(RefreshTokenRequest request)
     {
-        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to change roles"]));
-    }
-
-    public Task<BaseResult> GetAllAsync(int page, int pageSize)
-    {
-        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to perform this action"]));
-    }
-
-    public Task<BaseResult> SearchEmailsAsync(string query)
-    {
-        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to perform this action"]));
-    }
-
-    public Task<BaseResult> GetByIdAsync(string id)
-    {
-        return Task.FromResult(BaseResult.FailureResult(["You don't have permission to perform this action"]));
+        var manager = _loginManagerFactory.Create(request.LoginProvider);
+        return await manager.LoginWithRefreshTokenAsync(request);
     }
 }

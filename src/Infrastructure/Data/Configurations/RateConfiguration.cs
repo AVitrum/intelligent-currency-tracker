@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations;
 
-public class RateConfiguration : IEntityTypeConfiguration<Rate>
+internal sealed class RateConfiguration : IEntityTypeConfiguration<Rate>
 {
     public void Configure(EntityTypeBuilder<Rate> builder)
     {

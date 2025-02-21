@@ -1,4 +1,4 @@
-namespace DevUI.Configurations;
+namespace DevUI.Interfaces;
 
 public interface IDevUISettings
 {

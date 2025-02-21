@@ -9,6 +9,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Currency> Currencies => Set<Currency>();
     public DbSet<Rate> Rates => Set<Rate>();
     public DbSet<ApiRequestLog> ApiRequestLogs => Set<ApiRequestLog>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

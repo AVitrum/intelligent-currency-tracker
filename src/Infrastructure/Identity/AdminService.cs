@@ -1,4 +1,5 @@
 using Application.Common.Exceptions;
+using Application.Common.Interfaces.Services;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Identity.Results;
@@ -10,12 +11,12 @@ using Shared.Payload.Requests;
 
 namespace Infrastructure.Identity;
 
-public class AdminUserService : IUserService
+public class AdminService : IAdminService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public AdminUserService(UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
+    public AdminService(UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _httpContextAccessor = httpContextAccessor;
@@ -106,11 +107,6 @@ public class AdminUserService : IUserService
             Roles = _userManager.GetRolesAsync(user).Result,
             CreationMethod = user.CreationMethod.ToString()
         });
-    }
-
-    public Task<BaseResult> LoginAsync(LoginRequest request)
-    {
-        return Task.FromResult(BaseResult.FailureResult(["Method is not allowed from this service"]));
     }
 
     private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, UserRole role)

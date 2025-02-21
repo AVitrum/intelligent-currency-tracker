@@ -1,4 +1,6 @@
 using System.Net;
+using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

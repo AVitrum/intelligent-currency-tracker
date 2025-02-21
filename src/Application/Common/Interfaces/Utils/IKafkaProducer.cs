@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Utils;
 
 public interface IKafkaProducer
 {

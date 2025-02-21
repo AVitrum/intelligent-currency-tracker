@@ -1,7 +1,7 @@
 using Domain.Common;
 using Shared.Payload.Requests;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Services;
 
 public interface ICsvService
 {

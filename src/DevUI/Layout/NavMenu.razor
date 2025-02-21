@@ -1,9 +1,10 @@
-﻿@inject IJSRuntime Js
+﻿@using DevUI.Helpers
+@inject IJSRuntime Js
 @inject NavigationManager Navigation
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">DevUI</a>
+        <a class="navbar-brand" href="/all-users">DevUI</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -12,18 +13,12 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
-        <div class="nav-item">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
-                Home
-            </NavLink>
-        </div>
         @if (!_isTokenPresent)
         {
             <div class="nav-item">
-                <NavLink class="nav-link" href="login">
-                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
-                    Login
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
+                    Home
                 </NavLink>
             </div>
         }
@@ -45,6 +40,12 @@
                 <NavLink class="nav-link" href="all-users">
                     <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
                     User List
+                </NavLink>
+            </div>
+            <div class="nav-item">
+                <NavLink class="nav-link" href="currency-details">
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
+                    Exchange Rates
                 </NavLink>
             </div>
             <div class="nav-item">
@@ -75,8 +76,7 @@
 
     private async Task Logout()
     {
-        await Js.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
-        _isTokenPresent = false;
-        Navigation.NavigateTo("/");
+        await JwtTokenHelper.RemoveJwtTokensFromLocalStorageAsync(Js, Navigation);
     }
+
 }

@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Services;
 using Application.Common.Payload.Dtos;
 using Application.ExchangeRates.Results;
 using Microsoft.AspNetCore.Authorization;

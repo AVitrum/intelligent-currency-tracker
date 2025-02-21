@@ -18,7 +18,7 @@ public class CreateUserDto
 
     public string? PhoneNumber { get; set; } = string.Empty;
 
-    public string Provider { get; set; } = null!;
+    public string Provider { get; set; } = "default";
 
     [JsonIgnore] public UserServiceProvider ServiceProvider => Enum.Parse<UserServiceProvider>(Provider, true);
 }

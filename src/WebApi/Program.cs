@@ -26,7 +26,6 @@ builder.Services
     .AddApplication();
 
 builder.Services.AddSingleton<IExceptionHandler, CustomExceptionHandler>();
-
 var app = builder.Build();
 
 if (args.Length == 1 && args[0].Equals("seeddata", StringComparison.CurrentCultureIgnoreCase))

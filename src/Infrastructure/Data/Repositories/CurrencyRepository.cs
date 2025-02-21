@@ -1,3 +1,5 @@
+using Application.Common.Interfaces.Repositories;
+
 namespace Infrastructure.Data.Repositories;
 
 public class CurrencyRepository : BaseRepository<Currency>, ICurrencyRepository

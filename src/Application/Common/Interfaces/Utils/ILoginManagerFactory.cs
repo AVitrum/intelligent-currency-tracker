@@ -1,6 +1,6 @@
 using Domain.Enums;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Utils;
 
 public interface ILoginManagerFactory
 {

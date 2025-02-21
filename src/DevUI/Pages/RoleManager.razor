@@ -1,13 +1,11 @@
 @page "/role-manager"
-@using System.Net
-@using DevUI.Configurations
-@using DevUI.Helpers
+@using DevUI.Interfaces
 @using Domain.Enums
 @using Shared.Payload.Requests
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IDevUISettings DevUISettings
-@inject IJSRuntime Js
+@inject IHttpClientService HttpClientService
 @inject IToastService ToastService
 
 <div class="container">
@@ -15,14 +13,13 @@
         <h3 class="form-title">Provide Admin Functionality</h3>
 
         <EditForm Model="@_roleChangeRequest" OnValidSubmit="@HandleRoleChange" class="registration-form">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+            <DataAnnotationsValidator/>
 
             <div class="form-group">
                 <label for="email" class="form-label">Identifier</label>
                 <InputText id="email" @bind-Value="_roleChangeRequest.Email" class="form-control"
-                           placeholder="Enter user identifier" @oninput="SearchEmailSuggestions" />
-                <ValidationMessage For="@(() => _roleChangeRequest.Email)" />
+                           placeholder="Enter user identifier" @oninput="SearchEmailSuggestions"/>
+                <ValidationMessage For="@(() => _roleChangeRequest.Email)"/>
                 @if (_emailSuggestions.Any())
                 {
                     <ul class="suggestions-list">
@@ -42,7 +39,7 @@
                         <option value="@role.ToString()">@role.ToString()</option>
                     }
                 </InputSelect>
-                <ValidationMessage For="@(() => _roleChangeRequest.RoleString)" />
+                <ValidationMessage For="@(() => _roleChangeRequest.RoleString)"/>
             </div>
 
             <button type="submit" class="btn-primary">Submit</button>
@@ -52,33 +49,31 @@
 
 @code {
     private readonly ChangeRoleRequest _roleChangeRequest = new() { RoleString = UserRole.USER.ToString() };
-    private List<string> _emailSuggestions = new();
+    private List<string> _emailSuggestions = [];
 
     private async Task HandleRoleChange()
     {
-        await JwtTokenHelper.SetJwtTokenInHeaderAsync(Http, Js, Navigation);
-        var response = await Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/change-role", _roleChangeRequest);
+        var response = await HttpClientService.SendRequestAsync(() =>
+            Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/change-role", _roleChangeRequest)
+        );
 
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("Role assigned successfully");
-            Navigation.NavigateTo("/");
-            return;
+            Navigation.NavigateTo("/role-manager", true);
         }
-
-        HandleUnauthorizedResponse(response.StatusCode);
-
-        var errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
-        await foreach (var error in errorResponse)
+        else
         {
-            var errorMessage = !string.IsNullOrEmpty(error)
-                ? error
-                : "Request failed. Please try again later!";
-            ToastService.ShowError(errorMessage);
-        }
+            var errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
+            await foreach (var error in errorResponse)
+            {
+                var errorMessage = !string.IsNullOrEmpty(error) ? error : "Request failed. Please try again later!";
+                ToastService.ShowError(errorMessage);
+            }
 
-        await Task.Delay(3000);
-        ResetRequestFields();
+            await Task.Delay(3000);
+            ResetRequestFields();
+        }
     }
 
     private async Task SearchEmailSuggestions(ChangeEventArgs e)
@@ -90,9 +85,8 @@
             return;
         }
 
-        await JwtTokenHelper.SetJwtTokenInHeaderAsync(Http, Js, Navigation);
-        var response = await Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/search-emails?query={searchTerm}");
-        HandleUnauthorizedResponse(response.StatusCode);
+        var response = await HttpClientService.SendRequestAsync(() =>
+            Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/search-emails?query={searchTerm}"));
 
         if (response.IsSuccessStatusCode)
         {
@@ -111,11 +105,4 @@
         _roleChangeRequest.Email = string.Empty;
     }
 
-    private void HandleUnauthorizedResponse(HttpStatusCode statusCode)
-    {
-        if (statusCode == HttpStatusCode.Unauthorized)
-        {
-            Navigation.NavigateTo("/login");
-        }
-    }
 }

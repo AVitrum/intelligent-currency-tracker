@@ -1,3 +1,5 @@
+using DevUI.Interfaces;
+
 namespace DevUI.Configurations;
 
 public class DevUISettings : IDevUISettings
