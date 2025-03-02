@@ -4,7 +4,10 @@ namespace Application.ExchangeRates.Results;
 
 public class ExportExchangeRatesToCsvResult : BaseResult
 {
-    private ExportExchangeRatesToCsvResult(bool success, IEnumerable<string> errors, byte[] fileContent,
+    private ExportExchangeRatesToCsvResult(
+        bool success,
+        IEnumerable<string> errors,
+        byte[] fileContent,
         string fileName) : base(success, errors)
     {
         FileContent = fileContent;

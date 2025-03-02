@@ -1,7 +1,9 @@
 @page "/currency-details"
 @using System.Globalization
+@using System.Net
 @using System.Text.Json
 @using DevUI.Interfaces
+@using Domain.Constants
 @using Shared.Dtos
 @inject HttpClient Http
 @inject IDevUISettings DevUISettings
@@ -9,7 +11,6 @@
 @inject IHttpClientService HttpClientService
 
 <div class="container">
-    <!-- Фільтри в одному рядку -->
     <div class="filters"
          style="margin-bottom:20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: flex-end;">
         <div class="form-group" style="flex: 1; min-width: 120px;">
@@ -28,7 +29,7 @@
                        @bind-Value="_searchModel.Currency"/>
         </div>
         <div class="form-group">
-            <button class="btn-primary" @onclick="FetchRates" style="height: 38px;">Search</button>
+            <button class="btn-primary" @onclick="OnSearch" style="height: 38px;">Search</button>
         </div>
     </div>
 
@@ -73,25 +74,38 @@
             </tbody>
         </table>
     </div>
+    <div class="load-more-container">
+        <button class="btn btn-primary" @onclick="LoadMoreData" disabled="@_isLoading">Load More</button>
+    </div>
 </div>
 
 @code {
     private readonly SearchModel _searchModel = new();
 
-    private IEnumerable<RateDto>? _rates;
+    private readonly List<RateDto> _rates = [];
     private IEnumerable<RateDto> SortedRates => ApplySorting(_rates);
 
     private string _currentSortColumn = "";
     private bool _currentSortAscending = true;
+    private bool _isLoading;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
+        return Task.CompletedTask;
+    }
+
+    private async Task OnSearch()
+    {
+        _searchModel.Page = 1;
+        _rates.Clear();
         await FetchRates();
     }
 
     private async Task FetchRates()
     {
-        var url = $"{DevUISettings.ApiUrl}/Rate/get-range?StartDateString={_searchModel.StartDateString}&EndDateString={_searchModel.EndDateString}&Currency={_searchModel.Currency}";
+        _isLoading = true;
+
+        var url = $"{DevUISettings.ApiUrl}/Rate/get-range?StartDateString={_searchModel.StartDateString}&EndDateString={_searchModel.EndDateString}&Currency={_searchModel.Currency}&page={_searchModel.Page}&pageSize={_searchModel.PageSize}";
         var response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
 
         if (response.IsSuccessStatusCode)
@@ -101,12 +115,24 @@
             if (data is null)
             {
                 ToastService.ShowError("No data found");
-                _rates = Array.Empty<RateDto>();
+            }
+            else if (string.IsNullOrEmpty(_searchModel.Currency))
+            {
+                _rates.AddRange(data);
+                _searchModel.StartDateString = DateTime.ParseExact(
+                        _searchModel.StartDateString, DateConstants.DateFormat, null, DateTimeStyles.None)
+                    .AddDays(1)
+                    .ToString(DateConstants.DateFormat);
             }
             else
             {
-                _rates = data;
+                _rates.AddRange(data);
+                _searchModel.Page++;
             }
+        }
+        else if (response.StatusCode is HttpStatusCode.BadRequest)
+        {
+            ToastService.ShowError("Some of the input parameters are invalid or missing!");
         }
         else
         {
@@ -114,6 +140,7 @@
         }
 
         StateHasChanged();
+        _isLoading = false;
     }
 
     private IEnumerable<RateDto> ApplySorting(IEnumerable<RateDto>? rates)
@@ -160,11 +187,18 @@
         return new MarkupString(icon);
     }
 
+    private async Task LoadMoreData()
+    {
+        await FetchRates();
+    }
+
     public class SearchModel
     {
         public string StartDateString { get; set; } = "01.01.2016";
         public string EndDateString { get; set; } = "31.12.2024";
         public string Currency { get; set; } = "USD";
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 25;
     }
 
 }

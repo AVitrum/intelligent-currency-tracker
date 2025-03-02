@@ -1,39 +1,63 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
-using Domain.Constans;
+using Domain.Constants;
 using Shared.Validation;
 
 namespace Shared.Payload.Requests;
 
+[DateRange]
 public class ExchangeRateRequest
 {
     private DateTime _end;
     private DateTime _start;
 
-    [DateFormat] public required string StartDateString { get; init; }
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
 
-    [DateFormat] public required string EndDateString { get; init; }
-
+    public required string StartDateString { get; init; }
+    public required string EndDateString { get; set; }
     public string? Currency { get; init; }
 
     [JsonIgnore]
     public DateTime Start
     {
-        get => _start.ToUniversalTime();
-        set
+        get
         {
-            _start = value;
-            _start = DateTime.ParseExact(StartDateString, DateConstants.DateFormat, null);
+            if (_start == default)
+            {
+                _start = DateTime.ParseExact(
+                    StartDateString,
+                    DateConstants.DateFormat,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal
+                );
+            }
+
+            return _start;
         }
     }
 
     [JsonIgnore]
     public DateTime End
     {
-        get => _end.ToUniversalTime();
-        set
+        get
         {
-            _end = value;
-            _end = DateTime.ParseExact(EndDateString, DateConstants.DateFormat, null);
+            if (string.IsNullOrEmpty(EndDateString))
+            {
+                EndDateString = DateTime.UtcNow.ToString(DateConstants.DateFormat);
+            }
+
+            if (_end == default)
+            {
+                _end = DateTime.ParseExact(
+                    EndDateString,
+                    DateConstants.DateFormat,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal
+                );
+            }
+
+            return _end;
         }
     }
 }

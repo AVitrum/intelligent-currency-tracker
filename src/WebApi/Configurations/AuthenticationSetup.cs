@@ -32,9 +32,10 @@ public static class AuthenticationSetup
             })
             .AddGoogle(options =>
             {
-                options.ClientId = appSettings.GoogleClientId ?? throw new Exception("Google Client ID is missing.");
-                options.ClientSecret = appSettings.GoogleClientSecret ??
-                                       throw new Exception("Google Client Secret is missing.");
+                options.ClientId = appSettings.GoogleClientId
+                                   ?? throw new Exception("Google Client ID is missing.");
+                options.ClientSecret = appSettings.GoogleClientSecret
+                                       ?? throw new Exception("Google Client Secret is missing.");
                 options.SaveTokens = true;
             });
 

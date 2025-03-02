@@ -19,12 +19,14 @@
 
     <ItemGroup>
         <Folder Include="Components\"/>
+        <Folder Include="wwwroot\js\"/>
     </ItemGroup>
 
     <ItemGroup>
         <Content Include="..\..\.dockerignore">
             <Link>.dockerignore</Link>
         </Content>
+        <Content Remove="wwwroot\js\cookies.js"/>
     </ItemGroup>
 
 </Project>

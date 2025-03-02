@@ -1,4 +1,4 @@
-namespace Domain.Constans;
+namespace Domain.Constants;
 
 public static class DateConstants
 {

@@ -20,5 +20,6 @@ public class CreateUserDto
 
     public string Provider { get; set; } = "default";
 
-    [JsonIgnore] public UserServiceProvider ServiceProvider => Enum.Parse<UserServiceProvider>(Provider, true);
+    [JsonIgnore]
+    public UserServiceProvider ServiceProvider => Enum.Parse<UserServiceProvider>(Provider, true);
 }

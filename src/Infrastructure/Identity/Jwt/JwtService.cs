@@ -43,7 +43,10 @@ public class JwtService : IJwtService
     {
         var lastToken = await _refreshTokenRepository.GetByUserIdAsync(userId);
 
-        if (lastToken is not null) await _refreshTokenRepository.DeleteAsync(lastToken);
+        if (lastToken is not null)
+        {
+            await _refreshTokenRepository.DeleteAsync(lastToken);
+        }
 
         var refreshToken = new RefreshToken
         {

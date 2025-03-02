@@ -28,8 +28,11 @@ public static class CustomMiddleware
         app.Map("/error", async (HttpContext context, IExceptionHandler exceptionHandler) =>
         {
             var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+
             if (exceptionFeature?.Error != null)
+            {
                 await exceptionHandler.TryHandleAsync(context, exceptionFeature.Error, context.RequestAborted);
+            }
         });
     }
 }

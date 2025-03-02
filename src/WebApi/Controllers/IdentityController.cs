@@ -27,7 +27,10 @@ public class IdentityController : ControllerBase
     {
         var result = await _userService.CreateAsync(dto);
 
-        if (result.Success) return Created(string.Empty, null);
+        if (result.Success)
+        {
+            return Created(string.Empty, null);
+        }
 
         return Conflict(result.Errors);
     }
@@ -40,7 +43,9 @@ public class IdentityController : ControllerBase
         var result = await _userService.LoginAsync(request);
 
         if (result is UserServiceResult extendedResult)
+        {
             return Ok(new LoginResponse(extendedResult.Token, extendedResult.RefreshToken));
+        }
 
         return Unauthorized();
     }
@@ -53,7 +58,9 @@ public class IdentityController : ControllerBase
         var result = await _userService.LoginWithRefreshTokenAsync(request);
 
         if (result is UserServiceResult extendedResult)
+        {
             return Ok(new LoginResponse(extendedResult.Token, extendedResult.RefreshToken));
+        }
 
         return Unauthorized();
     }
@@ -67,7 +74,10 @@ public class IdentityController : ControllerBase
     {
         var result = await _adminService.CreateAsync(dto);
 
-        if (result.Success) return Created(string.Empty, null);
+        if (result.Success)
+        {
+            return Created(string.Empty, null);
+        }
 
         return Conflict(result.Errors);
     }
@@ -81,7 +91,10 @@ public class IdentityController : ControllerBase
     {
         var result = await _adminService.ChangeRoleAsync(request);
 
-        if (result.Success) return Ok();
+        if (result.Success)
+        {
+            return Ok();
+        }
 
         return NotFound(result.Errors);
     }
@@ -95,7 +108,10 @@ public class IdentityController : ControllerBase
     {
         var result = await _adminService.GetAllAsync(page, pageSize);
 
-        if (result is GetAllUsersResult extendedResult) return Ok(extendedResult.Data);
+        if (result is GetAllUsersResult extendedResult)
+        {
+            return Ok(extendedResult.Data);
+        }
 
         return NotFound(result.Errors);
     }
@@ -109,7 +125,10 @@ public class IdentityController : ControllerBase
     {
         var result = await _adminService.SearchEmailsAsync(query);
 
-        if (result is SearchEmailsResult searchEmailsResult) return Ok(searchEmailsResult.Data);
+        if (result is SearchEmailsResult searchEmailsResult)
+        {
+            return Ok(searchEmailsResult.Data);
+        }
 
         return NotFound(result.Errors);
     }
@@ -123,7 +142,10 @@ public class IdentityController : ControllerBase
     {
         var result = await _adminService.GetByIdAsync(id);
 
-        if (result is GetUserResult getUserResult) return Ok(getUserResult.Data);
+        if (result is GetUserResult getUserResult)
+        {
+            return Ok(getUserResult.Data);
+        }
 
         return NotFound(result.Errors);
     }

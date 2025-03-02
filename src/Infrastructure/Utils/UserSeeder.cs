@@ -23,17 +23,29 @@ public static class UserSeeder
         };
 
         var creationResult = await userManager.CreateAsync(adminUser);
-        if (!creationResult.Succeeded) throw new Exception("Failed to create admin user");
+        if (!creationResult.Succeeded)
+        {
+            throw new Exception("Failed to create admin user");
+        }
 
         var roleResult = await userManager.AddToRoleAsync(adminUser, UserRole.USER.ToString());
-        if (!roleResult.Succeeded) throw new Exception("Failed to add user to role");
+        if (!roleResult.Succeeded)
+        {
+            throw new Exception("Failed to add user to role");
+        }
 
         roleResult = await userManager.AddToRoleAsync(adminUser, UserRole.ADMIN.ToString());
-        if (!roleResult.Succeeded) throw new Exception("Failed to add user to role");
+        if (!roleResult.Succeeded)
+        {
+            throw new Exception("Failed to add user to role");
+        }
 
         //TODO: Remove this line in production
         var passwordResult = await userManager.AddPasswordAsync(adminUser, "Admin123!");
-        if (!passwordResult.Succeeded) throw new Exception("Failed to set password for admin user");
+        if (!passwordResult.Succeeded)
+        {
+            throw new Exception("Failed to set password for admin user");
+        }
 
         var user = new ApplicationUser
         {
@@ -45,13 +57,22 @@ public static class UserSeeder
         };
 
         creationResult = await userManager.CreateAsync(user);
-        if (!creationResult.Succeeded) throw new Exception("Failed to create user");
+        if (!creationResult.Succeeded)
+        {
+            throw new Exception("Failed to create user");
+        }
 
         roleResult = await userManager.AddToRoleAsync(user, UserRole.USER.ToString());
-        if (!roleResult.Succeeded) throw new Exception("Failed to add user to role");
+        if (!roleResult.Succeeded)
+        {
+            throw new Exception("Failed to add user to role");
+        }
 
         passwordResult = await userManager.AddPasswordAsync(user, "User123!");
-        if (!passwordResult.Succeeded) throw new Exception("Failed to set password for user");
+        if (!passwordResult.Succeeded)
+        {
+            throw new Exception("Failed to set password for user");
+        }
     }
 
     public static async Task SeedRolesAsync(IApplicationBuilder applicationBuilder)
@@ -65,7 +86,10 @@ public static class UserSeeder
         foreach (var roleName in roleNames)
         {
             var roleExist = await roleManager.RoleExistsAsync(roleName);
-            if (!roleExist) await roleManager.CreateAsync(new IdentityRole(roleName));
+            if (!roleExist)
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
         }
     }
 }

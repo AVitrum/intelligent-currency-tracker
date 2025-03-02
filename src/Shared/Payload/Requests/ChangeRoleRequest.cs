@@ -12,5 +12,6 @@ public class ChangeRoleRequest
 
     public string RoleString { get; set; } = "User";
 
-    [JsonIgnore] public UserRole Role => Enum.Parse<UserRole>(RoleString, true);
+    [JsonIgnore]
+    public UserRole Role => Enum.Parse<UserRole>(RoleString, true);
 }

@@ -27,7 +27,10 @@ public class RateController : ControllerBase
     {
         var result = await _rateService.GetRatesAsync(request);
 
-        if (result is not GetRatesResult getRatesResult) return BadRequest(result);
+        if (result is not GetRatesResult getRatesResult)
+        {
+            return BadRequest(result);
+        }
 
         return Ok(getRatesResult.Rates);
     }
@@ -40,7 +43,10 @@ public class RateController : ControllerBase
     {
         var result = await _csvService.ExportExchangeRatesToCsvAsync(request);
 
-        if (result is not ExportExchangeRatesToCsvResult toCsvResult) return BadRequest(result);
+        if (result is not ExportExchangeRatesToCsvResult toCsvResult)
+        {
+            return BadRequest(result);
+        }
 
         return File(toCsvResult.FileContent, "text/csv", toCsvResult.FileName);
     }

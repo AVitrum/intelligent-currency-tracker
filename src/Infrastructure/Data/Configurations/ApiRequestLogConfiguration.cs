@@ -4,7 +4,5 @@ namespace Infrastructure.Data.Configurations;
 
 internal sealed class ApiRequestLogConfiguration : IEntityTypeConfiguration<ApiRequestLog>
 {
-    public void Configure(EntityTypeBuilder<ApiRequestLog> builder)
-    {
-    }
+    public void Configure(EntityTypeBuilder<ApiRequestLog> builder) { }
 }

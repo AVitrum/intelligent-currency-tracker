@@ -8,5 +8,6 @@ public class RefreshTokenRequest
     public string RefreshToken { get; set; } = null!;
     public string Provider { get; init; } = null!;
 
-    [JsonIgnore] public LoginManagerProvider LoginProvider => Enum.Parse<LoginManagerProvider>(Provider, true);
+    [JsonIgnore]
+    public LoginManagerProvider LoginProvider => Enum.Parse<LoginManagerProvider>(Provider, true);
 }

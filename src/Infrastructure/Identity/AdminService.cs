@@ -35,8 +35,11 @@ public class AdminService : IAdminService
         await _userManager.CreateAsync(newUser);
 
         var passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
+
         if (!passwordResult.Succeeded)
+        {
             return BaseResult.FailureResult(passwordResult.Errors.Select(error => error.Description).ToList());
+        }
 
         var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.ADMIN.ToString());
 
@@ -51,14 +54,21 @@ public class AdminService : IAdminService
                    ?? throw new UserNotFoundException("User not found");
 
         if (_httpContextAccessor.HttpContext == null)
+        {
             return BaseResult.FailureResult(["Can't get user from context"]);
+        }
 
         var currentUser = await _userManager.FindByIdAsync(_httpContextAccessor.HttpContext.User.GetUserId()!);
+
         if (currentUser == user)
+        {
             return BaseResult.FailureResult(["You cannot change your own role"]);
+        }
 
         if (await _userManager.IsInRoleAsync(user, request.Role.ToString()))
+        {
             return BaseResult.FailureResult([$"User is already an {request.Role}"]);
+        }
 
         return await AddUserToRoleAsync(user, request.Role);
     }
@@ -67,7 +77,10 @@ public class AdminService : IAdminService
     {
         var users = await _userManager.Users.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-        if (users.Count == 0) return BaseResult.FailureResult(["No more users found"]);
+        if (users.Count == 0)
+        {
+            return BaseResult.FailureResult(["No more users found"]);
+        }
 
         return GetAllUsersResult.SuccessResult(users.Select(user => new UserDto
         {
@@ -96,7 +109,10 @@ public class AdminService : IAdminService
     {
         var user = await _userManager.FindByIdAsync(id);
 
-        if (user == null) return BaseResult.FailureResult(["User not found"]);
+        if (user == null)
+        {
+            return BaseResult.FailureResult(["User not found"]);
+        }
 
         return GetUserResult.SuccessResult(new UserDto
         {

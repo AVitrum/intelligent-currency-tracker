@@ -13,7 +13,9 @@ public class DefaultLoginManager : ILoginManager
     private readonly IUserHelper _userHelper;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public DefaultLoginManager(IUserHelper userHelper, IRefreshTokenRepository refreshTokenRepository,
+    public DefaultLoginManager(
+        IUserHelper userHelper,
+        IRefreshTokenRepository refreshTokenRepository,
         UserManager<ApplicationUser> userManager)
     {
         _userHelper = userHelper;
@@ -38,7 +40,10 @@ public class DefaultLoginManager : ILoginManager
     {
         var refreshToken = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken);
 
-        if (refreshToken is null) return BaseResult.FailureResult(["Invalid refresh token"]);
+        if (refreshToken is null)
+        {
+            return BaseResult.FailureResult(["Invalid refresh token"]);
+        }
 
         if (refreshToken.ExpiresOnUtc < DateTime.UtcNow)
         {
@@ -48,7 +53,10 @@ public class DefaultLoginManager : ILoginManager
 
         var user = await _userManager.FindByIdAsync(refreshToken.UserId);
 
-        if (user is null) return BaseResult.FailureResult(["User not found"]);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(["User not found"]);
+        }
 
         await _refreshTokenRepository.DeleteAsync(refreshToken);
         return await _userHelper.GenerateTokenResultAsync(user);

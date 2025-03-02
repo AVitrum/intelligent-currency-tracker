@@ -1,6 +1,6 @@
 using System.Globalization;
 using Application.Common.Interfaces.Repositories;
-using Domain.Constans;
+using Domain.Constants;
 
 namespace Infrastructure.Data.Repositories;
 
@@ -19,25 +19,35 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<Rate>> GetAsync(DateTime start, DateTime end)
+    public async Task<IEnumerable<Rate>> GetAsync(DateTime date)
     {
         return await _context.Rates
             .AsNoTracking()
             .Include(x => x.Currency)
-            .Where(x => x.Date >= start && x.Date <= end)
+            .Where(x => x.Date.Date == date.Date)
             .AsSplitQuery()
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Rate>> GetAsync(DateTime start, DateTime end, Currency currency)
+    public async Task<IEnumerable<Rate>> GetAsync(
+        DateTime start,
+        DateTime end,
+        Currency currency,
+        int page,
+        int pageSize)
     {
-        return await _context.Rates
+        var rates = await _context.Rates
             .AsNoTracking()
             .Include(x => x.Currency)
-            .Where(x => x.Date >= start && x.Date <= end && x.CurrencyId == currency.Id)
+            .Where(x => x.Date.Date >= start.Date && x.Date.Date <= end.Date && x.CurrencyId == currency.Id)
             .AsSplitQuery()
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return rates;
     }
+
 
     public async Task<DateTime> GetLastDateAsync()
     {

@@ -15,5 +15,6 @@ public class LoginRequest
 
     public string Provider { get; init; } = null!;
 
-    [JsonIgnore] public LoginManagerProvider LoginProvider => Enum.Parse<LoginManagerProvider>(Provider, true);
+    [JsonIgnore]
+    public LoginManagerProvider LoginProvider => Enum.Parse<LoginManagerProvider>(Provider, true);
 }

@@ -21,6 +21,12 @@
                     Home
                 </NavLink>
             </div>
+            <div class="nav-item">
+                <NavLink class="nav-link" href="login">
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
+                    Login
+                </NavLink>
+            </div>
         }
         else
         {
@@ -66,7 +72,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _isTokenPresent = await Js.InvokeAsync<string?>("localStorage.getItem", "jwtToken") != null;
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
     }
 
     private void ToggleNavMenu()
@@ -76,7 +82,7 @@
 
     private async Task Logout()
     {
-        await JwtTokenHelper.RemoveJwtTokensFromLocalStorageAsync(Js, Navigation);
+        await JwtTokenHelper.RemoveJwtTokensFromCookiesAsync(Js, Navigation);
     }
 
 }

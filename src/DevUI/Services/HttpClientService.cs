@@ -32,7 +32,11 @@ public class HttpClientService : IHttpClientService
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             var refreshed = await RefreshTokenAsync();
-            if (refreshed) response = await requestFunc();
+
+            if (refreshed)
+            {
+                response = await requestFunc();
+            }
         }
 
         return response;
@@ -40,20 +44,29 @@ public class HttpClientService : IHttpClientService
 
     private async Task<bool> RefreshTokenAsync()
     {
-        var refreshToken = await JwtTokenHelper.GetRefreshTokenFromLocalStorage(_js, _navigation);
+        var refreshToken = await JwtTokenHelper.GetRefreshTokenFromCookies(_js, _navigation);
 
-        if (string.IsNullOrEmpty(refreshToken)) return false;
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return false;
+        }
 
         var refreshRequest = new RefreshTokenRequest { RefreshToken = refreshToken, Provider = "DevUI" };
         var response = await _http.PostAsJsonAsync($"{_settings.ApiUrl}/Identity/refresh-token", refreshRequest);
 
-        if (!response.IsSuccessStatusCode) return false;
+        if (!response.IsSuccessStatusCode)
+        {
+            return false;
+        }
 
         var responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-        if (responseContent?.Token is null) return false;
+        if (responseContent?.Token is null)
+        {
+            return false;
+        }
 
-        await JwtTokenHelper.SetJwtTokensInLocalStorageAsync(responseContent.Token, responseContent.RefreshToken, _js);
+        await JwtTokenHelper.SetJwtTokensInCookiesAsync(responseContent.Token, responseContent.RefreshToken, _js);
         await JwtTokenHelper.SetJwtTokenInHeaderAsync(_http, _js, _navigation);
 
         return true;

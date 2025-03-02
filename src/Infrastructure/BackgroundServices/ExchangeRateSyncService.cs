@@ -84,6 +84,7 @@ public class ExchangeRateSyncService : BackgroundService
         try
         {
             var response = await client.GetAsync(url, stoppingToken);
+
             if (response.StatusCode == HttpStatusCode.GatewayTimeout)
             {
                 _logger.LogWarning("Received 504 Gateway Timeout. Retrying for {Date}", date);
@@ -117,6 +118,7 @@ public class ExchangeRateSyncService : BackgroundService
         foreach (var rateToken in ratesData)
         {
             var currencyCode = rateToken["cc"]?.Value<string>();
+
             if (string.IsNullOrEmpty(currencyCode))
             {
                 _logger.LogWarning("Currency code is missing in the response for {Date}.", date);
@@ -143,7 +145,10 @@ public class ExchangeRateSyncService : BackgroundService
         ICurrencyRepository currencyRepository)
     {
         var currency = await currencyRepository.GetByCodeAsync(currencyCode);
-        if (currency is not null) return currency;
+        if (currency is not null)
+        {
+            return currency;
+        }
 
         var currencyName = rateToken["txt"]?.Value<string>() ?? "Unknown";
         var r030 = rateToken["r030"]?.Value<int>() ?? 0;

@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using Amazon.S3;
 using Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +17,9 @@ public class CustomExceptionHandler : IExceptionHandler
         _logger = logger;
     }
 
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext httpContext,
+        Exception exception,
         CancellationToken cancellationToken)
     {
         var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
@@ -50,6 +54,8 @@ public class CustomExceptionHandler : IExceptionHandler
             DataNotFoundException ex => (404, ex.Message),
 
             ExportCsvException ex => (400, ex.Message),
+            ValidationException ex => (400, ex.Message),
+            AmazonS3Exception => (400, "Error while processing file"),
 
             IdentityException ex => (400, ex.Message),
             UserNotFoundException ex => (401, ex.Message),

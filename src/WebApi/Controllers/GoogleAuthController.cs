@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services;
-using Infrastructure.ExternalApis.GoogleAuth.Results;
+using Infrastructure.GoogleAuth.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Shared.Payload.Responses;
@@ -37,7 +37,10 @@ public class GoogleAuthController : ControllerBase
         var authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
         var result = await _service.HandleGoogleResponse(authResult);
 
-        if (result is not GoogleAuthResult googleAuthResult) return Unauthorized();
+        if (result is not GoogleAuthResult googleAuthResult)
+        {
+            return Unauthorized();
+        }
 
         Response.Cookies.Append("jwt", googleAuthResult.Token, new CookieOptions
         {

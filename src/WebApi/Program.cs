@@ -29,8 +29,10 @@ builder.Services.AddSingleton<IExceptionHandler, CustomExceptionHandler>();
 var app = builder.Build();
 
 if (args.Length == 1 && args[0].Equals("seeddata", StringComparison.CurrentCultureIgnoreCase))
-    // await CurrencySeeder.SeedCurrenciesAsync(app);
+{
     await UserSeeder.SeedRolesAsync(app);
+    // await CurrencySeeder.SeedCurrenciesAsync(app);
+}
 
 app.UseCustomMiddlewares();
 app.Run();

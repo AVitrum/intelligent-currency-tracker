@@ -17,6 +17,11 @@ public class AppSettings : IAppSettings
     }
 
     public string DbConnectionString { get; private set; } = null!;
+    public string AwsAccessKey { get; private set; } = null!;
+    public string AwsSecretKey { get; private set; } = null!;
+    public string AwsRegion { get; private set; } = null!;
+    public string AwsBucket { get; private set; } = null!;
+    public string AwsEndpoint { get; private set; } = null!;
     public string JwtKey { get; private set; } = null!;
     public string JwtIssuer { get; private set; } = null!;
     public string JwtAudience { get; private set; } = null!;
@@ -36,6 +41,11 @@ public class AppSettings : IAppSettings
     private void Initialize()
     {
         DbConnectionString = GetConnectionString();
+        AwsAccessKey = GetConfigurationValue("MINIO_ROOT_USER");
+        AwsSecretKey = GetConfigurationValue("MINIO_ROOT_PASSWORD");
+        AwsRegion = GetConfigurationValue("MINIO_REGION");
+        AwsBucket = GetConfigurationValue("MINIO_BUCKET");
+        AwsEndpoint = GetConfigurationValue("MINIO_ENDPOINT");
         JwtKey = GetConfigurationValue("JWT_KEY");
         JwtIssuer = GetConfigurationValue("JWT_ISSUER");
         JwtAudience = GetConfigurationValue("JWT_AUDIENCE");
@@ -57,7 +67,10 @@ public class AppSettings : IAppSettings
     private string GetConfigurationValue(string key)
     {
         var value = _configuration[key];
-        if (string.IsNullOrEmpty(value)) throw new Exception($"{key} cannot be null or empty");
+        if (string.IsNullOrEmpty(value))
+        {
+            throw new Exception($"{key} cannot be null or empty");
+        }
 
         return value;
     }

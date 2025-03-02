@@ -5,10 +5,11 @@ using Infrastructure.BackgroundServices;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Repositories;
 using Infrastructure.Email;
-using Infrastructure.ExternalApis.GoogleAuth;
+using Infrastructure.GoogleAuth;
 using Infrastructure.Identity;
 using Infrastructure.Identity.Factories;
 using Infrastructure.Identity.Jwt;
+using Infrastructure.Minio;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,7 @@ public static class DependencyInjection
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IMinioService, MinioService>();
 
         //Repositories
         services.AddScoped<ICurrencyRepository, CurrencyRepository>();
@@ -57,7 +59,10 @@ public static class DependencyInjection
         //Background Services
         services.AddHostedService<ExchangeRateSyncService>();
 
-        if (appSettings.IsDocker()) EnsureDatabaseCreated(services);
+        if (appSettings.IsDocker())
+        {
+            EnsureDatabaseCreated(services);
+        }
 
         return services;
     }
@@ -72,13 +77,21 @@ public static class DependencyInjection
         if (context.Database.CanConnect())
         {
             var pendingMigrations = context.Database.GetPendingMigrations();
-            if (pendingMigrations.Any()) context.Database.Migrate();
+
+            if (pendingMigrations.Any())
+            {
+                context.Database.Migrate();
+            }
         }
         else
         {
             context.Database.EnsureCreated();
             var pendingMigrations = context.Database.GetPendingMigrations();
-            if (pendingMigrations.Any()) context.Database.Migrate();
+
+            if (pendingMigrations.Any())
+            {
+                context.Database.Migrate();
+            }
         }
     }
 }

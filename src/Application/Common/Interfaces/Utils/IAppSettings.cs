@@ -3,6 +3,11 @@ namespace Application.Common.Interfaces.Utils;
 public interface IAppSettings
 {
     string DbConnectionString { get; }
+    string AwsAccessKey { get; }
+    string AwsSecretKey { get; }
+    string AwsRegion { get; }
+    string AwsBucket { get; }
+    string AwsEndpoint { get; }
     string JwtKey { get; }
     string JwtIssuer { get; }
     string JwtAudience { get; }

@@ -13,7 +13,9 @@ public class DevUILoginManager : ILoginManager
     private readonly IUserHelper _userHelper;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public DevUILoginManager(IUserHelper userHelper, IRefreshTokenRepository refreshTokenRepository,
+    public DevUILoginManager(
+        IUserHelper userHelper,
+        IRefreshTokenRepository refreshTokenRepository,
         UserManager<ApplicationUser> userManager)
     {
         _userHelper = userHelper;
@@ -41,11 +43,16 @@ public class DevUILoginManager : ILoginManager
         var refreshToken = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken);
 
         if (refreshToken is null || refreshToken.ExpiresOnUtc < DateTime.UtcNow)
+        {
             return BaseResult.FailureResult(["Invalid refresh token"]);
+        }
 
         var user = await _userManager.FindByIdAsync(refreshToken.UserId);
 
-        if (user is null) return BaseResult.FailureResult(["User not found"]);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(["User not found"]);
+        }
 
         await _userHelper.CheckIfUserIsAdmin(user);
 

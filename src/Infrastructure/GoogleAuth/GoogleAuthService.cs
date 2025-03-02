@@ -3,13 +3,13 @@ using System.Security.Claims;
 using Application.Common.Interfaces.Services;
 using Domain.Common;
 using Domain.Enums;
-using Infrastructure.ExternalApis.GoogleAuth.Results;
+using Infrastructure.GoogleAuth.Results;
 using Infrastructure.Identity;
 using Infrastructure.Identity.Jwt;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 
-namespace Infrastructure.ExternalApis.GoogleAuth;
+namespace Infrastructure.GoogleAuth;
 
 public class GoogleAuthService : IGoogleAuthService
 {
@@ -28,11 +28,17 @@ public class GoogleAuthService : IGoogleAuthService
     {
         var email = authResult.Principal?.FindFirst(ClaimTypes.Email)?.Value;
 
-        if (email is null) return GoogleAuthResult.FailureResult(["Email claim not found"]);
+        if (email is null)
+        {
+            return GoogleAuthResult.FailureResult(["Email claim not found"]);
+        }
 
         var newUser = await _userManager.FindByEmailAsync(email);
 
-        if (newUser is not null) return await LoginAsync(newUser);
+        if (newUser is not null)
+        {
+            return await LoginAsync(newUser);
+        }
 
         newUser = new ApplicationUser
         {
@@ -47,12 +53,16 @@ public class GoogleAuthService : IGoogleAuthService
         var result = await _userManager.CreateAsync(newUser);
 
         if (!result.Succeeded)
+        {
             return BaseResult.FailureResult(result.Errors.Select(error => error.Description).ToList());
+        }
 
         var addToRoleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
 
         if (!addToRoleResult.Succeeded)
+        {
             return BaseResult.FailureResult(addToRoleResult.Errors.Select(error => error.Description).ToList());
+        }
 
         return await LoginAsync(newUser);
     }

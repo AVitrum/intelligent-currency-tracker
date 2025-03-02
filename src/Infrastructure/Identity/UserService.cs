@@ -32,12 +32,18 @@ public class UserService : IUserService
         };
 
         var creationResult = await _userManager.CreateAsync(newUser);
+
         if (!creationResult.Succeeded)
+        {
             return BaseResult.FailureResult(creationResult.Errors.Select(e => e.Description).ToList());
+        }
 
         var passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
+
         if (!passwordResult.Succeeded)
+        {
             return BaseResult.FailureResult(passwordResult.Errors.Select(e => e.Description).ToList());
+        }
 
         var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
         return roleResult.Succeeded

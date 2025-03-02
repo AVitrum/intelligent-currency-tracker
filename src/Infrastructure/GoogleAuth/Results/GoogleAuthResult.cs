@@ -1,6 +1,6 @@
 using Domain.Common;
 
-namespace Infrastructure.ExternalApis.GoogleAuth.Results;
+namespace Infrastructure.GoogleAuth.Results;
 
 public class GoogleAuthResult : BaseResult
 {

@@ -1,5 +1,5 @@
 using AutoMapper;
-using Domain.Constans;
+using Domain.Constants;
 using Domain.Entities;
 
 namespace Shared.Dtos;

@@ -28,7 +28,11 @@ public class CsvService : ICsvService
     {
         var ratesDto = (ICollection<RateDto>)_rateHelper.ConvertRatesToDtoAsync(
             await _rateHelper.GetRatesFromRequestAsync(request));
-        if (ratesDto.Count == 0) return BaseResult.FailureResult(["No rates found."]);
+
+        if (ratesDto.Count == 0)
+        {
+            return BaseResult.FailureResult(["No rates found."]);
+        }
 
         var fileName = $"ExchangeRates_{request.Currency}_{request.Start:yyyyMMdd}_{request.End:yyyyMMdd}.csv";
         var fileContent = await CreateCsvFileAsync(ratesDto);

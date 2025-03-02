@@ -96,7 +96,10 @@ public static class CurrencySeeder
         {
             var existingCurrency =
                 await dbContext.Set<Currency>().FirstOrDefaultAsync(c => c.R030 == currency.R030);
-            if (existingCurrency == null) await dbContext.Set<Currency>().AddAsync(currency);
+            if (existingCurrency == null)
+            {
+                await dbContext.Set<Currency>().AddAsync(currency);
+            }
         }
 
         await dbContext.SaveChangesAsync();

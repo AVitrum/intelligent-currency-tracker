@@ -21,6 +21,7 @@ public class RequestLoggingMiddleware
 
         request.EnableBuffering();
         string body;
+
         if (request is { HasFormContentType: true, Form.Files.Count: > 0 })
         {
             body = "file";

@@ -31,14 +31,20 @@ public class UserHelper : IUserHelper
 
     public async Task ValidatePasswordAsync(ApplicationUser user, string password)
     {
-        if (!await _userManager.CheckPasswordAsync(user, password)) throw new PasswordException();
+        if (!await _userManager.CheckPasswordAsync(user, password))
+        {
+            throw new PasswordException();
+        }
     }
 
     public async Task CheckIfUserIsAdmin(ApplicationUser user)
     {
         var roles = await GetRolesAsync(user);
 
-        if (!roles.Contains("ADMIN")) throw new UnauthorizedAccessException("User is not authorized to use DevUI");
+        if (!roles.Contains("ADMIN"))
+        {
+            throw new UnauthorizedAccessException("User is not authorized to use DevUI");
+        }
     }
 
     public async Task<UserServiceResult> GenerateTokenResultAsync(ApplicationUser user)
