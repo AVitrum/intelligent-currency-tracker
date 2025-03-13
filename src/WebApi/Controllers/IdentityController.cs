@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services;
+using Domain.Common;
 using Infrastructure.Identity.Results;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Dtos;
@@ -25,7 +26,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register(CreateUserDto dto)
     {
-        var result = await _userService.CreateAsync(dto);
+        BaseResult result = await _userService.CreateAsync(dto);
 
         if (result.Success)
         {
@@ -40,7 +41,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var result = await _userService.LoginAsync(request);
+        BaseResult result = await _userService.LoginAsync(request);
 
         if (result is UserServiceResult extendedResult)
         {
@@ -55,7 +56,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
     {
-        var result = await _userService.LoginWithRefreshTokenAsync(request);
+        BaseResult result = await _userService.LoginWithRefreshTokenAsync(request);
 
         if (result is UserServiceResult extendedResult)
         {
@@ -72,7 +73,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateAdmin(CreateUserDto dto)
     {
-        var result = await _adminService.CreateAsync(dto);
+        BaseResult result = await _adminService.CreateAsync(dto);
 
         if (result.Success)
         {
@@ -89,7 +90,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddRole(ChangeRoleRequest request)
     {
-        var result = await _adminService.ChangeRoleAsync(request);
+        BaseResult result = await _adminService.ChangeRoleAsync(request);
 
         if (result.Success)
         {
@@ -106,7 +107,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 25)
     {
-        var result = await _adminService.GetAllAsync(page, pageSize);
+        BaseResult result = await _adminService.GetAllAsync(page, pageSize);
 
         if (result is GetAllUsersResult extendedResult)
         {
@@ -123,7 +124,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SearchEmails([FromQuery] string query)
     {
-        var result = await _adminService.SearchEmailsAsync(query);
+        BaseResult result = await _adminService.SearchEmailsAsync(query);
 
         if (result is SearchEmailsResult searchEmailsResult)
         {
@@ -140,7 +141,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserById([FromQuery] string id)
     {
-        var result = await _adminService.GetByIdAsync(id);
+        BaseResult result = await _adminService.GetByIdAsync(id);
 
         if (result is GetUserResult getUserResult)
         {

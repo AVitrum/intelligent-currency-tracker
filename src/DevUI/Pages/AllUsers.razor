@@ -20,7 +20,7 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (var user in _users)
+        @foreach (UserDto? user in _users)
         {
             <tr>
                 <td>@user.UserName</td>
@@ -54,13 +54,13 @@
     {
         _isLoading = true;
 
-        var response = await HttpClientService.SendRequestAsync(() =>
+        HttpResponseMessage? response = await HttpClientService.SendRequestAsync(() =>
             Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-all-users?page={_currentPage}&pageSize={PageSize}")
         );
 
         if (response.IsSuccessStatusCode)
         {
-            var users = await response.Content.ReadFromJsonAsync<List<UserDto>>();
+            List<UserDto>? users = await response.Content.ReadFromJsonAsync<List<UserDto>>();
             if (users is not null)
             {
                 _users.AddRange(users);
@@ -69,11 +69,11 @@
         }
         else
         {
-            var errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
+            IAsyncEnumerable<string?> errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
 
-            await foreach (var error in errorResponse)
+            await foreach (string? error in errorResponse)
             {
-                var errorMessage = !string.IsNullOrEmpty(error)
+                string errorMessage = !string.IsNullOrEmpty(error)
                     ? error
                     : "Request failed. Please try again later!";
                 ToastService.ShowError(errorMessage);

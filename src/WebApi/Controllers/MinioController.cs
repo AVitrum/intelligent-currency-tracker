@@ -22,8 +22,8 @@ public class MinioController : ControllerBase
             return BadRequest("File is empty");
         }
 
-        var filePath = Path.GetTempFileName();
-        await using (var stream = new FileStream(filePath, FileMode.Create))
+        string filePath = Path.GetTempFileName();
+        await using (FileStream stream = new(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
@@ -34,14 +34,14 @@ public class MinioController : ControllerBase
         {
             enumTags = new Dictionary<FileTag, string>();
 
-            foreach (var tag in tags)
-                if (Enum.TryParse<FileTag>(tag.Key, true, out var fileTag))
+            foreach (KeyValuePair<string, string> tag in tags)
+                if (Enum.TryParse(tag.Key, true, out FileTag fileTag))
                 {
                     enumTags[fileTag] = tag.Value;
                 }
         }
 
-        var key = await _minioService.UploadFileAsync(filePath, file.FileName, enumTags);
+        string key = await _minioService.UploadFileAsync(filePath, file.FileName, enumTags);
 
         return Ok(new { Message = "File uploaded successfully", FileName = key });
     }
@@ -49,7 +49,7 @@ public class MinioController : ControllerBase
     [HttpGet("download/{fileName}")]
     public async Task<IActionResult> DownloadAsync(string fileName)
     {
-        var fileBytes = await _minioService.DownloadFileAsync(fileName);
+        byte[]? fileBytes = await _minioService.DownloadFileAsync(fileName);
 
         if (fileBytes.Length == 0)
         {
@@ -62,7 +62,7 @@ public class MinioController : ControllerBase
     [HttpGet("tags/{fileName}")]
     public async Task<IActionResult> GetTagsAsync(string fileName)
     {
-        var tags = await _minioService.GetTagsAsync(fileName);
+        Dictionary<FileTag, string>? tags = await _minioService.GetTagsAsync(fileName);
 
         return Ok(tags);
     }

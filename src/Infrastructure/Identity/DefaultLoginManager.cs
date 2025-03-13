@@ -25,12 +25,12 @@ public class DefaultLoginManager : ILoginManager
 
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        var lookupDelegate = _userHelper.GetUserLookupDelegate(request);
-        var identifier = request.UserName ?? request.Email
+        UserLookupDelegate lookupDelegate = _userHelper.GetUserLookupDelegate(request);
+        string identifier = request.UserName ?? request.Email
             ?? throw new ArgumentException("Username or Email must be provided");
 
-        var user = await lookupDelegate(identifier)
-                   ?? throw new UserNotFoundException("User not found");
+        ApplicationUser user = await lookupDelegate(identifier)
+                               ?? throw new UserNotFoundException("User not found");
 
         await _userHelper.ValidatePasswordAsync(user, request.Password);
         return await _userHelper.GenerateTokenResultAsync(user);
@@ -38,7 +38,7 @@ public class DefaultLoginManager : ILoginManager
 
     public async Task<BaseResult> LoginWithRefreshTokenAsync(RefreshTokenRequest request)
     {
-        var refreshToken = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken);
+        RefreshToken? refreshToken = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken);
 
         if (refreshToken is null)
         {
@@ -51,7 +51,7 @@ public class DefaultLoginManager : ILoginManager
             return BaseResult.FailureResult(["Invalid refresh token"]);
         }
 
-        var user = await _userManager.FindByIdAsync(refreshToken.UserId);
+        ApplicationUser? user = await _userManager.FindByIdAsync(refreshToken.UserId);
 
         if (user is null)
         {

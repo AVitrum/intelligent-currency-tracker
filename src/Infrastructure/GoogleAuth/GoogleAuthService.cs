@@ -26,14 +26,14 @@ public class GoogleAuthService : IGoogleAuthService
 
     public async Task<BaseResult> HandleGoogleResponse(AuthenticateResult authResult)
     {
-        var email = authResult.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+        string? email = authResult.Principal?.FindFirst(ClaimTypes.Email)?.Value;
 
         if (email is null)
         {
             return GoogleAuthResult.FailureResult(["Email claim not found"]);
         }
 
-        var newUser = await _userManager.FindByEmailAsync(email);
+        ApplicationUser? newUser = await _userManager.FindByEmailAsync(email);
 
         if (newUser is not null)
         {
@@ -50,14 +50,14 @@ public class GoogleAuthService : IGoogleAuthService
             CreationMethod = UserCreationMethod.GOOGLE
         };
 
-        var result = await _userManager.CreateAsync(newUser);
+        IdentityResult result = await _userManager.CreateAsync(newUser);
 
         if (!result.Succeeded)
         {
             return BaseResult.FailureResult(result.Errors.Select(error => error.Description).ToList());
         }
 
-        var addToRoleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
+        IdentityResult addToRoleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
 
         if (!addToRoleResult.Succeeded)
         {
@@ -76,8 +76,8 @@ public class GoogleAuthService : IGoogleAuthService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
 
-        var token = _jwtService.GenerateToken(claims);
-        var refreshToken = await _jwtService.GenerateRefreshToken(user.Id);
+        JwtSecurityToken token = _jwtService.GenerateToken(claims);
+        RefreshToken refreshToken = await _jwtService.GenerateRefreshToken(user.Id);
 
         return GoogleAuthResult.SuccessResult(new JwtSecurityTokenHandler().WriteToken(token), refreshToken.Token);
     }

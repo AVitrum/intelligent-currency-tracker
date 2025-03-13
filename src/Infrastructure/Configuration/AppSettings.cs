@@ -66,7 +66,7 @@ public class AppSettings : IAppSettings
 
     private string GetConfigurationValue(string key)
     {
-        var value = _configuration[key];
+        string? value = _configuration[key];
         if (string.IsNullOrEmpty(value))
         {
             throw new Exception($"{key} cannot be null or empty");

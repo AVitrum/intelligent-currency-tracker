@@ -39,7 +39,7 @@ public class UserHelper : IUserHelper
 
     public async Task CheckIfUserIsAdmin(ApplicationUser user)
     {
-        var roles = await GetRolesAsync(user);
+        IEnumerable<string> roles = await GetRolesAsync(user);
 
         if (!roles.Contains("ADMIN"))
         {
@@ -49,16 +49,16 @@ public class UserHelper : IUserHelper
 
     public async Task<UserServiceResult> GenerateTokenResultAsync(ApplicationUser user)
     {
-        var roles = await GetRolesAsync(user);
-        var claims = new List<Claim>
-        {
+        IEnumerable<string> roles = await GetRolesAsync(user);
+        List<Claim> claims =
+        [
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+        ];
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-        var token = _jwtService.GenerateToken(claims);
-        var refreshToken = await _jwtService.GenerateRefreshToken(user.Id);
+        JwtSecurityToken token = _jwtService.GenerateToken(claims);
+        RefreshToken refreshToken = await _jwtService.GenerateRefreshToken(user.Id);
 
         return UserServiceResult.ReturnTokenResult(new JwtSecurityTokenHandler().WriteToken(token), refreshToken.Token);
     }

@@ -33,12 +33,19 @@ public class RateHelper : IRateHelper
         IEnumerable<Rate> rates;
         if (request.Currency is null)
         {
-            rates = await _rateRepository.GetAsync(request.Start);
+            if (request.Start.Date == request.End.Date)
+            {
+                rates = await _rateRepository.GetAsync(request.Start);
+            }
+            else
+            {
+                rates = await _rateRepository.GetAsync(request.Start, request.End);
+            }
         }
         else
         {
-            var currency = await _currencyRepository.GetByCodeAsync(request.Currency)
-                           ?? throw new EntityNotFoundException<Currency>();
+            Currency currency = await _currencyRepository.GetByCodeAsync(request.Currency)
+                                ?? throw new EntityNotFoundException<Currency>();
 
             rates = await _rateRepository.GetAsync(request.Start, request.End, currency, request.Page,
                 request.PageSize);

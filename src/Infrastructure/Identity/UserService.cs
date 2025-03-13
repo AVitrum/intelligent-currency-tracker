@@ -23,7 +23,7 @@ public class UserService : IUserService
 
     public async Task<BaseResult> CreateAsync(CreateUserDto dto)
     {
-        var newUser = new ApplicationUser
+        ApplicationUser newUser = new()
         {
             UserName = dto.UserName,
             Email = dto.Email,
@@ -31,21 +31,21 @@ public class UserService : IUserService
             CreationMethod = UserCreationMethod.EMAIL
         };
 
-        var creationResult = await _userManager.CreateAsync(newUser);
+        IdentityResult creationResult = await _userManager.CreateAsync(newUser);
 
         if (!creationResult.Succeeded)
         {
             return BaseResult.FailureResult(creationResult.Errors.Select(e => e.Description).ToList());
         }
 
-        var passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
+        IdentityResult passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
 
         if (!passwordResult.Succeeded)
         {
             return BaseResult.FailureResult(passwordResult.Errors.Select(e => e.Description).ToList());
         }
 
-        var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
+        IdentityResult roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.USER.ToString());
         return roleResult.Succeeded
             ? BaseResult.SuccessResult()
             : BaseResult.FailureResult(roleResult.Errors.Select(e => e.Description).ToList());
@@ -53,13 +53,13 @@ public class UserService : IUserService
 
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        var manager = _loginManagerFactory.Create(request.LoginProvider);
+        ILoginManager manager = _loginManagerFactory.Create(request.LoginProvider);
         return await manager.LoginAsync(request);
     }
 
     public async Task<BaseResult> LoginWithRefreshTokenAsync(RefreshTokenRequest request)
     {
-        var manager = _loginManagerFactory.Create(request.LoginProvider);
+        ILoginManager manager = _loginManagerFactory.Create(request.LoginProvider);
         return await manager.LoginWithRefreshTokenAsync(request);
     }
 }

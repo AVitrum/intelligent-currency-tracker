@@ -17,9 +17,9 @@ public class EmailSender : IEmailSender
 
     public Task SendEmailAsync(string email, string subject, string message)
     {
-        var client = GetSmtpClient();
+        SmtpClient client = GetSmtpClient();
 
-        var msg = new MailMessage
+        MailMessage msg = new()
         {
             From = new MailAddress(_email),
             Subject = subject,

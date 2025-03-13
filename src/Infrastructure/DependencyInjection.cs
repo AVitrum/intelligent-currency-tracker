@@ -22,7 +22,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<IAppSettings, AppSettings>();
 
-        var appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
+        IAppSettings appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(appSettings.DbConnectionString));
@@ -70,13 +70,13 @@ public static class DependencyInjection
     //TODO: Fix this method and move it to a separate class file.
     private static void EnsureDatabaseCreated(IServiceCollection services)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        using var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        ServiceProvider serviceProvider = services.BuildServiceProvider();
+        using IServiceScope scope = serviceProvider.CreateScope();
+        ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         if (context.Database.CanConnect())
         {
-            var pendingMigrations = context.Database.GetPendingMigrations();
+            IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
 
             if (pendingMigrations.Any())
             {
@@ -86,7 +86,7 @@ public static class DependencyInjection
         else
         {
             context.Database.EnsureCreated();
-            var pendingMigrations = context.Database.GetPendingMigrations();
+            IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
 
             if (pendingMigrations.Any())
             {

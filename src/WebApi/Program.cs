@@ -1,12 +1,11 @@
 using Application;
 using Infrastructure;
-using Infrastructure.Utils;
 using Microsoft.AspNetCore.Diagnostics;
 using WebApi.Configurations;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-var defaultDirectory = EnvironmentSetup.ConfigureEnvironment(builder);
+string defaultDirectory = EnvironmentSetup.ConfigureEnvironment(builder);
 LoggingConfiguration.ConfigureLogging(builder, defaultDirectory);
 
 // Add services to the container.
@@ -26,12 +25,13 @@ builder.Services
     .AddApplication();
 
 builder.Services.AddSingleton<IExceptionHandler, CustomExceptionHandler>();
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (args.Length == 1 && args[0].Equals("seeddata", StringComparison.CurrentCultureIgnoreCase))
 {
-    await UserSeeder.SeedRolesAsync(app);
+    // await UserSeeder.SeedRolesAsync(app);
     // await CurrencySeeder.SeedCurrenciesAsync(app);
+    // await RateSeeder.SeedRatesAsync(app);
 }
 
 app.UseCustomMiddlewares();

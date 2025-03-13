@@ -7,8 +7,8 @@ public static class CurrencySeeder
 {
     public static async Task SeedCurrenciesAsync(IApplicationBuilder applicationBuilder)
     {
-        using var serviceScope = applicationBuilder.ApplicationServices.CreateScope();
-        var dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope serviceScope = applicationBuilder.ApplicationServices.CreateScope();
+        ApplicationDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         ICollection<Currency> currencies =
         [
@@ -92,9 +92,9 @@ public static class CurrencySeeder
             new() { R030 = 952, Name = "West African CFA Franc", Code = "XOF" }
         ];
 
-        foreach (var currency in currencies)
+        foreach (Currency currency in currencies)
         {
-            var existingCurrency =
+            Currency? existingCurrency =
                 await dbContext.Set<Currency>().FirstOrDefaultAsync(c => c.R030 == currency.R030);
             if (existingCurrency == null)
             {

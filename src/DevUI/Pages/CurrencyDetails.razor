@@ -44,6 +44,9 @@
                 <th @onclick="@(() => SortBy(nameof(RateDto.Value)))" style="cursor: pointer;">
                     Value @DisplaySortIcon(nameof(RateDto.Value))
                 </th>
+                <th @onclick="@(() => SortBy(nameof(RateDto.ValueCompareToPrevious)))" style="cursor: pointer;">
+                    Changed @DisplaySortIcon(nameof(RateDto.ValueCompareToPrevious))
+                </th>
                 <th @onclick='() => SortBy("Code")' style="cursor: pointer;">
                     Code @DisplaySortIcon("Code")
                 </th>
@@ -55,11 +58,12 @@
             <tbody>
             @if (SortedRates.Any())
             {
-                foreach (var rate in SortedRates)
+                foreach (RateDto? rate in SortedRates)
                 {
                     <tr>
                         <td>@rate.Date</td>
                         <td>@rate.Value</td>
+                        <td>@rate.ValueCompareToPrevious</td>
                         <td>@rate.Currency.Code</td>
                         <td>@rate.Currency.Name</td>
                     </tr>
@@ -105,13 +109,13 @@
     {
         _isLoading = true;
 
-        var url = $"{DevUISettings.ApiUrl}/Rate/get-range?StartDateString={_searchModel.StartDateString}&EndDateString={_searchModel.EndDateString}&Currency={_searchModel.Currency}&page={_searchModel.Page}&pageSize={_searchModel.PageSize}";
-        var response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+        string url = $"{DevUISettings.ApiUrl}/Rate/get-range?StartDateString={_searchModel.StartDateString}&EndDateString={_searchModel.EndDateString}&Currency={_searchModel.Currency}&page={_searchModel.Page}&pageSize={_searchModel.PageSize}";
+        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
 
         if (response.IsSuccessStatusCode)
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var data = await response.Content.ReadFromJsonAsync<IEnumerable<RateDto>>(options);
+            JsonSerializerOptions options = new() { PropertyNameCaseInsensitive = true };
+            IEnumerable<RateDto>? data = await response.Content.ReadFromJsonAsync<IEnumerable<RateDto>>(options);
             if (data is null)
             {
                 ToastService.ShowError("No data found");
@@ -155,6 +159,9 @@
             nameof(RateDto.Value) => _currentSortAscending
                 ? rates.OrderBy(r => r.Value)
                 : rates.OrderByDescending(r => r.Value),
+            nameof(RateDto.ValueCompareToPrevious) => _currentSortAscending
+                ? rates.OrderBy(r => r.ValueCompareToPrevious)
+                : rates.OrderByDescending(r => r.ValueCompareToPrevious),
             "Code" => _currentSortAscending
                 ? rates.OrderBy(r => r.Currency.Code)
                 : rates.OrderByDescending(r => r.Currency.Code),
@@ -183,7 +190,7 @@
         if (_currentSortColumn != column)
             return new MarkupString(string.Empty);
 
-        var icon = _currentSortAscending ? "▲" : "▼";
+        string icon = _currentSortAscending ? "▲" : "▼";
         return new MarkupString(icon);
     }
 
@@ -200,5 +207,4 @@
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 25;
     }
-
 }

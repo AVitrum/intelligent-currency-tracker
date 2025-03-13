@@ -24,7 +24,7 @@ public class AdminService : IAdminService
 
     public async Task<BaseResult> CreateAsync(CreateUserDto dto)
     {
-        var newUser = new ApplicationUser
+        ApplicationUser newUser = new()
         {
             UserName = dto.UserName,
             Email = dto.Email,
@@ -34,14 +34,14 @@ public class AdminService : IAdminService
 
         await _userManager.CreateAsync(newUser);
 
-        var passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
+        IdentityResult passwordResult = await _userManager.AddPasswordAsync(newUser, dto.Password);
 
         if (!passwordResult.Succeeded)
         {
             return BaseResult.FailureResult(passwordResult.Errors.Select(error => error.Description).ToList());
         }
 
-        var roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.ADMIN.ToString());
+        IdentityResult roleResult = await _userManager.AddToRoleAsync(newUser, UserRole.ADMIN.ToString());
 
         return roleResult.Succeeded
             ? BaseResult.SuccessResult()
@@ -50,15 +50,16 @@ public class AdminService : IAdminService
 
     public async Task<BaseResult> ChangeRoleAsync(ChangeRoleRequest request)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email)
-                   ?? throw new UserNotFoundException("User not found");
+        ApplicationUser user = await _userManager.FindByEmailAsync(request.Email)
+                               ?? throw new UserNotFoundException("User not found");
 
         if (_httpContextAccessor.HttpContext == null)
         {
             return BaseResult.FailureResult(["Can't get user from context"]);
         }
 
-        var currentUser = await _userManager.FindByIdAsync(_httpContextAccessor.HttpContext.User.GetUserId()!);
+        ApplicationUser? currentUser =
+            await _userManager.FindByIdAsync(_httpContextAccessor.HttpContext.User.GetUserId()!);
 
         if (currentUser == user)
         {
@@ -75,7 +76,8 @@ public class AdminService : IAdminService
 
     public async Task<BaseResult> GetAllAsync(int page, int pageSize)
     {
-        var users = await _userManager.Users.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        List<ApplicationUser> users =
+            await _userManager.Users.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
         if (users.Count == 0)
         {
@@ -95,7 +97,7 @@ public class AdminService : IAdminService
 
     public async Task<BaseResult> SearchEmailsAsync(string query)
     {
-        var emails = await _userManager.Users
+        List<string> emails = await _userManager.Users
             .Where(user => user.Email != null && user.Email.Contains(query))
             .Select(user => user.Email!)
             .ToListAsync();
@@ -107,7 +109,7 @@ public class AdminService : IAdminService
 
     public async Task<BaseResult> GetByIdAsync(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        ApplicationUser? user = await _userManager.FindByIdAsync(id);
 
         if (user == null)
         {
@@ -127,12 +129,12 @@ public class AdminService : IAdminService
 
     private async Task<BaseResult> AddUserToRoleAsync(ApplicationUser user, UserRole role)
     {
-        var errors = new List<string>();
-        var currentRoles = await _userManager.GetRolesAsync(user);
+        List<string> errors = [];
+        IList<string> currentRoles = await _userManager.GetRolesAsync(user);
 
-        foreach (var userRole in currentRoles)
+        foreach (string userRole in currentRoles)
         {
-            var removeResult = await _userManager.RemoveFromRoleAsync(user, userRole);
+            IdentityResult removeResult = await _userManager.RemoveFromRoleAsync(user, userRole);
 
             if (!removeResult.Succeeded)
             {
@@ -141,7 +143,7 @@ public class AdminService : IAdminService
             }
         }
 
-        var addRoleResult = await _userManager.AddToRoleAsync(user, role.ToString());
+        IdentityResult addRoleResult = await _userManager.AddToRoleAsync(user, role.ToString());
 
         if (!addRoleResult.Succeeded)
         {

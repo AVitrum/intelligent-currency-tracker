@@ -25,6 +25,18 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
             .AsNoTracking()
             .Include(x => x.Currency)
             .Where(x => x.Date.Date == date.Date)
+            .OrderBy(x => x.Date)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Rate>> GetAsync(DateTime start, DateTime end)
+    {
+        return await _context.Rates
+            .AsNoTracking()
+            .Include(x => x.Currency)
+            .Where(x => x.Date.Date >= start.Date && x.Date.Date <= end.Date)
+            .OrderBy(x => x.Date)
             .AsSplitQuery()
             .ToListAsync();
     }
@@ -36,10 +48,11 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         int page,
         int pageSize)
     {
-        var rates = await _context.Rates
+        List<Rate> rates = await _context.Rates
             .AsNoTracking()
             .Include(x => x.Currency)
             .Where(x => x.Date.Date >= start.Date && x.Date.Date <= end.Date && x.CurrencyId == currency.Id)
+            .OrderBy(x => x.Date)
             .AsSplitQuery()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

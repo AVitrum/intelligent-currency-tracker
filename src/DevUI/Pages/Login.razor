@@ -56,10 +56,10 @@
             _request.Email = string.Empty;
         }
 
-        var response = await Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/login", _request);
+        HttpResponseMessage response = await Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/login", _request);
         if (response.IsSuccessStatusCode)
         {
-            var responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            LoginResponse? responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
             if (responseContent?.Token is not null)
             {
                 await JwtTokenHelper.SetJwtTokensInCookiesAsync(responseContent.Token, responseContent.RefreshToken, Js);
@@ -69,8 +69,8 @@
         }
         else
         {
-            var errorResponse = await response.Content.ReadAsStringAsync();
-            var errorMessage = !string.IsNullOrEmpty(errorResponse)
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            string errorMessage = !string.IsNullOrEmpty(errorResponse)
                 ? errorResponse
                 : "Login failed. Please try again.";
 

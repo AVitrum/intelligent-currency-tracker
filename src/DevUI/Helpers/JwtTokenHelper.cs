@@ -57,7 +57,7 @@ public static class JwtTokenHelper
     public static async Task SetJwtTokenInHeaderAsync(HttpClient http, IJSRuntime js, NavigationManager navigation)
     {
         await EnsureJsFunctionsExistAsync(js);
-        var jwtToken = await js.InvokeAsync<string?>("getCookie", "jwtToken");
+        string? jwtToken = await js.InvokeAsync<string?>("getCookie", "jwtToken");
         if (string.IsNullOrEmpty(jwtToken))
         {
             navigation.NavigateTo("/", true);
@@ -70,14 +70,14 @@ public static class JwtTokenHelper
     public static async Task<string?> GetJwtTokenFromCookies(IJSRuntime js, NavigationManager navigation)
     {
         await EnsureJsFunctionsExistAsync(js);
-        var token = await js.InvokeAsync<string?>("getCookie", "jwtToken");
+        string? token = await js.InvokeAsync<string?>("getCookie", "jwtToken");
         return token;
     }
 
     public static async Task<string> GetRefreshTokenFromCookies(IJSRuntime js, NavigationManager navigation)
     {
         await EnsureJsFunctionsExistAsync(js);
-        var token = await js.InvokeAsync<string?>("getCookie", "refreshToken");
+        string? token = await js.InvokeAsync<string?>("getCookie", "refreshToken");
 
         if (string.IsNullOrEmpty(token))
         {

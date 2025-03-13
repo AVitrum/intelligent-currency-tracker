@@ -53,7 +53,7 @@
     {
         _isLoading = true;
 
-        var response = await HttpClientService.SendRequestAsync(() =>
+        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() =>
             Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-user-by-id?id={UserId}"));
 
         if (response.IsSuccessStatusCode)

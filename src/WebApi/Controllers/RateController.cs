@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services;
 using Application.ExchangeRates.Results;
 using Application.Rates.Results;
+using Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Payload.Requests;
 
@@ -19,13 +20,13 @@ public class RateController : ControllerBase
         _csvService = csvService;
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize]
     [HttpGet("get-range")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetRatesAsync([FromQuery] ExchangeRateRequest request)
     {
-        var result = await _rateService.GetRatesAsync(request);
+        BaseResult result = await _rateService.GetRatesAsync(request);
 
         if (result is not GetRatesResult getRatesResult)
         {
@@ -41,7 +42,7 @@ public class RateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ExportRatesToCsv([FromQuery] ExchangeRateRequest request)
     {
-        var result = await _csvService.ExportExchangeRatesToCsvAsync(request);
+        BaseResult result = await _csvService.ExportExchangeRatesToCsvAsync(request);
 
         if (result is not ExportExchangeRatesToCsvResult toCsvResult)
         {

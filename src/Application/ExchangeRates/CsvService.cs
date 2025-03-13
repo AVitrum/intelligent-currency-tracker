@@ -26,7 +26,7 @@ public class CsvService : ICsvService
 
     public async Task<BaseResult> ExportExchangeRatesToCsvAsync(ExchangeRateRequest request)
     {
-        var ratesDto = (ICollection<RateDto>)_rateHelper.ConvertRatesToDtoAsync(
+        ICollection<RateDto> ratesDto = (ICollection<RateDto>)_rateHelper.ConvertRatesToDtoAsync(
             await _rateHelper.GetRatesFromRequestAsync(request));
 
         if (ratesDto.Count == 0)
@@ -34,8 +34,8 @@ public class CsvService : ICsvService
             return BaseResult.FailureResult(["No rates found."]);
         }
 
-        var fileName = $"ExchangeRates_{request.Currency}_{request.Start:yyyyMMdd}_{request.End:yyyyMMdd}.csv";
-        var fileContent = await CreateCsvFileAsync(ratesDto);
+        string fileName = $"ExchangeRates_{request.Currency}_{request.Start:yyyyMMdd}_{request.End:yyyyMMdd}.csv";
+        byte[] fileContent = await CreateCsvFileAsync(ratesDto);
 
         return ExportExchangeRatesToCsvResult.SuccessResult(fileContent, fileName);
     }
@@ -44,9 +44,9 @@ public class CsvService : ICsvService
     {
         try
         {
-            using var memoryStream = new MemoryStream();
-            await using var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
-            await using var csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture)
+            using MemoryStream memoryStream = new();
+            await using StreamWriter streamWriter = new(memoryStream, Encoding.UTF8);
+            await using CsvWriter csvWriter = new(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 Delimiter = ","
             });
@@ -59,8 +59,9 @@ public class CsvService : ICsvService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while exporting rates to CSV file");
-            throw new ExportCsvException("An error occurred while exporting rates to CSV file");
+            const string message = "An error occurred while exporting rates to CSV file";
+            _logger.LogError(ex, message);
+            throw new ExportCsvException(message);
         }
     }
 }

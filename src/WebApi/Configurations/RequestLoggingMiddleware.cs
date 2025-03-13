@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Utils;
+using Microsoft.Extensions.Primitives;
 
 namespace WebApi.Configurations;
 
@@ -15,9 +16,9 @@ public class RequestLoggingMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        var request = context.Request;
-        var userId = context.User.GetUserId();
-        var referer = request.Headers.Referer;
+        HttpRequest request = context.Request;
+        string? userId = context.User.GetUserId();
+        StringValues referer = request.Headers.Referer;
 
         request.EnableBuffering();
         string body;
@@ -28,12 +29,12 @@ public class RequestLoggingMiddleware
         }
         else
         {
-            using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
+            using StreamReader reader = new(request.Body, Encoding.UTF8, leaveOpen: true);
             body = await reader.ReadToEndAsync();
             request.Body.Position = 0;
         }
 
-        var logEntry = new ApiRequestLog
+        ApiRequestLog logEntry = new()
         {
             UserId = userId,
             Method = request.Method,
@@ -44,8 +45,8 @@ public class RequestLoggingMiddleware
             TimeStamp = DateTime.UtcNow
         };
 
-        using var scope = context.RequestServices.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = context.RequestServices.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.ApiRequestLogs.Add(logEntry);
         await dbContext.SaveChangesAsync();
 

@@ -6,7 +6,7 @@ public static class EnvironmentSetup
 {
     public static string ConfigureEnvironment(WebApplicationBuilder builder)
     {
-        var defaultDirectory = "/app";
+        string defaultDirectory = "/app";
 
         if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
         {

@@ -25,7 +25,7 @@ public class DateRangeAttribute : ValidationAttribute
                 DateConstants.DateFormat,
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                out var start))
+                out DateTime start))
         {
             return new ValidationResult("Invalid start date format.", [nameof(dto.StartDateString)]);
         }
@@ -40,7 +40,7 @@ public class DateRangeAttribute : ValidationAttribute
                 DateConstants.DateFormat,
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                out var end))
+                out DateTime end))
         {
             return new ValidationResult("Invalid end date format.", [nameof(dto.EndDateString)]);
         }

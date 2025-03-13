@@ -27,11 +27,11 @@ public class HttpClientService : IHttpClientService
     public async Task<HttpResponseMessage> SendRequestAsync(Func<Task<HttpResponseMessage>> requestFunc)
     {
         await JwtTokenHelper.SetJwtTokenInHeaderAsync(_http, _js, _navigation);
-        var response = await requestFunc();
+        HttpResponseMessage response = await requestFunc();
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var refreshed = await RefreshTokenAsync();
+            bool refreshed = await RefreshTokenAsync();
 
             if (refreshed)
             {
@@ -44,22 +44,23 @@ public class HttpClientService : IHttpClientService
 
     private async Task<bool> RefreshTokenAsync()
     {
-        var refreshToken = await JwtTokenHelper.GetRefreshTokenFromCookies(_js, _navigation);
+        string refreshToken = await JwtTokenHelper.GetRefreshTokenFromCookies(_js, _navigation);
 
         if (string.IsNullOrEmpty(refreshToken))
         {
             return false;
         }
 
-        var refreshRequest = new RefreshTokenRequest { RefreshToken = refreshToken, Provider = "DevUI" };
-        var response = await _http.PostAsJsonAsync($"{_settings.ApiUrl}/Identity/refresh-token", refreshRequest);
+        RefreshTokenRequest refreshRequest = new() { RefreshToken = refreshToken, Provider = "DevUI" };
+        HttpResponseMessage response =
+            await _http.PostAsJsonAsync($"{_settings.ApiUrl}/Identity/refresh-token", refreshRequest);
 
         if (!response.IsSuccessStatusCode)
         {
             return false;
         }
 
-        var responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        LoginResponse? responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
         if (responseContent?.Token is null)
         {

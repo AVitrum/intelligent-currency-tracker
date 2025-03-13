@@ -57,7 +57,7 @@
     {
         _request.Provider = UserServiceProvider.ADMIN.ToString();
 
-        var response = await HttpClientService.SendRequestAsync(() =>
+        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() =>
             Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/register", _request));
 
         if (response.IsSuccessStatusCode)
@@ -67,8 +67,8 @@
         }
         else
         {
-            var errorResponse = await response.Content.ReadAsStringAsync();
-            var errorMessage = !string.IsNullOrEmpty(errorResponse)
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            string errorMessage = !string.IsNullOrEmpty(errorResponse)
                 ? errorResponse
                 : "Registration failed. Please try again.";
 

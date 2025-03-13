@@ -10,10 +10,11 @@ public static class UserSeeder
 {
     public static async Task SeedUsersAsync(IApplicationBuilder applicationBuilder)
     {
-        using var serviceScope = applicationBuilder.ApplicationServices.CreateScope();
-        var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        using IServiceScope serviceScope = applicationBuilder.ApplicationServices.CreateScope();
+        UserManager<ApplicationUser> userManager =
+            serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        var adminUser = new ApplicationUser
+        ApplicationUser adminUser = new()
         {
             UserName = "admin",
             Email = "admin@gmail.com",
@@ -22,13 +23,13 @@ public static class UserSeeder
             CreationMethod = UserCreationMethod.EMAIL
         };
 
-        var creationResult = await userManager.CreateAsync(adminUser);
+        IdentityResult creationResult = await userManager.CreateAsync(adminUser);
         if (!creationResult.Succeeded)
         {
             throw new Exception("Failed to create admin user");
         }
 
-        var roleResult = await userManager.AddToRoleAsync(adminUser, UserRole.USER.ToString());
+        IdentityResult roleResult = await userManager.AddToRoleAsync(adminUser, UserRole.USER.ToString());
         if (!roleResult.Succeeded)
         {
             throw new Exception("Failed to add user to role");
@@ -41,13 +42,13 @@ public static class UserSeeder
         }
 
         //TODO: Remove this line in production
-        var passwordResult = await userManager.AddPasswordAsync(adminUser, "Admin123!");
+        IdentityResult passwordResult = await userManager.AddPasswordAsync(adminUser, "Admin123!");
         if (!passwordResult.Succeeded)
         {
             throw new Exception("Failed to set password for admin user");
         }
 
-        var user = new ApplicationUser
+        ApplicationUser user = new()
         {
             UserName = "user",
             Email = "user@gmail.com",
@@ -77,15 +78,15 @@ public static class UserSeeder
 
     public static async Task SeedRolesAsync(IApplicationBuilder applicationBuilder)
     {
-        using var serviceScope = applicationBuilder.ApplicationServices.CreateScope();
-        var roleManager =
+        using IServiceScope serviceScope = applicationBuilder.ApplicationServices.CreateScope();
+        RoleManager<IdentityRole> roleManager =
             serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
         string[] roleNames = ["ADMIN", "USER"];
 
-        foreach (var roleName in roleNames)
+        foreach (string? roleName in roleNames)
         {
-            var roleExist = await roleManager.RoleExistsAsync(roleName);
+            bool roleExist = await roleManager.RoleExistsAsync(roleName);
             if (!roleExist)
             {
                 await roleManager.CreateAsync(new IdentityRole(roleName));

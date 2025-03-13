@@ -27,7 +27,7 @@ public static class CustomMiddleware
 
         app.Map("/error", async (HttpContext context, IExceptionHandler exceptionHandler) =>
         {
-            var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+            IExceptionHandlerFeature? exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
 
             if (exceptionFeature?.Error != null)
             {

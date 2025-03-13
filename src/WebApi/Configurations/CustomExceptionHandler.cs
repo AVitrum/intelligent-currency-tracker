@@ -22,7 +22,7 @@ public class CustomExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+        string traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
 
         _logger.LogError(
             exception,
@@ -31,7 +31,7 @@ public class CustomExceptionHandler : IExceptionHandler
             traceId
         );
 
-        var (statusCode, title) = MapException(exception);
+        (int statusCode, string? title) = MapException(exception);
 
         await Results.Problem(
             title: title,

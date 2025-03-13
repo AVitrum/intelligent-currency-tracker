@@ -23,7 +23,7 @@
                 @if (_emailSuggestions.Any())
                 {
                     <ul class="suggestions-list">
-                        @foreach (var suggestion in _emailSuggestions)
+                        @foreach (string? suggestion in _emailSuggestions)
                         {
                             <li @onclick="() => SelectSuggestedEmail(suggestion)">@suggestion</li>
                         }
@@ -34,7 +34,7 @@
             <div class="form-group">
                 <label for="roleString" class="form-label">Role</label>
                 <InputSelect id="roleString" @bind-Value="_roleChangeRequest.RoleString" class="form-control">
-                    @foreach (var role in Enum.GetValues(typeof(UserRole)).Cast<UserRole>())
+                    @foreach (UserRole role in Enum.GetValues(typeof(UserRole)).Cast<UserRole>())
                     {
                         <option value="@role.ToString()">@role.ToString()</option>
                     }
@@ -53,7 +53,7 @@
 
     private async Task HandleRoleChange()
     {
-        var response = await HttpClientService.SendRequestAsync(() =>
+        HttpResponseMessage? response = await HttpClientService.SendRequestAsync(() =>
             Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/change-role", _roleChangeRequest)
         );
 
@@ -64,10 +64,10 @@
         }
         else
         {
-            var errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
-            await foreach (var error in errorResponse)
+            IAsyncEnumerable<string> errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
+            await foreach (string? error in errorResponse)
             {
-                var errorMessage = !string.IsNullOrEmpty(error) ? error : "Request failed. Please try again later!";
+                string errorMessage = !string.IsNullOrEmpty(error) ? error : "Request failed. Please try again later!";
                 ToastService.ShowError(errorMessage);
             }
 
@@ -78,14 +78,14 @@
 
     private async Task SearchEmailSuggestions(ChangeEventArgs e)
     {
-        var searchTerm = e.Value?.ToString();
+        string? searchTerm = e.Value?.ToString();
         if (string.IsNullOrEmpty(searchTerm))
         {
             _emailSuggestions.Clear();
             return;
         }
 
-        var response = await HttpClientService.SendRequestAsync(() =>
+        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() =>
             Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/search-emails?query={searchTerm}"));
 
         if (response.IsSuccessStatusCode)

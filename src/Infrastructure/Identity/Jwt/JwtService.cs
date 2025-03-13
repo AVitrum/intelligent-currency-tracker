@@ -26,10 +26,10 @@ public class JwtService : IJwtService
 
     public JwtSecurityToken GenerateToken(ICollection<Claim> claims)
     {
-        var generatedKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
-        var credentials = new SigningCredentials(generatedKey, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey generatedKey = new(Encoding.UTF8.GetBytes(_key));
+        SigningCredentials credentials = new(generatedKey, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             _issuer,
             _audience,
             claims,
@@ -41,14 +41,14 @@ public class JwtService : IJwtService
 
     public async Task<RefreshToken> GenerateRefreshToken(string userId)
     {
-        var lastToken = await _refreshTokenRepository.GetByUserIdAsync(userId);
+        RefreshToken? lastToken = await _refreshTokenRepository.GetByUserIdAsync(userId);
 
         if (lastToken is not null)
         {
             await _refreshTokenRepository.DeleteAsync(lastToken);
         }
 
-        var refreshToken = new RefreshToken
+        RefreshToken refreshToken = new()
         {
             UserId = userId,
             Token = GenerateRefreshToken(),

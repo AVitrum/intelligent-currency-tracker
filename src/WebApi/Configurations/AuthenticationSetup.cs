@@ -7,7 +7,7 @@ public static class AuthenticationSetup
 {
     public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)
     {
-        var appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
+        IAppSettings appSettings = services.BuildServiceProvider().GetRequiredService<IAppSettings>();
 
         services.AddAuthentication(options =>
             {

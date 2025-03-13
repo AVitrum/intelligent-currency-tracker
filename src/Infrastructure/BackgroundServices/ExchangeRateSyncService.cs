@@ -26,7 +26,7 @@ public class ExchangeRateSyncService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var timer = new PeriodicTimer(TimeSpan.FromDays(1));
+        PeriodicTimer timer = new(TimeSpan.FromDays(1));
 
         do
         {
@@ -38,14 +38,14 @@ public class ExchangeRateSyncService : BackgroundService
     {
         try
         {
-            using var scope = _scopeFactory.CreateScope();
-            var appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
-            var rateRepository = scope.ServiceProvider.GetRequiredService<IRateRepository>();
-            var currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            IAppSettings appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
+            IRateRepository rateRepository = scope.ServiceProvider.GetRequiredService<IRateRepository>();
+            ICurrencyRepository currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
 
-            var lastProcessedDate = await rateRepository.GetLastDateAsync();
-            var startDate = lastProcessedDate.AddDays(1);
-            var currentDate = DateTime.UtcNow.Date;
+            DateTime lastProcessedDate = await rateRepository.GetLastDateAsync();
+            DateTime startDate = lastProcessedDate.AddDays(1);
+            DateTime currentDate = DateTime.UtcNow.Date;
 
             if (startDate > currentDate)
             {
@@ -53,11 +53,11 @@ public class ExchangeRateSyncService : BackgroundService
                 return;
             }
 
-            var client = _httpClientFactory.CreateClient();
+            HttpClient client = _httpClientFactory.CreateClient();
 
-            for (var date = startDate; date <= currentDate; date = date.AddDays(1))
+            for (DateTime date = startDate; date <= currentDate; date = date.AddDays(1))
             {
-                var url = BuildNbuApiUrl(appSettings.NbuUrl, date);
+                string url = BuildNbuApiUrl(appSettings.NbuUrl, date);
                 await HandleApiResponseAsync(client, url, date, rateRepository, currencyRepository, stoppingToken);
             }
         }
@@ -69,7 +69,7 @@ public class ExchangeRateSyncService : BackgroundService
 
     private static string BuildNbuApiUrl(string baseUrl, DateTime date)
     {
-        var formattedDate = date.ToString("yyyyMMdd");
+        string formattedDate = date.ToString("yyyyMMdd");
         return $"{baseUrl}/NBUStatService/v1/statdirectory/exchange?date={formattedDate}&json";
     }
 
@@ -83,7 +83,7 @@ public class ExchangeRateSyncService : BackgroundService
     {
         try
         {
-            var response = await client.GetAsync(url, stoppingToken);
+            HttpResponseMessage response = await client.GetAsync(url, stoppingToken);
 
             if (response.StatusCode == HttpStatusCode.GatewayTimeout)
             {
@@ -94,10 +94,10 @@ public class ExchangeRateSyncService : BackgroundService
 
             response.EnsureSuccessStatusCode();
 
-            var responseBody = await response.Content.ReadAsStringAsync(stoppingToken);
-            var ratesData = JArray.Parse(responseBody);
+            string responseBody = await response.Content.ReadAsStringAsync(stoppingToken);
+            JArray ratesData = JArray.Parse(responseBody);
 
-            var rates = await ParseExchangeRatesAsync(ratesData, date, currencyRepository);
+            ICollection<Rate> rates = await ParseExchangeRatesAsync(ratesData, date, currencyRepository);
             await rateRepository.AddRangeAsync(rates);
 
             _logger.LogInformation("Exchange rates for {Date} were successfully stored.", date);
@@ -113,11 +113,11 @@ public class ExchangeRateSyncService : BackgroundService
         DateTime date,
         ICurrencyRepository currencyRepository)
     {
-        var rates = new List<Rate>();
+        List<Rate> rates = [];
 
-        foreach (var rateToken in ratesData)
+        foreach (JToken rateToken in ratesData)
         {
-            var currencyCode = rateToken["cc"]?.Value<string>();
+            string? currencyCode = rateToken["cc"]?.Value<string>();
 
             if (string.IsNullOrEmpty(currencyCode))
             {
@@ -125,14 +125,14 @@ public class ExchangeRateSyncService : BackgroundService
                 continue;
             }
 
-            var currency = await EnsureCurrencyExistsAsync(currencyCode, rateToken, currencyRepository);
+            Currency currency = await EnsureCurrencyExistsAsync(currencyCode, rateToken, currencyRepository);
 
-            var rateValue = rateToken["rate"]?.Value<decimal>() ?? 0;
+            decimal rateValue = rateToken["rate"]?.Value<decimal>() ?? 0;
             rates.Add(new Rate
             {
                 CurrencyId = currency.Id,
                 Value = rateValue,
-                Date = date
+                Date = date,
             });
         }
 
@@ -144,14 +144,14 @@ public class ExchangeRateSyncService : BackgroundService
         JToken rateToken,
         ICurrencyRepository currencyRepository)
     {
-        var currency = await currencyRepository.GetByCodeAsync(currencyCode);
+        Currency? currency = await currencyRepository.GetByCodeAsync(currencyCode);
         if (currency is not null)
         {
             return currency;
         }
 
-        var currencyName = rateToken["txt"]?.Value<string>() ?? "Unknown";
-        var r030 = rateToken["r030"]?.Value<int>() ?? 0;
+        string currencyName = rateToken["txt"]?.Value<string>() ?? "Unknown";
+        int r030 = rateToken["r030"]?.Value<int>() ?? 0;
 
         currency = new Currency
         {

@@ -9,7 +9,7 @@ public class KafkaProducer : IKafkaProducer
 
     public KafkaProducer(IAppSettings appSettings)
     {
-        var config = new ConsumerConfig
+        ConsumerConfig config = new()
         {
             GroupId = "test-consumer-group",
             BootstrapServers = appSettings.KafkaHost,

@@ -32,7 +32,7 @@ public class MinioService : IMinioService
 
         ConvertTypeIntoTags(key, ref tags);
 
-        var putRequest = new PutObjectRequest
+        PutObjectRequest putRequest = new()
         {
             BucketName = _bucketName,
             Key = key,
@@ -43,8 +43,8 @@ public class MinioService : IMinioService
 
         if (tags is not null && tags.Count != 0)
         {
-            var tagSet = tags.Select(kvp => new Tag { Key = kvp.Key.ToString(), Value = kvp.Value }).ToList();
-            var tagRequest = new PutObjectTaggingRequest
+            List<Tag> tagSet = tags.Select(kvp => new Tag { Key = kvp.Key.ToString(), Value = kvp.Value }).ToList();
+            PutObjectTaggingRequest tagRequest = new()
             {
                 BucketName = _bucketName,
                 Key = key,
@@ -59,14 +59,14 @@ public class MinioService : IMinioService
 
     public async Task<byte[]> DownloadFileAsync(string key)
     {
-        var request = new GetObjectRequest
+        GetObjectRequest request = new()
         {
             BucketName = _bucketName,
             Key = key
         };
 
-        using var response = await _s3Client.GetObjectAsync(request);
-        using var memoryStream = new MemoryStream();
+        using GetObjectResponse? response = await _s3Client.GetObjectAsync(request);
+        using MemoryStream memoryStream = new();
         await response.ResponseStream.CopyToAsync(memoryStream);
         return memoryStream.ToArray();
     }
@@ -75,7 +75,7 @@ public class MinioService : IMinioService
     {
         key = key.Replace(" ", "_");
 
-        var tagResponse = await _s3Client.GetObjectTaggingAsync(new GetObjectTaggingRequest
+        GetObjectTaggingResponse? tagResponse = await _s3Client.GetObjectTaggingAsync(new GetObjectTaggingRequest
         {
             BucketName = _bucketName,
             Key = key
@@ -91,9 +91,9 @@ public class MinioService : IMinioService
 
     private async Task<string> EnsureUniqueKeyAsync(string key)
     {
-        var counter = 1;
-        var extension = Path.GetExtension(key);
-        var baseName = Path.GetFileNameWithoutExtension(key);
+        int counter = 1;
+        string extension = Path.GetExtension(key);
+        string baseName = Path.GetFileNameWithoutExtension(key);
 
         while (await FileExistsAsync(key))
         {
@@ -108,7 +108,7 @@ public class MinioService : IMinioService
     {
         try
         {
-            var metadataRequest = new GetObjectMetadataRequest
+            GetObjectMetadataRequest metadataRequest = new()
             {
                 BucketName = _bucketName,
                 Key = key
@@ -127,7 +127,7 @@ public class MinioService : IMinioService
     {
         tags ??= new Dictionary<FileTag, string>();
 
-        var extension = Path.GetExtension(key);
+        string extension = Path.GetExtension(key);
 
         if (!string.IsNullOrEmpty(extension))
         {
@@ -137,7 +137,7 @@ public class MinioService : IMinioService
 
             if (!tags.ContainsKey(FileTag.FileType))
             {
-                if (FileConstants.ExtensionToType.TryGetValue(extension, out var value))
+                if (FileConstants.ExtensionToType.TryGetValue(extension, out string? value))
                 {
                     tags.Add(FileTag.FileType, value);
                 }
