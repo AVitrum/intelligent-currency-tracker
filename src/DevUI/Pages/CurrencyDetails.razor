@@ -84,7 +84,7 @@
 </div>
 
 @code {
-    private readonly SearchModel _searchModel = new();
+    private readonly SearchModel _searchModel = new SearchModel();
 
     private readonly List<RateDto> _rates = [];
     private IEnumerable<RateDto> SortedRates => ApplySorting(_rates);
@@ -114,7 +114,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            JsonSerializerOptions options = new() { PropertyNameCaseInsensitive = true };
+            JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             IEnumerable<RateDto>? data = await response.Content.ReadFromJsonAsync<IEnumerable<RateDto>>(options);
             if (data is null)
             {
@@ -207,4 +207,5 @@
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 25;
     }
+
 }

@@ -14,7 +14,7 @@ public static class UserSeeder
         UserManager<ApplicationUser> userManager =
             serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        ApplicationUser adminUser = new()
+        ApplicationUser adminUser = new ApplicationUser
         {
             UserName = "admin",
             Email = "admin@gmail.com",
@@ -48,7 +48,7 @@ public static class UserSeeder
             throw new Exception("Failed to set password for admin user");
         }
 
-        ApplicationUser user = new()
+        ApplicationUser user = new ApplicationUser
         {
             UserName = "user",
             Email = "user@gmail.com",

@@ -52,8 +52,8 @@ public class UserHelper : IUserHelper
         IEnumerable<string> roles = await GetRolesAsync(user);
         List<Claim> claims =
         [
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 

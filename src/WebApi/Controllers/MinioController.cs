@@ -23,7 +23,7 @@ public class MinioController : ControllerBase
         }
 
         string filePath = Path.GetTempFileName();
-        await using (FileStream stream = new(filePath, FileMode.Create))
+        await using (FileStream stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }

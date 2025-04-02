@@ -51,7 +51,8 @@ public class HttpClientService : IHttpClientService
             return false;
         }
 
-        RefreshTokenRequest refreshRequest = new() { RefreshToken = refreshToken, Provider = "DevUI" };
+        RefreshTokenRequest refreshRequest = new RefreshTokenRequest
+            { RefreshToken = refreshToken, Provider = "DevUI" };
         HttpResponseMessage response =
             await _http.PostAsJsonAsync($"{_settings.ApiUrl}/Identity/refresh-token", refreshRequest);
 

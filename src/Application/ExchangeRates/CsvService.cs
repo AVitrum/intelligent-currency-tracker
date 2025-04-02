@@ -44,12 +44,10 @@ public class CsvService : ICsvService
     {
         try
         {
-            using MemoryStream memoryStream = new();
-            await using StreamWriter streamWriter = new(memoryStream, Encoding.UTF8);
-            await using CsvWriter csvWriter = new(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                Delimiter = ","
-            });
+            using MemoryStream memoryStream = new MemoryStream();
+            await using StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
+            await using CsvWriter csvWriter = new CsvWriter(streamWriter,
+                new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," });
 
             await csvWriter.WriteRecordsAsync(content);
             await streamWriter.FlushAsync();

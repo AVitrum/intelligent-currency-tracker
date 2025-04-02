@@ -26,7 +26,7 @@ public class ExchangeRateSyncService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        PeriodicTimer timer = new(TimeSpan.FromDays(1));
+        PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromDays(1));
 
         do
         {
@@ -132,7 +132,7 @@ public class ExchangeRateSyncService : BackgroundService
             {
                 CurrencyId = currency.Id,
                 Value = rateValue,
-                Date = date,
+                Date = date
             });
         }
 

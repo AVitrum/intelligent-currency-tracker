@@ -19,7 +19,7 @@ public class EmailSender : IEmailSender
     {
         SmtpClient client = GetSmtpClient();
 
-        MailMessage msg = new()
+        MailMessage msg = new MailMessage
         {
             From = new MailAddress(_email),
             Subject = subject,

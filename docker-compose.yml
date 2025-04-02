@@ -89,6 +89,16 @@
     networks:
       - test-network
   
+  model:
+    image: model
+    build:
+      context: .
+      dockerfile: src/Model/Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - test-network
+  
   devui:
     image: devui
     build:

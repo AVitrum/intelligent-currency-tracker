@@ -1,3 +1,4 @@
+using Application.AiModel;
 using Application.Common.Helpers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
@@ -16,10 +17,10 @@ public static class DependencyInjection
         services.AddHttpClient();
         services.AddShared();
 
-        // services.AddScoped<IMlModelService, MlModelService>();
         services.AddScoped<ICsvService, CsvService>();
         services.AddScoped<IRateService, RateService>();
         services.AddScoped<IRateHelper, RateHelper>();
+        services.AddScoped<IAiModelService, AiModelService>();
 
         services.AddScoped<IKafkaProducer, KafkaProducer>();
     }

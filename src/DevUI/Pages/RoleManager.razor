@@ -48,7 +48,7 @@
 </div>
 
 @code {
-    private readonly ChangeRoleRequest _roleChangeRequest = new() { RoleString = UserRole.USER.ToString() };
+    private readonly ChangeRoleRequest _roleChangeRequest = new ChangeRoleRequest { RoleString = UserRole.USER.ToString() };
     private List<string> _emailSuggestions = [];
 
     private async Task HandleRoleChange()

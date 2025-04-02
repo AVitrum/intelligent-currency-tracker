@@ -29,12 +29,12 @@ public class RequestLoggingMiddleware
         }
         else
         {
-            using StreamReader reader = new(request.Body, Encoding.UTF8, leaveOpen: true);
+            using StreamReader reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
             body = await reader.ReadToEndAsync();
             request.Body.Position = 0;
         }
 
-        ApiRequestLog logEntry = new()
+        ApiRequestLog logEntry = new ApiRequestLog
         {
             UserId = userId,
             Method = request.Method,

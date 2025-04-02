@@ -71,9 +71,9 @@ public class GoogleAuthService : IGoogleAuthService
     {
         ICollection<Claim> claims =
         [
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Email, user.Email!),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
 
         JwtSecurityToken token = _jwtService.GenerateToken(claims);

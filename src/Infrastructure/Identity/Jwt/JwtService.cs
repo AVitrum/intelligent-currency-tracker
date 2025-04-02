@@ -26,8 +26,8 @@ public class JwtService : IJwtService
 
     public JwtSecurityToken GenerateToken(ICollection<Claim> claims)
     {
-        SymmetricSecurityKey generatedKey = new(Encoding.UTF8.GetBytes(_key));
-        SigningCredentials credentials = new(generatedKey, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey generatedKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
+        SigningCredentials credentials = new SigningCredentials(generatedKey, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken token = new JwtSecurityToken(
             _issuer,
@@ -48,7 +48,7 @@ public class JwtService : IJwtService
             await _refreshTokenRepository.DeleteAsync(lastToken);
         }
 
-        RefreshToken refreshToken = new()
+        RefreshToken refreshToken = new RefreshToken
         {
             UserId = userId,
             Token = GenerateRefreshToken(),

@@ -23,7 +23,7 @@ public class UserService : IUserService
 
     public async Task<BaseResult> CreateAsync(CreateUserDto dto)
     {
-        ApplicationUser newUser = new()
+        ApplicationUser newUser = new ApplicationUser
         {
             UserName = dto.UserName,
             Email = dto.Email,

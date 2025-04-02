@@ -43,7 +43,7 @@
 }
 
 @code {
-    private readonly LoginRequest _request = new() { Provider = LoginManagerProvider.DevUI.ToString() };
+    private readonly LoginRequest _request = new LoginRequest { Provider = LoginManagerProvider.DevUI.ToString() };
 
     [Inject] private IJSRuntime Js { get; set; } = null!;
     private string? _errorMessage;

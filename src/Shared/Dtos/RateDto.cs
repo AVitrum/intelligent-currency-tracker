@@ -25,8 +25,8 @@ public class RateDto
             CreateMap<Rate, RateDto>()
                 .ForMember(dest => dest.Currency, opt =>
                     opt.MapFrom(src => src.Currency))
-            .ForMember(dest => dest.Date, opt =>
-                opt.MapFrom(src => src.Date.ToString(DateConstants.DateFormat)));
+                .ForMember(dest => dest.Date, opt =>
+                    opt.MapFrom(src => src.Date.ToString(DateConstants.DateFormat)));
         }
     }
 }

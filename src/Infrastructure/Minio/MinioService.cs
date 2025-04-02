@@ -32,7 +32,7 @@ public class MinioService : IMinioService
 
         ConvertTypeIntoTags(key, ref tags);
 
-        PutObjectRequest putRequest = new()
+        PutObjectRequest putRequest = new PutObjectRequest
         {
             BucketName = _bucketName,
             Key = key,
@@ -44,7 +44,7 @@ public class MinioService : IMinioService
         if (tags is not null && tags.Count != 0)
         {
             List<Tag> tagSet = tags.Select(kvp => new Tag { Key = kvp.Key.ToString(), Value = kvp.Value }).ToList();
-            PutObjectTaggingRequest tagRequest = new()
+            PutObjectTaggingRequest tagRequest = new PutObjectTaggingRequest
             {
                 BucketName = _bucketName,
                 Key = key,
@@ -59,14 +59,14 @@ public class MinioService : IMinioService
 
     public async Task<byte[]> DownloadFileAsync(string key)
     {
-        GetObjectRequest request = new()
+        GetObjectRequest request = new GetObjectRequest
         {
             BucketName = _bucketName,
             Key = key
         };
 
         using GetObjectResponse? response = await _s3Client.GetObjectAsync(request);
-        using MemoryStream memoryStream = new();
+        using MemoryStream memoryStream = new MemoryStream();
         await response.ResponseStream.CopyToAsync(memoryStream);
         return memoryStream.ToArray();
     }
@@ -108,7 +108,7 @@ public class MinioService : IMinioService
     {
         try
         {
-            GetObjectMetadataRequest metadataRequest = new()
+            GetObjectMetadataRequest metadataRequest = new GetObjectMetadataRequest
             {
                 BucketName = _bucketName,
                 Key = key
