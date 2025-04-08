@@ -15,4 +15,9 @@ public class CurrencyRepository : BaseRepository<Currency>, ICurrencyRepository
     {
         return await _context.Currencies.FirstOrDefaultAsync(currency => currency.Code == code);
     }
+
+    public async Task<Currency?> GetByR030Async(int r030)
+    {
+        return await _context.Currencies.FirstOrDefaultAsync(currency => currency.R030 == r030);
+    }
 }

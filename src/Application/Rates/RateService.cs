@@ -19,7 +19,7 @@ public class RateService : IRateService
     public async Task<BaseResult> GetRatesAsync(ExchangeRateRequest request)
     {
         IEnumerable<RateDto> ratesDto = _rateHelper.ConvertRatesToDtoAsync(
-            await _rateHelper.GetRatesFromRequestAsync(request));
+            await _rateHelper.GetRatesAsync(request.Start, request.End, request.Currency, request.Page, request.PageSize));
 
         return GetRatesResult.SuccessResult(ratesDto);
     }

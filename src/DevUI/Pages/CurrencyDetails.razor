@@ -201,9 +201,9 @@
 
     public class SearchModel
     {
-        public string StartDateString { get; set; } = "01.01.2016";
-        public string EndDateString { get; set; } = "31.12.2024";
-        public string Currency { get; set; } = "USD";
+        public string StartDateString { get; set; } = DateTime.Now.ToString(DateConstants.DateFormat);
+        public string EndDateString { get; set; } = DateTime.Now.ToString(DateConstants.DateFormat);
+        public string Currency { get; set; } = "USD"; // TODO: Make selectable.
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 25;
     }

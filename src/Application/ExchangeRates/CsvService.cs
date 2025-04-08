@@ -9,7 +9,6 @@ using CsvHelper.Configuration;
 using Domain.Common;
 using Microsoft.Extensions.Logging;
 using Shared.Dtos;
-using Shared.Payload.Requests;
 
 namespace Application.ExchangeRates;
 
@@ -24,17 +23,17 @@ public class CsvService : ICsvService
         _rateHelper = rateHelper;
     }
 
-    public async Task<BaseResult> ExportExchangeRatesToCsvAsync(ExchangeRateRequest request)
+    public async Task<BaseResult> ExportExchangeRatesToCsvAsync(DateTime start, DateTime end, int currencyR030)
     {
         ICollection<RateDto> ratesDto = (ICollection<RateDto>)_rateHelper.ConvertRatesToDtoAsync(
-            await _rateHelper.GetRatesFromRequestAsync(request));
+            await _rateHelper.GetRatesAsync(start, end, currencyR030));
 
         if (ratesDto.Count == 0)
         {
             return BaseResult.FailureResult(["No rates found."]);
         }
 
-        string fileName = $"ExchangeRates_{request.Currency}_{request.Start:yyyyMMdd}_{request.End:yyyyMMdd}.csv";
+        string fileName = $"ExchangeRates_{currencyR030}_{start:yyyyMMdd}_{end:yyyyMMdd}.csv";
         byte[] fileContent = await CreateCsvFileAsync(ratesDto);
 
         return ExportExchangeRatesToCsvResult.SuccessResult(fileContent, fileName);

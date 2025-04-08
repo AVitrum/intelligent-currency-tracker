@@ -28,27 +28,51 @@ public class RateHelper : IRateHelper
         _logger = logger;
     }
 
-    public async Task<IEnumerable<Rate>> GetRatesFromRequestAsync(ExchangeRateRequest request)
+    public async Task<IEnumerable<Rate>> GetRatesAsync(DateTime start, DateTime end, string? currencyString, int page, int pageSize)
     {
         IEnumerable<Rate> rates;
-        if (request.Currency is null)
+        if (currencyString is null)
         {
-            if (request.Start.Date == request.End.Date)
+            if (start.Date == end.Date)
             {
-                rates = await _rateRepository.GetAsync(request.Start);
+                rates = await _rateRepository.GetRangeAsync(start);
             }
             else
             {
-                rates = await _rateRepository.GetAsync(request.Start, request.End);
+                rates = await _rateRepository.GetRangeAsync(start, end, page, pageSize);
             }
         }
         else
         {
-            Currency currency = await _currencyRepository.GetByCodeAsync(request.Currency)
+            Currency currency = await _currencyRepository.GetByCodeAsync(currencyString)
                                 ?? throw new EntityNotFoundException<Currency>();
 
-            rates = await _rateRepository.GetAsync(request.Start, request.End, currency, request.Page,
-                request.PageSize);
+            rates = await _rateRepository.GetRangeAsync(start, end, currency, page, pageSize);
+        }
+
+        return rates;
+    }
+
+    public async Task<IEnumerable<Rate>> GetRatesAsync(DateTime start, DateTime end, int currencyR030)
+    {
+        IEnumerable<Rate> rates;
+        if (currencyR030 == 0)
+        {
+            if (start.Date == end.Date)
+            {
+                rates = await _rateRepository.GetRangeAsync(start);
+            }
+            else
+            {
+                rates = await _rateRepository.GetRangeAsync(start, end);
+            }
+        }
+        else
+        {
+            Currency currency = await _currencyRepository.GetByR030Async(currencyR030)
+                                ?? throw new EntityNotFoundException<Currency>();
+
+            rates = await _rateRepository.GetRangeAsync(start, end, currency);
         }
 
         return rates;

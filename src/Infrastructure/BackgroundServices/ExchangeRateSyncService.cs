@@ -67,12 +67,6 @@ public class ExchangeRateSyncService : BackgroundService
         }
     }
 
-    private static string BuildNbuApiUrl(string baseUrl, DateTime date)
-    {
-        string formattedDate = date.ToString("yyyyMMdd");
-        return $"{baseUrl}/NBUStatService/v1/statdirectory/exchange?date={formattedDate}&json";
-    }
-
     private async Task HandleApiResponseAsync(
         HttpClient client,
         string url,
@@ -98,6 +92,8 @@ public class ExchangeRateSyncService : BackgroundService
             JArray ratesData = JArray.Parse(responseBody);
 
             ICollection<Rate> rates = await ParseExchangeRatesAsync(ratesData, date, currencyRepository);
+            rates = await CompareToPreviousAsync(rates, rateRepository);
+            
             await rateRepository.AddRangeAsync(rates);
 
             _logger.LogInformation("Exchange rates for {Date} were successfully stored.", date);
@@ -136,6 +132,25 @@ public class ExchangeRateSyncService : BackgroundService
             });
         }
 
+        return rates;
+    }
+
+    private static string BuildNbuApiUrl(string baseUrl, DateTime date)
+    {
+        string formattedDate = date.ToString("yyyyMMdd");
+        return $"{baseUrl}/NBUStatService/v1/statdirectory/exchange?date={formattedDate}&json";
+    }
+
+    private static async Task<ICollection<Rate>> CompareToPreviousAsync(
+        ICollection<Rate> rates,
+        IRateRepository rateRepository)
+    {
+        foreach (Rate rate in rates)
+        {
+            Rate lastRate = await rateRepository.GetLastByCurrencyIdAsync(rate.CurrencyId);
+            rate.ValueCompareToPrevious = rate.Value - lastRate.Value;
+        }
+        
         return rates;
     }
 
