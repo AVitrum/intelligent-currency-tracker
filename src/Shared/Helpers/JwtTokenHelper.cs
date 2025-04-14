@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace DevUI.Helpers;
+namespace Shared.Helpers;
 
 public static class JwtTokenHelper
 {

@@ -1,22 +1,22 @@
 using System.Net;
 using System.Net.Http.Json;
-using DevUI.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Shared.Helpers;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses;
+using UI.Configurations;
 
-namespace DevUI.Services;
+namespace UI.Services;
 
 public class HttpClientService : IHttpClientService
 {
     private readonly HttpClient _http;
     private readonly IJSRuntime _js;
     private readonly NavigationManager _navigation;
-    private readonly IDevUISettings _settings;
+    private readonly IUISettings _settings;
 
-    public HttpClientService(HttpClient http, IJSRuntime js, NavigationManager navigation, IDevUISettings settings)
+    public HttpClientService(HttpClient http, IJSRuntime js, NavigationManager navigation, IUISettings settings)
     {
         _http = http;
         _js = js;

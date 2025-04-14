@@ -14,7 +14,9 @@ public static class CustomMiddleware
         }
 
         app.UseStaticFiles();
-        app.UseCors("DevUI");
+        
+        app.UseCors("AllowedCors");
+        
         app.UseSerilogRequestLogging();
         app.UseExceptionHandler("/error");
         app.UseRouting();
