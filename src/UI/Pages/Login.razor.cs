@@ -8,7 +8,7 @@ using Shared.Payload.Responses;
 
 namespace UI.Pages;
 
-public partial class Login : ComponentBase
+public partial class Login : ComponentBase, IPageComponent
 {
     private readonly LoginRequest _request = new LoginRequest { Provider = LoginManagerProvider.Default.ToString() };
 
@@ -23,31 +23,43 @@ public partial class Login : ComponentBase
             _request.Email = string.Empty;
         }
 
-        HttpResponseMessage response = await Http.PostAsJsonAsync($"{UISettings.ApiUrl}/Identity/login", _request);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            LoginResponse? responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            if (responseContent?.Token is not null)
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"{UISettings.ApiUrl}/Identity/login", _request);
+            if (response.IsSuccessStatusCode)
             {
-                await JwtTokenHelper.SetJwtTokensInCookiesAsync(responseContent.Token, responseContent.RefreshToken, Js);
-                ToastService.ShowSuccess("User successfully login!");
-                Navigation.NavigateTo("/all-users", true);
+                LoginResponse? responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                if (responseContent?.Token is not null)
+                {
+                    await JwtTokenHelper.SetJwtTokensInCookiesAsync(responseContent.Token, responseContent.RefreshToken, Js);
+                    ToastService.ShowSuccess("User successfully login!");
+                    Navigation.NavigateTo("/all-users", true);
+                }
+            }
+            else
+            {
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                string errorMessage = !string.IsNullOrEmpty(errorResponse)
+                    ? errorResponse
+                    : "Login failed. Please try again.";
+                
+                await HandleInvalidResponse(errorMessage);
             }
         }
-        else
+        catch (Exception)
         {
-            string errorResponse = await response.Content.ReadAsStringAsync();
-            string errorMessage = !string.IsNullOrEmpty(errorResponse)
-                ? errorResponse
-                : "Login failed. Please try again.";
-
-            ToastService.ShowError(errorMessage);
-
-            await Task.Delay(3000);
-            _errorMessage = null;
-            _request.Email = string.Empty;
-            _request.UserName = string.Empty;
-            _request.Password = string.Empty;
+            await HandleInvalidResponse();
         }
+    }
+    
+    public async Task HandleInvalidResponse(string message = "An error occurred while processing your request. Try again later.")
+    {
+        ToastService.ShowError(message);
+        
+        await Task.Delay(3000);
+        _errorMessage = null;
+        _request.Email = string.Empty;
+        _request.UserName = string.Empty;
+        _request.Password = string.Empty;
     }
 }
