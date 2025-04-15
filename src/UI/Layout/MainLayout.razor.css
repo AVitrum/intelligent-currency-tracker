@@ -1,0 +1,135 @@
+.page {
+    display: flex;
+    flex-direction: row;
+    transition: all 0.3s ease;
+    background-color: #FFFAEC;
+}
+
+main {
+    flex: 1;
+    background-color: #FFFAEC;
+    color: #578E7E;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #FFFAEC;
+    color: #3D3D3D;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, #578E7E 0%, #F5ECD5 40%, #FFFAEC 100%);
+    color: #FFFAEC;
+}
+
+.top-row {
+    background-color: #F5ECD5;
+    border-bottom: 1px solid #578E7E;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    color: #578E7E;
+}
+
+.top-row ::deep a,
+.top-row ::deep .btn-link {
+    white-space: nowrap;
+    margin-left: 1.5rem;
+    text-decoration: none;
+    color: #578E7E;
+}
+
+.top-row ::deep a:hover,
+.top-row ::deep .btn-link:hover {
+    text-decoration: underline;
+    color: #3D3D3D;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem;
+}
+
+.sidebar-toggle-btn {
+    background: none;
+    color: #FFFAEC;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.sidebar-toggle-placeholder {
+    width: 60px;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background-color: #578E7E;
+    padding-top: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, #578E7E 0%, #F5ECD5 40%, #FFFAEC 100%);
+    width: 250px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    color: #FFFAEC;
+}
+
+.sidebar.collapsing {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media (max-width: 640.98px) {
+    .top-row {
+        justify-content: space-between;
+    }
+
+    .top-row ::deep a,
+    .top-row ::deep .btn-link {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 641px) {
+    .page {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .top-row.auth ::deep a:first-child {
+        flex: 1;
+        text-align: right;
+        width: 0;
+    }
+
+    .top-row,
+    article {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}

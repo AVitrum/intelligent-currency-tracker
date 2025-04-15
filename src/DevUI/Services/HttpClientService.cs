@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using DevUI.Helpers;
 using DevUI.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Shared.Helpers;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses;
 

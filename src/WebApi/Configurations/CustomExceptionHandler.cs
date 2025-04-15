@@ -58,7 +58,7 @@ public class CustomExceptionHandler : IExceptionHandler
             AmazonS3Exception => (400, "Error while processing file"),
 
             IdentityException ex => (400, ex.Message),
-            UserNotFoundException ex => (401, ex.Message),
+            UserNotFoundException => (401, "User not found"),
             PasswordException ex => (400, ex.Message),
             UnauthorizedAccessException ex => (401, ex.Message),
             _ => (500, "An error occurred while processing your request")

@@ -1,0 +1,155 @@
+.main-container {
+    display: flex;
+    width: 100%;
+    height: 90vh;
+    margin: 0;
+    padding: 0;
+    background-color: #FFFAEC;
+}
+
+.image-container {
+    flex: 1;
+    height: 100%;
+    background-color: #F5ECD5;
+    padding: 0;
+    margin: 0;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+}
+
+.form-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+
+.form-card {
+    background-color: #FFFAEC;
+    padding: 2rem;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(61, 61, 61, 0.2);
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+    max-width: 90%;
+    max-height: 90%;
+    min-width: 50%;
+}
+
+.form-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    color: #3D3D3D;
+}
+
+.form-subtitle {
+    font-size: 1rem;
+    color: #578E7E;
+    margin-bottom: 1.5rem;
+}
+
+.sub-form {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #3D3D3D;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #578E7E;
+    border-radius: 12px;
+    background-color: #F5ECD5;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #578E7E;
+    box-shadow: 0 0 8px rgba(87, 142, 126, 0.3);
+    outline: none;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #FFFAEC;
+    background-color: #578E7E;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 1rem;
+}
+
+.btn-primary:hover {
+    background-color: #3D3D3D;
+    transform: scale(1.02);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #578E7E;
+    background-color: #F5ECD5;
+    border: 1px solid #578E7E;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 1rem;
+}
+
+.btn-secondary:hover {
+    background-color: #FFFAEC;
+    color: #3D3D3D;
+    transform: scale(1.02);
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
+.alert.error-alert {
+    margin: 1rem auto;
+    padding: 1rem;
+    max-width: 400px;
+    border-radius: 12px;
+    background-color: #e63946;
+    color: white;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

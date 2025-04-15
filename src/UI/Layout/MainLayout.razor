@@ -1,0 +1,34 @@
+﻿@inherits LayoutComponentBase
+
+@code {
+    private bool _isSidebarVisible = false;
+
+    private void ToggleSidebar()
+    {
+        _isSidebarVisible = !_isSidebarVisible;
+    }
+}
+
+<div class="page">
+    <div class="sidebar @( _isSidebarVisible ? "" : "collapsing" )">
+        <NavMenu OnToggleSidebar="ToggleSidebar" />
+    </div>
+
+    @if (!_isSidebarVisible)
+    {
+        <div class="sidebar-toggle-placeholder">
+            <button class="sidebar-toggle-btn" @onclick="ToggleSidebar">☰</button>
+        </div>
+    }
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+    <BlazoredToasts />
+</div>
