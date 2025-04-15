@@ -1,8 +1,25 @@
 ﻿@inherits LayoutComponentBase
+
+@code {
+    private bool _isSidebarVisible = false;
+
+    private void ToggleSidebar()
+    {
+        _isSidebarVisible = !_isSidebarVisible;
+    }
+}
+
 <div class="page">
-    <div class="sidebar">
-        <NavMenu/>
+    <div class="sidebar @( _isSidebarVisible ? "" : "collapsing" )">
+        <NavMenu OnToggleSidebar="ToggleSidebar" />
     </div>
+
+    @if (!_isSidebarVisible)
+    {
+        <div class="sidebar-toggle-placeholder">
+            <button class="sidebar-toggle-btn" @onclick="ToggleSidebar">☰</button>
+        </div>
+    }
 
     <main>
         <div class="top-row px-4">
@@ -13,5 +30,5 @@
             @Body
         </article>
     </main>
-    <BlazoredToasts/>
+    <BlazoredToasts />
 </div>

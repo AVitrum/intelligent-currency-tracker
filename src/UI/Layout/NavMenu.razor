@@ -5,13 +5,13 @@
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/all-users">DevUI</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+        <button title="Navigation menu" class="navbar-toggler" @onclick="() => OnToggleSidebar.InvokeAsync()">
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
 </div>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+<div class="nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
         @if (!_isTokenPresent)
         {
@@ -22,38 +22,14 @@
                 </NavLink>
             </div>
             <div class="nav-item">
-                <NavLink class="nav-link" href="login">
+                <NavLink class="nav-link" href="auth">
                     <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
-                    Login
+                    Sign Up / Sign In
                 </NavLink>
             </div>
         }
         else
         {
-            <div class="nav-item">
-                <NavLink class="nav-link" href="create-admin">
-                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span>
-                    Create Admin
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="role-manager">
-                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span>
-                    Role Manager
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="all-users">
-                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
-                    User List
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="currency-details">
-                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
-                    Exchange Rates
-                </NavLink>
-            </div>
             <div class="nav-item">
                 <button class="nav-link" @onclick="Logout">
                     <span class="bi bi-logout-nav-menu" aria-hidden="true"></span>
@@ -65,7 +41,9 @@
 </div>
 
 @code {
-    private bool _collapseNavMenu = true;
+    [Parameter] public EventCallback OnToggleSidebar { get; set; }
+
+    private bool _collapseNavMenu = false;
     private bool _isTokenPresent;
 
     private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
@@ -84,5 +62,4 @@
     {
         await JwtTokenHelper.RemoveJwtTokensFromCookiesAsync(Js, Navigation);
     }
-
 }

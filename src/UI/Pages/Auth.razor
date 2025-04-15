@@ -1,0 +1,101 @@
+@page "/auth"
+@using UI.Configurations
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IToastService ToastService
+@inject IUISettings UISettings
+
+@if (IsLogin)
+{
+    <div class="main-container">
+        <div class="image-container">
+            <img src="images/auth.png" alt="Login Image" />
+        </div>
+        <div class="form-container">
+            <div class="form-card">
+                <h3 class="form-title">Login into your account</h3>
+                <p class="form-subtitle">Login and Begin.</p>
+
+                <EditForm Model="@_loginRequest" OnValidSubmit="@HandleLoginValidSubmit" class="sub-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email or Username</label>
+                        <InputText id="email" @bind-Value="_loginRequest.Email" class="form-control"
+                                   placeholder="Enter your email or username" />
+                        <ValidationMessage For="@(() => _loginRequest.Email)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <InputText id="password" @bind-Value="_loginRequest.Password" type="password" class="form-control"
+                                   placeholder="Enter your password" />
+                        <ValidationMessage For="@(() => _loginRequest.Password)" />
+                    </div>
+
+                    <button type="submit" class="btn-primary">Login</button>
+                    <button @onclick="ToggleLoginMode" class="btn-secondary">Switch to Registration</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert error-alert">@_errorMessage</div>
+    }
+}
+else
+{
+    <div class="main-container">
+        <div class="image-container">
+            <img src="images/login.png" alt="Login Image" />
+        </div>
+        <div class="form-container">
+            <div class="form-card">
+                <h3 class="form-title">Create your account</h3>
+                @* <p class="form-subtitle">Login and Begin.</p> *@
+
+                <EditForm Model="@_registrationRequest" OnValidSubmit="@HandleRegistrationValidSubmit" class="sub-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email*</label>
+                        <InputText id="email" @bind-Value="_registrationRequest.Email" class="form-control" placeholder="Enter your email"/>
+                        <ValidationMessage For="@(() => _registrationRequest.Email)"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username*</label>
+                        <InputText id="username" @bind-Value="_registrationRequest.UserName" class="form-control"
+                                   placeholder="Choose a username"/>
+                        <ValidationMessage For="@(() => _registrationRequest.UserName)"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <InputText id="phoneNumber" @bind-Value="_registrationRequest.PhoneNumber" class="form-control"
+                                   placeholder="Enter your phone number"/>
+                        <ValidationMessage For="@(() => _registrationRequest.PhoneNumber)"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password*</label>
+                        <InputText id="password" @bind-Value="_registrationRequest.Password" type="password" class="form-control"
+                                   placeholder="Create a password"/>
+                        <ValidationMessage For="@(() => _registrationRequest.Password)"/>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Finish</button>
+                    <button @onclick="ToggleLoginMode" class="btn-secondary">Switch to Login</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert error-alert">@_errorMessage</div>
+    }
+}
