@@ -5,7 +5,7 @@ public class UISettings : IUISettings
     public UISettings()
     {
         // Set this variable to true if you are running the application in a Docker container
-        bool isDocker = false;
+        bool isDocker = true;
         ApiUrl = SetVariable(isDocker, "https://localhost:8001/api", "/api");
     }
 

@@ -11,6 +11,7 @@ public static class CorsPolicyConfiguration
                 builder
                     .WithOrigins(
                         "http://localhost",
+                        "http://localhost/devui",
                         "https://localhost:8003",
                         "http://localhost:5097",
                         "https://localhost:7135")

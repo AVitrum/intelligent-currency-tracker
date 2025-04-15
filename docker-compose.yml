@@ -109,6 +109,16 @@
     networks:
       - test-network
   
+  ui:
+    image: ui
+    build:
+      context: .
+      dockerfile: src/UI/Dockerfile
+    ports:
+      - "7135:80"
+    networks:
+      - test-network
+  
   nginx:
     build:
       context: .
@@ -118,6 +128,8 @@
       - "80:80"
     depends_on:
       - webapi
+      - ui
+      - devui
     networks:
       - test-network
 
