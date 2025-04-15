@@ -1,0 +1,64 @@
+.navbar-toggler {
+    background-color: transparent;
+    border: none;
+}
+
+.top-row {
+    min-height: 3.5rem;
+    background-color: #578E7E;
+    color: #FFFAEC;
+}
+
+.navbar-brand {
+    font-size: 1.1rem;
+    color: #FFFAEC;
+}
+
+.nav-item ::deep a {
+    color: #3D3D3D;
+    border-radius: 4px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    line-height: 3rem;
+    padding: 0 1rem;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+.nav-item ::deep a.active {
+    background-color: #3D3D3D;
+    color: #FFFAEC;
+}
+
+.nav-item ::deep a:hover {
+    background-color: #F5ECD5;
+    color: #578E7E;
+}
+
+.nav-scrollable {
+    background-color: #FFFAEC;
+    color: #3D3D3D;
+    overflow-y: auto;
+    max-height: calc(100vh - 3.5rem);
+    border-radius: 20px;
+    padding: 15px 1rem 1rem;
+    margin: 2.5%;
+}
+
+.nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-item ::deep button {
+    background-color: transparent;
+    border: none;
+    color: #FFFAEC;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1rem;
+}
+
+.nav-item ::deep button:hover {
+    color: #F5ECD5;
+}

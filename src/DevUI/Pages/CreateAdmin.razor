@@ -1,0 +1,85 @@
+@page "/create-admin"
+@using DevUI.Interfaces
+@using Domain.Enums
+@using Shared.Dtos
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IDevUISettings DevUISettings
+@inject IToastService ToastService
+@inject IHttpClientService HttpClientService
+
+<div class="container">
+    <div class="form-card">
+        <h3 class="form-title">Create Admin</h3>
+        <p class="form-subtitle">Create an account for a new employee, but be careful, they will have the same rights as
+            you.</p>
+
+        <EditForm Model="@_request" OnValidSubmit="@HandleValidSubmit" class="sub-form">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email*</label>
+                <InputText id="email" @bind-Value="_request.Email" class="form-control" placeholder="Enter your email"/>
+                <ValidationMessage For="@(() => _request.Email)"/>
+            </div>
+
+            <div class="form-group">
+                <label for="username" class="form-label">Username*</label>
+                <InputText id="username" @bind-Value="_request.UserName" class="form-control"
+                           placeholder="Choose a username"/>
+                <ValidationMessage For="@(() => _request.UserName)"/>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password*</label>
+                <InputText id="password" @bind-Value="_request.Password" type="password" class="form-control"
+                           placeholder="Create a password"/>
+                <ValidationMessage For="@(() => _request.Password)"/>
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber" class="form-label">Phone Number</label>
+                <InputText id="phoneNumber" @bind-Value="_request.PhoneNumber" class="form-control"
+                           placeholder="Enter your phone number"/>
+                <ValidationMessage For="@(() => _request.PhoneNumber)"/>
+            </div>
+
+            <button type="submit" class="btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private readonly CreateUserDto _request = new CreateUserDto();
+
+    private async Task HandleValidSubmit()
+    {
+        _request.Provider = UserServiceProvider.ADMIN.ToString();
+
+        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() =>
+            Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/register", _request));
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("User successfully registered!");
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            string errorMessage = !string.IsNullOrEmpty(errorResponse)
+                ? errorResponse
+                : "Registration failed. Please try again.";
+
+            ToastService.ShowError(errorMessage);
+
+            await Task.Delay(3000);
+            _request.Email = string.Empty;
+            _request.UserName = string.Empty;
+            _request.Password = string.Empty;
+            _request.PhoneNumber = string.Empty;
+        }
+    }
+
+}

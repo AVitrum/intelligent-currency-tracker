@@ -1,0 +1,211 @@
+@page "/currency-details"
+@using System.Globalization
+@using System.Net
+@using System.Text.Json
+@using DevUI.Interfaces
+@using Domain.Constants
+@using Shared.Dtos
+@inject HttpClient Http
+@inject IDevUISettings DevUISettings
+@inject IToastService ToastService
+@inject IHttpClientService HttpClientService
+
+<div class="container">
+    <div class="filters"
+         style="margin-bottom:20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: flex-end;">
+        <div class="form-group" style="flex: 1; min-width: 120px;">
+            <label class="form-label" for="startDate">Start Date</label>
+            <InputText id="startDate" class="form-control"
+                       @bind-Value="_searchModel.StartDateString"/>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 120px;">
+            <label class="form-label" for="endDate">End Date</label>
+            <InputText id="endDate" class="form-control"
+                       @bind-Value="_searchModel.EndDateString"/>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 120px;">
+            <label class="form-label" for="currency">Currency</label>
+            <InputText id="currency" class="form-control"
+                       @bind-Value="_searchModel.Currency"/>
+        </div>
+        <div class="form-group">
+            <button class="btn-primary" @onclick="OnSearch" style="height: 38px;">Search</button>
+        </div>
+    </div>
+
+    <div class="form-card" style="margin-top:20px; width: 100%; overflow-x: auto;">
+        <h3 class="form-title">Results</h3>
+        <table class="table" style="min-width: 600px;">
+            <thead>
+            <tr>
+                <th @onclick="@(() => SortBy(nameof(RateDto.Date)))" style="cursor: pointer;">
+                    Date @DisplaySortIcon(nameof(RateDto.Date))
+                </th>
+                <th @onclick="@(() => SortBy(nameof(RateDto.Value)))" style="cursor: pointer;">
+                    Value @DisplaySortIcon(nameof(RateDto.Value))
+                </th>
+                <th @onclick="@(() => SortBy(nameof(RateDto.ValueCompareToPrevious)))" style="cursor: pointer;">
+                    Changed @DisplaySortIcon(nameof(RateDto.ValueCompareToPrevious))
+                </th>
+                <th @onclick='() => SortBy("Code")' style="cursor: pointer;">
+                    Code @DisplaySortIcon("Code")
+                </th>
+                <th @onclick='() => SortBy("CurrencyName")' style="cursor: pointer;">
+                    Currency Name @DisplaySortIcon("CurrencyName")
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (SortedRates.Any())
+            {
+                foreach (RateDto? rate in SortedRates)
+                {
+                    <tr>
+                        <td>@rate.Date</td>
+                        <td>@rate.Value</td>
+                        <td>@rate.ValueCompareToPrevious</td>
+                        <td>@rate.Currency.Code</td>
+                        <td>@rate.Currency.Name</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4">No data available</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="load-more-container">
+        <button class="btn btn-primary" @onclick="LoadMoreData" disabled="@_isLoading">Load More</button>
+    </div>
+</div>
+
+@code {
+    private readonly SearchModel _searchModel = new SearchModel();
+
+    private readonly List<RateDto> _rates = [];
+    private IEnumerable<RateDto> SortedRates => ApplySorting(_rates);
+
+    private string _currentSortColumn = "";
+    private bool _currentSortAscending = true;
+    private bool _isLoading;
+
+    protected override Task OnInitializedAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    private async Task OnSearch()
+    {
+        _searchModel.Page = 1;
+        _rates.Clear();
+        await FetchRates();
+    }
+
+    private async Task FetchRates()
+    {
+        _isLoading = true;
+
+        string url = $"{DevUISettings.ApiUrl}/Rate/get-range?StartDateString={_searchModel.StartDateString}&EndDateString={_searchModel.EndDateString}&Currency={_searchModel.Currency}&page={_searchModel.Page}&pageSize={_searchModel.PageSize}";
+        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+
+        if (response.IsSuccessStatusCode)
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            IEnumerable<RateDto>? data = await response.Content.ReadFromJsonAsync<IEnumerable<RateDto>>(options);
+            if (data is null)
+            {
+                ToastService.ShowError("No data found");
+            }
+            else if (string.IsNullOrEmpty(_searchModel.Currency))
+            {
+                _rates.AddRange(data);
+                _searchModel.StartDateString = DateTime.ParseExact(
+                        _searchModel.StartDateString, DateConstants.DateFormat, null, DateTimeStyles.None)
+                    .AddDays(1)
+                    .ToString(DateConstants.DateFormat);
+            }
+            else
+            {
+                _rates.AddRange(data);
+                _searchModel.Page++;
+            }
+        }
+        else if (response.StatusCode is HttpStatusCode.BadRequest)
+        {
+            ToastService.ShowError("Some of the input parameters are invalid or missing!");
+        }
+        else
+        {
+            ToastService.ShowError("Request failed: " + response.StatusCode);
+        }
+
+        StateHasChanged();
+        _isLoading = false;
+    }
+
+    private IEnumerable<RateDto> ApplySorting(IEnumerable<RateDto>? rates)
+    {
+        if (rates == null) return Array.Empty<RateDto>();
+
+        return _currentSortColumn switch
+        {
+            nameof(RateDto.Date) => _currentSortAscending
+                ? rates.OrderBy(r => DateTime.ParseExact(r.Date, "dd.MM.yyyy", CultureInfo.InvariantCulture))
+                : rates.OrderByDescending(r => DateTime.ParseExact(r.Date, "dd.MM.yyyy", CultureInfo.InvariantCulture)),
+            nameof(RateDto.Value) => _currentSortAscending
+                ? rates.OrderBy(r => r.Value)
+                : rates.OrderByDescending(r => r.Value),
+            nameof(RateDto.ValueCompareToPrevious) => _currentSortAscending
+                ? rates.OrderBy(r => r.ValueCompareToPrevious)
+                : rates.OrderByDescending(r => r.ValueCompareToPrevious),
+            "Code" => _currentSortAscending
+                ? rates.OrderBy(r => r.Currency.Code)
+                : rates.OrderByDescending(r => r.Currency.Code),
+            "CurrencyName" => _currentSortAscending
+                ? rates.OrderBy(r => r.Currency.Name)
+                : rates.OrderByDescending(r => r.Currency.Name),
+            _ => rates
+        };
+    }
+
+    private void SortBy(string column)
+    {
+        if (_currentSortColumn == column)
+        {
+            _currentSortAscending = !_currentSortAscending;
+        }
+        else
+        {
+            _currentSortColumn = column;
+            _currentSortAscending = true;
+        }
+    }
+
+    private MarkupString DisplaySortIcon(string column)
+    {
+        if (_currentSortColumn != column)
+            return new MarkupString(string.Empty);
+
+        string icon = _currentSortAscending ? "▲" : "▼";
+        return new MarkupString(icon);
+    }
+
+    private async Task LoadMoreData()
+    {
+        await FetchRates();
+    }
+
+    public class SearchModel
+    {
+        public string StartDateString { get; set; } = DateTime.Now.ToString(DateConstants.DateFormat);
+        public string EndDateString { get; set; } = DateTime.Now.ToString(DateConstants.DateFormat);
+        public string Currency { get; set; } = "USD"; // TODO: Make selectable.
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 25;
+    }
+
+}
