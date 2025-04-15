@@ -7,10 +7,13 @@ def load_and_prepare_data(filepath, currency_r030=None):
     df = pd.read_csv(filepath, delimiter=',')
     df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
     df.sort_values('Date', inplace=True)
+
     if currency_r030 is not None:
         df = df[df['R030'] == currency_r030]
+
     df['Value'] = pd.to_numeric(df['Value'], errors='coerce')
     df.dropna(subset=['Value'], inplace=True)
+
     df_prophet = df[['Date', 'Value']].rename(columns={'Date': 'ds', 'Value': 'y'})
     return df_prophet
 
