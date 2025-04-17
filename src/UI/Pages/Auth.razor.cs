@@ -11,24 +11,15 @@ namespace UI.Pages;
 
 public partial class Auth : ComponentBase, IPageComponent
 {
-    private readonly LoginRequest _loginRequest = new LoginRequest
-    {
-        Provider = nameof(LoginManagerProvider.Default)
-    };
-
-    private readonly CreateUserDto _registrationRequest = new CreateUserDto
-    {
-        Provider = nameof(UserServiceProvider.DEFAULT)
-    };
-    
     private bool IsLogin { get; set; } = true;
-
-    [Inject] private IJSRuntime Js { get; set; } = null!;
     private string? _errorMessage;
-    
+    private readonly LoginRequest _loginRequest = new LoginRequest { Provider = nameof(LoginManagerProvider.Default) };
+    private readonly CreateUserDto _registrationRequest = new CreateUserDto { Provider = nameof(UserServiceProvider.DEFAULT) };
+    [Inject] private IJSRuntime Js { get; set; } = null!;
+
     private async Task HandleLoginValidSubmit()
     {
-        if (_loginRequest.Email is not null && !_loginRequest.Email.Contains("@"))
+        if (_loginRequest.Email is not null && !_loginRequest.Email.Contains('@'))
         {
             _loginRequest.UserName = _loginRequest.Email;
             _loginRequest.Email = string.Empty;

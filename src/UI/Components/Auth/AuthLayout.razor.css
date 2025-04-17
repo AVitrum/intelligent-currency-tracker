@@ -1,0 +1,133 @@
+.main-container {
+    display: flex;
+    width: 100%;
+    height: 90vh;
+    margin: 0;
+    padding: 0;
+    background-color: #FFFAEC;
+}
+
+.image-container {
+    flex: 1;
+    height: 100%;
+    background-color: #F5ECD5;
+    padding: 0;
+    margin: 0;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+}
+
+.form-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+
+.form-card {
+    background-color: #FFFAEC;
+    padding: 2rem;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(61, 61, 61, 0.2);
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+    max-width: 90%;
+    max-height: 90%;
+    min-width: 50%;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.btn-primary:hover {
+    background-color: #3D3D3D;
+    transform: scale(1.02);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.alert.error-alert {
+    margin: 1rem auto;
+    padding: 1rem;
+    max-width: 400px;
+    border-radius: 12px;
+    background-color: #e63946;
+    color: white;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.slide-left {
+    animation: slideFromLeft 0.5s ease-in-out;
+}
+
+.slide-right {
+    animation: slideFromRight 0.5s ease-in-out;
+}
+
+@keyframes slideFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+::deep .form-group {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+::deep .form-group:nth-child(1) { animation-delay: 0.1s; }
+::deep .form-group:nth-child(2) { animation-delay: 0.2s; }
+::deep .form-group:nth-child(3) { animation-delay: 0.3s; }
+::deep .form-group:nth-child(4) { animation-delay: 0.4s; }
+
+::deep .btn-primary,
+::deep .btn-secondary {
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+::deep .btn-primary:hover,
+::deep .btn-secondary:hover {
+    transform: translateY(-2px);
+}
+
+::deep .btn-primary:active,
+::deep .btn-secondary:active {
+    transform: translateY(0);
+}

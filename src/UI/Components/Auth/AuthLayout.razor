@@ -1,0 +1,23 @@
+<div class="main-container">
+    <div class="image-container">
+        <img src="@ImageSource" alt="@ImageAlt" class="@(IsLogin ? "slide-left" : "slide-right")" />
+    </div>
+    <div class="form-container">
+        <div class="form-card @(IsLogin ? "slide-right" : "slide-left")">
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert error-alert">@ErrorMessage</div>
+}
+
+@code {
+    [Parameter] public string ImageSource { get; set; } = "";
+    [Parameter] public string ImageAlt { get; set; } = "";
+    [Parameter] public string ErrorMessage { get; set; } = "";
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public bool IsLogin { get; set; }
+}

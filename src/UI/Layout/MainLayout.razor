@@ -2,16 +2,27 @@
 
 @code {
     private bool _isSidebarVisible = false;
+    private bool _hideNavItems = false;
 
     private void ToggleSidebar()
     {
+        if (_isSidebarVisible)
+        {
+            _hideNavItems = true;
+        }
+        else
+        {
+            _hideNavItems = false;
+        }
+
         _isSidebarVisible = !_isSidebarVisible;
     }
 }
 
+
 <div class="page">
     <div class="sidebar @( _isSidebarVisible ? "" : "collapsing" )">
-        <NavMenu OnToggleSidebar="ToggleSidebar" />
+        <NavMenu OnToggleSidebar="ToggleSidebar" HideNavItems="@_hideNavItems" />
     </div>
 
     @if (!_isSidebarVisible)

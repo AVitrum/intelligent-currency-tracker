@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<div class="nav-scrollable" @onclick="ToggleNavMenu">
+<div class="nav-scrollable @(HideNavItems ? "nav-hidden" : "")" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
         @if (!_isTokenPresent)
         {
@@ -42,6 +42,7 @@
 
 @code {
     [Parameter] public EventCallback OnToggleSidebar { get; set; }
+    [Parameter] public bool HideNavItems { get; set; } 
 
     private bool _collapseNavMenu = false;
     private bool _isTokenPresent;

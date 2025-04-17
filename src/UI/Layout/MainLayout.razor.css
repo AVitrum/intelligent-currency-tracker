@@ -1,7 +1,7 @@
 .page {
     display: flex;
     flex-direction: row;
-    transition: all 0.3s ease;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: #FFFAEC;
 }
 
@@ -9,6 +9,7 @@ main {
     flex: 1;
     background-color: #FFFAEC;
     color: #578E7E;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
@@ -19,11 +20,6 @@ body {
     padding: 0;
 }
 
-.sidebar {
-    background-image: linear-gradient(180deg, #578E7E 0%, #F5ECD5 40%, #FFFAEC 100%);
-    color: #FFFAEC;
-}
-
 .top-row {
     background-color: #F5ECD5;
     border-bottom: 1px solid #578E7E;
@@ -32,6 +28,7 @@ body {
     display: flex;
     align-items: center;
     color: #578E7E;
+    transition: background-color 0.4s ease;
 }
 
 .top-row ::deep a,
@@ -40,6 +37,7 @@ body {
     margin-left: 1.5rem;
     text-decoration: none;
     color: #578E7E;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
 .top-row ::deep a:hover,
@@ -60,6 +58,10 @@ body {
     border: none;
     font-size: 24px;
     cursor: pointer;
+    transition: transform 0.3s ease;
+}
+.sidebar-toggle-btn:hover {
+    transform: scale(1.1);
 }
 
 .sidebar-toggle-placeholder {
@@ -73,6 +75,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 2;
+    transition: background-color 0.3s ease;
 }
 
 .sidebar {
@@ -81,14 +84,19 @@ body {
     height: 100vh;
     position: sticky;
     top: 0;
-    transition: width 0.3s ease, opacity 0.3s ease;
     overflow: hidden;
     color: #FFFAEC;
+    transition:
+            width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.5s ease,
+            transform 0.5s ease;
+    will-change: width, opacity, transform;
 }
 
 .sidebar.collapsing {
     width: 0;
     opacity: 0;
+    transform: translateX(-20px);
     pointer-events: none;
 }
 
