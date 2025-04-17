@@ -1,10 +1,13 @@
-using System.Net;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Polly;
+using Polly.Retry;
+using Policy = Polly.Policy;
 
 namespace Infrastructure.BackgroundServices;
 
@@ -13,12 +16,15 @@ public class ExchangeRateSyncService : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExchangeRateSyncService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly TimeSpan _updateInterval;
 
     public ExchangeRateSyncService(
         IHttpClientFactory httpClientFactory,
         ILogger<ExchangeRateSyncService> logger,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        IConfiguration configuration)
     {
+        _updateInterval = TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _scopeFactory = scopeFactory;
@@ -26,7 +32,7 @@ public class ExchangeRateSyncService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromDays(1));
+        using PeriodicTimer timer = new PeriodicTimer(_updateInterval);    
 
         do
         {
@@ -55,10 +61,19 @@ public class ExchangeRateSyncService : BackgroundService
 
             HttpClient client = _httpClientFactory.CreateClient();
 
-            for (DateTime date = startDate; date <= currentDate; date = date.AddDays(1))
+            const int batchSize = 10;
+            List<DateTime> datesToProcess = Enumerable
+                .Range(0, (currentDate - startDate).Days + 1)
+                .Select(offset => startDate.AddDays(offset))
+                .ToList();
+
+            foreach (DateTime[] batch in datesToProcess.Chunk(batchSize))
             {
-                string url = BuildNbuApiUrl(appSettings.NbuUrl, date);
-                await HandleApiResponseAsync(client, url, date, rateRepository, currencyRepository, stoppingToken);
+                IEnumerable<Task> tasks = batch.Select(date => 
+                    HandleApiResponseAsync(client, BuildNbuApiUrl(appSettings.NbuUrl, date), 
+                        date, rateRepository, currencyRepository, stoppingToken));
+        
+                await Task.WhenAll(tasks);
             }
         }
         catch (Exception ex)
@@ -75,17 +90,15 @@ public class ExchangeRateSyncService : BackgroundService
         ICurrencyRepository currencyRepository,
         CancellationToken stoppingToken)
     {
-        try
+        AsyncRetryPolicy? policy = Policy
+            .Handle<HttpRequestException>()
+            .Or<TimeoutException>()
+            .WaitAndRetryAsync(3, retryAttempt => 
+                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        await policy.ExecuteAsync(async () =>
         {
             HttpResponseMessage response = await client.GetAsync(url, stoppingToken);
-
-            if (response.StatusCode == HttpStatusCode.GatewayTimeout)
-            {
-                _logger.LogWarning("Received 504 Gateway Timeout. Retrying for {Date}", date);
-                await HandleApiResponseAsync(client, url, date, rateRepository, currencyRepository, stoppingToken);
-                return;
-            }
-
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync(stoppingToken);
@@ -97,11 +110,7 @@ public class ExchangeRateSyncService : BackgroundService
             await rateRepository.AddRangeAsync(rates);
 
             _logger.LogInformation("Exchange rates for {Date} were successfully stored.", date);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error processing API response for {Date}", date);
-        }
+        });
     }
 
     private async Task<ICollection<Rate>> ParseExchangeRatesAsync(

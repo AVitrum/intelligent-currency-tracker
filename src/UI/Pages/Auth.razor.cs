@@ -13,12 +13,12 @@ public partial class Auth : ComponentBase, IPageComponent
 {
     private readonly LoginRequest _loginRequest = new LoginRequest
     {
-        Provider = LoginManagerProvider.Default.ToString()
+        Provider = nameof(LoginManagerProvider.Default)
     };
 
     private readonly CreateUserDto _registrationRequest = new CreateUserDto
     {
-        Provider = UserServiceProvider.DEFAULT.ToString()
+        Provider = nameof(UserServiceProvider.DEFAULT)
     };
     
     private bool IsLogin { get; set; } = true;
@@ -44,7 +44,7 @@ public partial class Auth : ComponentBase, IPageComponent
                 {
                     await JwtTokenHelper.SetJwtTokensInCookiesAsync(responseContent.Token, responseContent.RefreshToken, Js);
                     ToastService.ShowSuccess("User successfully login!");
-                    Navigation.NavigateTo("/all-users", true);
+                    Navigation.NavigateTo("/", forceLoad: true);
                 }
             }
             else
