@@ -42,9 +42,9 @@
 
 @code {
     [Parameter] public EventCallback OnToggleSidebar { get; set; }
-    [Parameter] public bool HideNavItems { get; set; } 
+    [Parameter] public bool HideNavItems { get; set; }
 
-    private bool _collapseNavMenu = false;
+    private bool _collapseNavMenu;
     private bool _isTokenPresent;
 
     private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
@@ -63,4 +63,5 @@
     {
         await JwtTokenHelper.RemoveJwtTokensFromCookiesAsync(Js, Navigation);
     }
+
 }

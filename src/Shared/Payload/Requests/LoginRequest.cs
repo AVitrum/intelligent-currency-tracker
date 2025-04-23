@@ -8,6 +8,7 @@ public class LoginRequest
 {
     public string? UserName { get; set; }
 
+    [Required(ErrorMessage = "Email or username field is required!")]
     public string? Email { get; set; }
 
     [Required(ErrorMessage = "Password field is required!")]

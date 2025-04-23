@@ -24,7 +24,8 @@ public class ExchangeRateSyncService : BackgroundService
         IServiceScopeFactory scopeFactory,
         IConfiguration configuration)
     {
-        _updateInterval = TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
+        _updateInterval =
+            TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _scopeFactory = scopeFactory;
@@ -32,7 +33,7 @@ public class ExchangeRateSyncService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using PeriodicTimer timer = new PeriodicTimer(_updateInterval);    
+        using PeriodicTimer timer = new PeriodicTimer(_updateInterval);
 
         do
         {
@@ -47,7 +48,6 @@ public class ExchangeRateSyncService : BackgroundService
             using IServiceScope scope = _scopeFactory.CreateScope();
             IAppSettings appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
             IRateRepository rateRepository = scope.ServiceProvider.GetRequiredService<IRateRepository>();
-            ICurrencyRepository currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
 
             DateTime lastProcessedDate = await rateRepository.GetLastDateAsync();
             DateTime startDate = lastProcessedDate.AddDays(1);
@@ -69,10 +69,16 @@ public class ExchangeRateSyncService : BackgroundService
 
             foreach (DateTime[] batch in datesToProcess.Chunk(batchSize))
             {
-                IEnumerable<Task> tasks = batch.Select(date => 
-                    HandleApiResponseAsync(client, BuildNbuApiUrl(appSettings.NbuUrl, date), 
-                        date, rateRepository, currencyRepository, stoppingToken));
-        
+                IEnumerable<Task> tasks = batch.Select(async date =>
+                {
+                    using IServiceScope innerScope = _scopeFactory.CreateScope();
+                    IRateRepository rateRepo = innerScope.ServiceProvider.GetRequiredService<IRateRepository>();
+                    ICurrencyRepository currencyRepo = innerScope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
+
+                    await HandleApiResponseAsync(client, BuildNbuApiUrl(appSettings.NbuUrl, date),
+                        date, rateRepo, currencyRepo, stoppingToken);
+                });
+
                 await Task.WhenAll(tasks);
             }
         }
@@ -93,7 +99,7 @@ public class ExchangeRateSyncService : BackgroundService
         AsyncRetryPolicy? policy = Policy
             .Handle<HttpRequestException>()
             .Or<TimeoutException>()
-            .WaitAndRetryAsync(3, retryAttempt => 
+            .WaitAndRetryAsync(3, retryAttempt =>
                 TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
         await policy.ExecuteAsync(async () =>
@@ -106,7 +112,7 @@ public class ExchangeRateSyncService : BackgroundService
 
             ICollection<Rate> rates = await ParseExchangeRatesAsync(ratesData, date, currencyRepository);
             rates = await CompareToPreviousAsync(rates, rateRepository);
-            
+
             await rateRepository.AddRangeAsync(rates);
 
             _logger.LogInformation("Exchange rates for {Date} were successfully stored.", date);
@@ -159,7 +165,7 @@ public class ExchangeRateSyncService : BackgroundService
             Rate lastRate = await rateRepository.GetLastByCurrencyIdAsync(rate.CurrencyId);
             rate.ValueCompareToPrevious = rate.Value - lastRate.Value;
         }
-        
+
         return rates;
     }
 

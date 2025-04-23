@@ -80,7 +80,8 @@ public static class CurrencySeeder
             new Currency { R030 = 440, Name = "Lithuanian Litas", Code = "LTL" },
             new Currency { R030 = 792, Name = "Turkish Lira (Old)", Code = "TRL" }, // Старий код для ліри
             new Currency { R030 = 795, Name = "Turkmenistan Manat (Old)", Code = "TMM" }, // Старий код для маната
-            new Currency { R030 = 974, Name = "Belarusian Ruble (Old)", Code = "BYR" }, // Старий код для білоруського рубля
+            new Currency
+                { R030 = 974, Name = "Belarusian Ruble (Old)", Code = "BYR" }, // Старий код для білоруського рубля
             new Currency { R030 = 100, Name = "Bulgarian Lev (Old)", Code = "BGL" }, // Старий код для лева
             new Currency { R030 = 152, Name = "Chilean Peso", Code = "CLP" },
             new Currency { R030 = 191, Name = "Croatian Kuna", Code = "HRK" },

@@ -60,6 +60,7 @@ body {
     cursor: pointer;
     transition: transform 0.3s ease;
 }
+
 .sidebar-toggle-btn:hover {
     transform: scale(1.1);
 }
@@ -86,10 +87,9 @@ body {
     top: 0;
     overflow: hidden;
     color: #FFFAEC;
-    transition:
-            width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 0.5s ease,
-            transform 0.5s ease;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.5s ease,
+    transform 0.5s ease;
     will-change: width, opacity, transform;
 }
 

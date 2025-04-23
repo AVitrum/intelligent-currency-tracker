@@ -1,31 +1,31 @@
 @page "/auth"
-@using UI.Configurations
 @using UI.Components.Auth
+@using UI.Configurations
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IToastService ToastService
 @inject IUISettings UISettings
 
-<AuthLayout 
+<AuthLayout
     ImageSource="@(IsLogin ? "images/auth.png" : "images/login.png")"
     ImageAlt="Authentication Image"
     ErrorMessage="@_errorMessage"
     IsLogin="@IsLogin">
-    
+
     <CascadingValue Value="@IsLogin" Name="IsLogin">
         @if (IsLogin)
         {
-            <LoginForm 
+            <LoginForm
                 LoginRequest="_loginRequest"
                 OnValidSubmit="HandleLoginValidSubmit"
-                OnToggleMode="ToggleLoginMode" />
+                OnToggleMode="ToggleLoginMode"/>
         }
         else
         {
-            <RegistrationForm 
+            <RegistrationForm
                 RegistrationRequest="_registrationRequest"
                 OnValidSubmit="HandleRegistrationValidSubmit"
-                OnToggleMode="ToggleLoginMode" />
+                OnToggleMode="ToggleLoginMode"/>
         }
     </CascadingValue>
 </AuthLayout>

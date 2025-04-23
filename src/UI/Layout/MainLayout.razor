@@ -1,28 +1,21 @@
 ﻿@inherits LayoutComponentBase
 
 @code {
-    private bool _isSidebarVisible = false;
-    private bool _hideNavItems = false;
+    private bool _isSidebarVisible;
+    private bool _hideNavItems;
 
     private void ToggleSidebar()
     {
-        if (_isSidebarVisible)
-        {
-            _hideNavItems = true;
-        }
-        else
-        {
-            _hideNavItems = false;
-        }
-
+        _hideNavItems = _isSidebarVisible;
         _isSidebarVisible = !_isSidebarVisible;
     }
+
 }
 
 
 <div class="page">
-    <div class="sidebar @( _isSidebarVisible ? "" : "collapsing" )">
-        <NavMenu OnToggleSidebar="ToggleSidebar" HideNavItems="@_hideNavItems" />
+    <div class="sidebar @(_isSidebarVisible ? "" : "collapsing")">
+        <NavMenu OnToggleSidebar="ToggleSidebar" HideNavItems="@_hideNavItems"/>
     </div>
 
     @if (!_isSidebarVisible)
@@ -41,5 +34,5 @@
             @Body
         </article>
     </main>
-    <BlazoredToasts />
+    <BlazoredToasts/>
 </div>

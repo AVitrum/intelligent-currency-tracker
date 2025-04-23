@@ -1,24 +1,23 @@
 @using Shared.Payload.Requests
-
 <h3 class="form-title">Login into your account</h3>
 <p class="form-subtitle">Login and Begin.</p>
 
 <EditForm Model="@LoginRequest" OnValidSubmit="@OnValidSubmit" class="sub-form">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
 
     <div class="form-group">
         <label for="email" class="form-label">Email or Username</label>
         <InputText id="email" @bind-Value="LoginRequest.Email" class="form-control"
-                   placeholder="Enter your email or username" />
-        <ValidationMessage For="@(() => LoginRequest.Email)" />
+                   placeholder="Enter your email or username"/>
+        <ValidationMessage For="@(() => LoginRequest.Email)"/>
     </div>
 
     <div class="form-group">
         <label for="password" class="form-label">Password</label>
         <InputText id="password" @bind-Value="LoginRequest.Password" type="password" class="form-control"
-                   placeholder="Enter your password" />
-        <ValidationMessage For="@(() => LoginRequest.Password)" />
+                   placeholder="Enter your password"/>
+        <ValidationMessage For="@(() => LoginRequest.Password)"/>
     </div>
 
     <button type="submit" class="btn-primary">Login</button>

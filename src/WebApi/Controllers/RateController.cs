@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.Services;
-using Application.ExchangeRates.Results;
 using Application.Rates.Results;
 using Domain.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -11,13 +10,11 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public class RateController : ControllerBase
 {
-    private readonly ICsvService _csvService;
     private readonly IRateService _rateService;
 
-    public RateController(IRateService rateService, ICsvService csvService)
+    public RateController(IRateService rateService)
     {
         _rateService = rateService;
-        _csvService = csvService;
     }
 
     [Authorize]
@@ -35,7 +32,23 @@ public class RateController : ControllerBase
 
         return Ok(getRatesResult.Rates);
     }
+    
+    [Authorize]
+    [HttpDelete("delete")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteRatesAsync([FromBody] DeleteRatesRequest request)
+    {
+        BaseResult result = await _rateService.DeleteRatesAsync(request.Date);
 
+        if (result.Success)
+        {
+            return Ok("Rates deleted successfully.");
+        }
+        
+        return BadRequest(result);
+    }
+    
     // [Authorize]
     // [HttpGet("export-rates")]
     // [ProducesResponseType(StatusCodes.Status200OK)]

@@ -19,7 +19,7 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         await _context.Rates.AddRangeAsync(rates);
         await _context.SaveChangesAsync();
     }
-
+    
     public async Task<Rate> GetLastByCurrencyIdAsync(Guid currencyId)
     {
         Rate rate = await _context.Rates
@@ -28,7 +28,7 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
             .OrderByDescending(x => x.Date)
             .AsSplitQuery()
             .FirstOrDefaultAsync() ?? throw new EntityNotFoundException<Rate>();
-         
+
         return rate;
     }
 
@@ -113,5 +113,24 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         {
             return DateTime.ParseExact("01.01.2014", DateConstants.DateFormat, CultureInfo.InvariantCulture);
         }
+    }
+
+    public async Task<bool> RemoveByDateAsync(DateTime date)
+    {
+        IEnumerable<Rate> rates = await _context.Rates
+            .Where(x => x.Date.Date == date.Date)
+            .OrderBy(x => x.Date)
+            .AsSplitQuery()
+            .ToListAsync();
+
+        if (rates.Any())
+        {
+            _context.Rates.RemoveRange(rates);
+            await _context.SaveChangesAsync();
+            
+            return true;
+        }
+
+        return false;
     }
 }

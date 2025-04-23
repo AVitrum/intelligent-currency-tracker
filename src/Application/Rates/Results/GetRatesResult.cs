@@ -14,6 +14,6 @@ public class GetRatesResult : BaseResult
 
     public static GetRatesResult SuccessResult(IEnumerable<RateDto> rates)
     {
-        return new GetRatesResult(true, Array.Empty<string>(), rates);
+        return new GetRatesResult(true, [], rates);
     }
 }

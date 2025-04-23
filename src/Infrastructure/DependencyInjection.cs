@@ -2,13 +2,13 @@ using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
 using Infrastructure.BackgroundServices;
-using Infrastructure.Configuration;
 using Infrastructure.Data.Repositories;
 using Infrastructure.Email;
 using Infrastructure.GoogleAuth;
 using Infrastructure.Identity;
 using Infrastructure.Identity.Factories;
 using Infrastructure.Identity.Jwt;
+using Infrastructure.Identity.Traceable;
 using Infrastructure.Minio;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
@@ -50,11 +50,13 @@ public static class DependencyInjection
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IMinioService, MinioService>();
+        services.AddScoped<ITraceableCurrencyService, TraceableCurrencyService>();
 
         //Repositories
         services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         services.AddScoped<IRateRepository, RateRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<ITraceableCurrencyRepository, TraceableCurrencyRepository>();
 
         //Background Services
         services.AddHostedService<ExchangeRateSyncService>();

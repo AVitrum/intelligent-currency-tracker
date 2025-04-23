@@ -5,7 +5,6 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Microsoft.Extensions.Logging;
 using Shared.Dtos;
-using Shared.Payload.Requests;
 
 namespace Application.Common.Helpers;
 
@@ -28,7 +27,12 @@ public class RateHelper : IRateHelper
         _logger = logger;
     }
 
-    public async Task<IEnumerable<Rate>> GetRatesAsync(DateTime start, DateTime end, string? currencyString, int page, int pageSize)
+    public async Task<IEnumerable<Rate>> GetRatesAsync(
+        DateTime start,
+        DateTime end,
+        string? currencyString,
+        int page,
+        int pageSize)
     {
         IEnumerable<Rate> rates;
         if (currencyString is null)
@@ -85,5 +89,10 @@ public class RateHelper : IRateHelper
 
         _logger.LogInformation("Successfully converted rates to DTO");
         return ratesDto;
+    }
+
+    public async Task<bool> DeleteRatesAsync(DateTime date)
+    {
+        return await _rateRepository.RemoveByDateAsync(date);
     }
 }
