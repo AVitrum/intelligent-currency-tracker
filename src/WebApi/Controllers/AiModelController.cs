@@ -8,7 +8,7 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "ADMIN")]
 public class AiModelController : ControllerBase
 {
     private readonly IAiModelService _aiModelService;

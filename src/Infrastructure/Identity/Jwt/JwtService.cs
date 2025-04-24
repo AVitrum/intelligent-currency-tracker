@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Utils;
-using Infrastructure.Utils;
+using Infrastructure.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Identity.Jwt;

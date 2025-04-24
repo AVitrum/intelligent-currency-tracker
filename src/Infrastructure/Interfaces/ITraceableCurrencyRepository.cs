@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Repositories;
 using Infrastructure.Identity.SubUserEntities;
 
-namespace Infrastructure.Utils;
+namespace Infrastructure.Interfaces;
 
 public interface ITraceableCurrencyRepository : IBaseRepository<TraceableCurrency>
 {

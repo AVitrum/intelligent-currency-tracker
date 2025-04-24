@@ -1,5 +1,5 @@
 using Infrastructure.Identity.SubUserEntities;
-using Infrastructure.Utils;
+using Infrastructure.Interfaces;
 
 namespace Infrastructure.Data.Repositories;
 

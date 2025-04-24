@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Domain.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -25,21 +26,43 @@ public partial class Auth : ComponentBase, IPageComponent
     {
         ToastService.ShowError(message);
 
-        await Task.Delay(3000);
         _errorMessage = null;
-        _loginRequest.Email = string.Empty;
-        _loginRequest.UserName = string.Empty;
+        _loginRequest.Identifier = string.Empty;
         _loginRequest.Password = string.Empty;
+    }
+
+    public async Task<string> HandleResponse(HttpResponseMessage response)
+    {
+        string errorResponse = await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(errorResponse))
+        {
+            return "Something went wrong. Please try again.";
+        }
+
+        try
+        {
+            using JsonDocument doc = JsonDocument.Parse(errorResponse);
+            if (doc.RootElement.TryGetProperty("title", out JsonElement titleElement))
+            {
+                return titleElement.GetString() ?? errorResponse;
+            }
+
+            if (doc.RootElement.TryGetProperty("message", out JsonElement messageElement))
+            {
+                return messageElement.GetString() ?? errorResponse;
+            }
+
+            return errorResponse;
+        }
+        catch (JsonException)
+        {
+            return errorResponse;
+        }
     }
 
     private async Task HandleLoginValidSubmit()
     {
-        if (_loginRequest.Email is not null && !_loginRequest.Email.Contains('@'))
-        {
-            _loginRequest.UserName = _loginRequest.Email;
-            _loginRequest.Email = string.Empty;
-        }
-
         try
         {
             HttpResponseMessage response =
@@ -49,19 +72,19 @@ public partial class Auth : ComponentBase, IPageComponent
                 LoginResponse? responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
                 if (responseContent?.Token is not null)
                 {
-                    await JwtTokenHelper.SetJwtTokensInCookiesAsync(responseContent.Token, responseContent.RefreshToken,
-                        Js);
+                    await JwtTokenHelper.SetJwtTokensInCookiesAsync(
+                        responseContent.Token, responseContent.RefreshToken, Js);
+                    
                     ToastService.ShowSuccess("User successfully login!");
                     Navigation.NavigateTo("/", true);
                 }
             }
             else
             {
-                string errorResponse = await response.Content.ReadAsStringAsync();
+                string errorResponse = await HandleResponse(response);
                 string errorMessage = !string.IsNullOrEmpty(errorResponse)
                     ? errorResponse
                     : "Login failed. Please try again.";
-
                 await HandleInvalidResponse(errorMessage);
             }
         }
@@ -79,11 +102,11 @@ public partial class Auth : ComponentBase, IPageComponent
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("User successfully registered!");
-            Navigation.NavigateTo("/login", true);
+            Navigation.NavigateTo("/auth", true);
         }
         else
         {
-            string errorResponse = await response.Content.ReadAsStringAsync();
+            string errorResponse = await HandleResponse(response);
             string errorMessage = !string.IsNullOrEmpty(errorResponse)
                 ? errorResponse
                 : "Registration failed. Please try again.";

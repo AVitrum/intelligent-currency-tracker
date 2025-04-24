@@ -4,7 +4,7 @@ using AutoMapper;
 using Domain.Common;
 using Infrastructure.Identity.SubUserEntities;
 using Infrastructure.Identity.Traceable.Results;
-using Infrastructure.Utils;
+using Infrastructure.Interfaces;
 using Shared.Dtos;
 
 namespace Infrastructure.Identity.Traceable;

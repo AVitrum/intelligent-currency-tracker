@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Repositories;
 using Infrastructure.Identity;
 
-namespace Infrastructure.Utils;
+namespace Infrastructure.Interfaces;
 
 public interface IRefreshTokenRepository : IBaseRepository<RefreshToken>
 {

@@ -1,12 +1,10 @@
 using Infrastructure.Identity;
 using Infrastructure.Identity.Results;
-using Shared.Payload.Requests;
 
-namespace Infrastructure.Utils;
+namespace Infrastructure.Interfaces;
 
 public interface IUserHelper
 {
-    UserLookupDelegate GetUserLookupDelegate(LoginRequest request);
     Task ValidatePasswordAsync(ApplicationUser user, string password);
     Task CheckIfUserIsAdmin(ApplicationUser user);
     Task<UserServiceResult> GenerateTokenResultAsync(ApplicationUser user);

@@ -5,7 +5,7 @@ using Domain.Common;
 using Domain.Enums;
 using Infrastructure.GoogleAuth.Results;
 using Infrastructure.Identity;
-using Infrastructure.Identity.Jwt;
+using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 

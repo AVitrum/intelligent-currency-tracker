@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Utils;
+namespace Infrastructure.Utils.Seeders;
 
 public static class UserSeeder
 {

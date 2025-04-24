@@ -6,10 +6,8 @@ namespace Shared.Payload.Requests;
 
 public class LoginRequest
 {
-    public string? UserName { get; set; }
-
     [Required(ErrorMessage = "Email or username field is required!")]
-    public string? Email { get; set; }
+    public string Identifier { get; set; } = null!;
 
     [Required(ErrorMessage = "Password field is required!")]
     public string Password { get; set; } = null!;

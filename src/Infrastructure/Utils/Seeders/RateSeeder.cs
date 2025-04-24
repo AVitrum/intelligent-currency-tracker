@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Utils;
+namespace Infrastructure.Utils.Seeders;
 
 public static class RateSeeder
 {

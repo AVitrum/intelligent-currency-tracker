@@ -19,10 +19,10 @@
             <ValidationSummary/>
 
             <div class="form-group">
-                <label for="email" class="form-label">Email or Username</label>
-                <InputText id="email" @bind-Value="_request.Email" class="form-control"
+                <label for="identifier" class="form-label">Email or Username</label>
+                <InputText id="identifier" @bind-Value="_request.Identifier" class="form-control"
                            placeholder="Enter your email or username"/>
-                <ValidationMessage For="@(() => _request.Email)"/>
+                <ValidationMessage For="@(() => _request.Identifier)"/>
             </div>
 
             <div class="form-group">
@@ -50,12 +50,6 @@
 
     private async Task HandleValidSubmit()
     {
-        if (_request.Email is not null && !_request.Email.Contains("@"))
-        {
-            _request.UserName = _request.Email;
-            _request.Email = string.Empty;
-        }
-
         HttpResponseMessage response = await Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/login", _request);
         if (response.IsSuccessStatusCode)
         {
@@ -78,8 +72,7 @@
 
             await Task.Delay(3000);
             _errorMessage = null;
-            _request.Email = string.Empty;
-            _request.UserName = string.Empty;
+            _request.Identifier = string.Empty;
             _request.Password = string.Empty;
         }
     }

@@ -9,6 +9,7 @@ using Infrastructure.Identity;
 using Infrastructure.Identity.Factories;
 using Infrastructure.Identity.Jwt;
 using Infrastructure.Identity.Traceable;
+using Infrastructure.Interfaces;
 using Infrastructure.Minio;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;

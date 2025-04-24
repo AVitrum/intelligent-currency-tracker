@@ -8,6 +8,7 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class RateController : ControllerBase
 {
     private readonly IRateService _rateService;
@@ -17,7 +18,6 @@ public class RateController : ControllerBase
         _rateService = rateService;
     }
 
-    [Authorize]
     [HttpGet("get-range")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,7 +33,6 @@ public class RateController : ControllerBase
         return Ok(getRatesResult.Rates);
     }
     
-    [Authorize]
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

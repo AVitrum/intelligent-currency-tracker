@@ -1,7 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Infrastructure.Identity;
 
-namespace Infrastructure.Identity.Jwt;
+namespace Infrastructure.Interfaces;
 
 public interface IJwtService
 {

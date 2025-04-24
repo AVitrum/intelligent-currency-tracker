@@ -1,10 +1,12 @@
 using Application.Common.Interfaces.Services;
 using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class MinioController : ControllerBase
 {
     private readonly IMinioService _minioService;
