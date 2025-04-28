@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Services;
 using Domain.Common;
 using Infrastructure.Identity.Traceable.Results;
 using Infrastructure.Utils;
+using Infrastructure.Utils.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Payload.Requests;
 

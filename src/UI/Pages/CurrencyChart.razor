@@ -1,0 +1,53 @@
+@page "/currency-chart"
+@using UI.Configurations
+@using UI.Services
+@inject HttpClient Http
+@inject IToastService ToastService
+@inject IUISettings UISettings
+@inject IHttpClientService HttpClientService
+@inject IJSRuntime JS
+
+<div class="page-container">
+    <div class="header-section">
+        <h2>Currency Exchange Rate Chart</h2>
+        <p class="description">
+            Historical exchange rates data provided by the National Bank of Ukraine.
+            Select a currency and date range to view the exchange rate dynamics.
+        </p>
+    </div>
+    
+    <div class="content-section">
+        <div class="form-container">
+            <div class="form-card">
+                <div class="form-group">
+                    <label for="currencySelect">Currency:</label>
+                    <select id="currencySelect" @bind="_selectedCurrency" @bind:after="LoadRatesAsync" class="form-control">
+                        @foreach (string c in _currencies)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input id="startDate" type="date" @bind="_startDate" @bind:after="LoadRatesAsync" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input id="endDate" type="date" @bind="_endDate" @bind:after="LoadRatesAsync" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="chart-section">
+            <div class="chart-container">
+                <canvas id="currencyChart"></canvas>
+            </div>
+            <div class="chart-footer">
+                <small>
+                    Chart shows exchange rates against Ukrainian Hryvnia (UAH).
+                    Data is updated daily on business days.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

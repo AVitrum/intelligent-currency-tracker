@@ -1,10 +1,9 @@
-using System.Globalization;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
 using Application.Rates.Results;
 using Domain.Common;
-using Domain.Constants;
 using Shared.Dtos;
+using Shared.Helpers;
 using Shared.Payload.Requests;
 
 namespace Application.Rates;
@@ -29,11 +28,16 @@ public class RateService : IRateService
 
     public async Task<BaseResult> DeleteRatesAsync(string date)
     {
-        DateTime dateTime = DateTime.ParseExact(
-            date, DateConstants.DateFormat, CultureInfo.InvariantCulture,
-            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+        DateTime dateTime = DateHelper.ParseDdMmYyyy(date);
         bool isDeleted = await _rateHelper.DeleteRatesAsync(dateTime);
         
         return isDeleted ? BaseResult.SuccessResult() : BaseResult.FailureResult(["Failed to delete rates."]);
+    }
+
+    public async Task<BaseResult> GetAllCurrenciesAsync()
+    {
+        IEnumerable<CurrencyDto> currenciesDto = await _rateHelper.GetAllCurrenciesAsync();
+        
+        return GetAllCurrenciesResult.SuccessResult(currenciesDto);
     }
 }

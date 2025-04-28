@@ -3,7 +3,7 @@ using Application.Common.Interfaces.Services;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Identity.Results;
-using Infrastructure.Utils;
+using Infrastructure.Utils.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Shared.Dtos;

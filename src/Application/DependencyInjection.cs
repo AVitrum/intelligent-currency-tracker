@@ -7,6 +7,7 @@ using Application.Kafka;
 using Application.Rates;
 using Microsoft.Extensions.DependencyInjection;
 using Shared;
+using Shared.Helpers;
 
 namespace Application;
 
@@ -17,9 +18,10 @@ public static class DependencyInjection
         services.AddHttpClient();
         services.AddShared();
 
+        services.AddScoped<IRateHelper, RateHelper>();
+        
         services.AddScoped<ICsvService, CsvService>();
         services.AddScoped<IRateService, RateService>();
-        services.AddScoped<IRateHelper, RateHelper>();
         services.AddScoped<IAiModelService, AiModelService>();
 
         services.AddScoped<IKafkaProducer, KafkaProducer>();

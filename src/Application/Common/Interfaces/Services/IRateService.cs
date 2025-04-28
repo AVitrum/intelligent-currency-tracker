@@ -7,4 +7,5 @@ public interface IRateService
 {
     Task<BaseResult> GetRatesAsync(ExchangeRateRequest request);
     Task<BaseResult> DeleteRatesAsync(string date);
+    Task<BaseResult> GetAllCurrenciesAsync();
 }

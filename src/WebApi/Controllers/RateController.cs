@@ -17,6 +17,22 @@ public class RateController : ControllerBase
     {
         _rateService = rateService;
     }
+    
+    [HttpGet("get-all-currencies")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetAllCurrencies()
+    {
+        BaseResult result = await _rateService.GetAllCurrenciesAsync();
+
+        if (result is not GetAllCurrenciesResult getAllCurrenciesResult)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(getAllCurrenciesResult.Currencies);
+    }
 
     [HttpGet("get-range")]
     [ProducesResponseType(StatusCodes.Status200OK)]

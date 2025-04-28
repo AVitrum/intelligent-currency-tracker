@@ -1,0 +1,154 @@
+.page-container {
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    background-color: #FFFAEC;
+}
+
+.header-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header-section h2 {
+    margin-bottom: 1rem;
+    color: #3D3D3D;
+    font-size: 2rem;
+}
+
+.description {
+    color: #3D3D3D;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.content-section {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.form-container {
+    flex: 0 0 300px;
+    min-width: 280px;
+}
+
+.form-card {
+    background: #F5ECD5;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px,
+    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    backdrop-filter: blur(10px);
+}
+
+.chart-section {
+    flex: 1;
+    background: #F5ECD5;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px,
+    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+}
+
+.chart-container {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.chart-footer {
+    text-align: center;
+    color: #3D3D3D;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #3D3D3D;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #578E7E;
+    border-radius: 6px;
+    background: #FFFAEC;
+    transition: all 0.2s ease;
+    color: #3D3D3D;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #578E7E;
+    box-shadow: 0 0 0 2px rgba(87, 142, 126, 0.2);
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .content-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .form-container {
+        flex: auto;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .header-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .description {
+        font-size: 1rem;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .chart-section {
+        width: 100%;
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-container {
+        padding: 1rem;
+    }
+
+    .header-section h2 {
+        font-size: 1.2rem;
+    }
+
+    .description {
+        font-size: 0.9rem;
+    }
+
+    .form-card, .chart-section {
+        padding: 1rem;
+    }
+
+    .form-control {
+        font-size: 0.9rem;
+    }
+
+    .chart-footer {
+        font-size: 0.8rem;
+    }
+}

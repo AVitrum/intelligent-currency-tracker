@@ -51,7 +51,14 @@ public class RateHelper : IRateHelper
             Currency currency = await _currencyRepository.GetByCodeAsync(currencyString)
                                 ?? throw new EntityNotFoundException<Currency>();
 
-            rates = await _rateRepository.GetRangeAsync(start, end, currency, page, pageSize);
+            if (page == 0 || pageSize == 0)
+            {
+                rates = await _rateRepository.GetRangeAsync(start, end, currency);
+            }
+            else 
+            {
+                rates = await _rateRepository.GetRangeAsync(start, end, currency, page, pageSize);
+            }
         }
 
         return rates;
@@ -80,6 +87,23 @@ public class RateHelper : IRateHelper
         }
 
         return rates;
+    }
+
+    public async Task<IEnumerable<CurrencyDto>> GetAllCurrenciesAsync()
+    {
+        ICollection<Currency> currencies = (ICollection<Currency>) await _currencyRepository.GetAllAsync();
+        
+        if (currencies is null || currencies.Count == 0)
+        {
+            throw new EntityNotFoundException<Currency>();
+        }
+
+        List<CurrencyDto> currenciesDto = [];
+        currenciesDto.AddRange(currencies.Select(currency => _mapper.Map<CurrencyDto>(currency)));
+        currenciesDto = currenciesDto.OrderBy(c => c.Code).ToList();
+
+        _logger.LogInformation("Successfully retrieved all currencies");
+        return currenciesDto;
     }
 
     public IEnumerable<RateDto> ConvertRatesToDtoAsync(IEnumerable<Rate> rates)
