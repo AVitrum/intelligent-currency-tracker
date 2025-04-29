@@ -5,7 +5,7 @@ namespace Application.Common.Interfaces.Services;
 
 public interface IRateService
 {
-    Task<BaseResult> GetRatesAsync(ExchangeRateRequest request);
-    Task<BaseResult> DeleteRatesAsync(string date);
     Task<BaseResult> GetAllCurrenciesAsync();
+    Task<BaseResult> GetRatesAsync(DateTime start, DateTime end, string? currencyString, int page, int pageSize);
+    Task<BaseResult> DeleteRatesAsync(string date);
 }

@@ -39,7 +39,7 @@ public class RateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetRatesAsync([FromQuery] ExchangeRateRequest request)
     {
-        BaseResult result = await _rateService.GetRatesAsync(request);
+        BaseResult result = await _rateService.GetRatesAsync(request.Start, request.End, request.Currency, request.Page, request.PageSize);
 
         if (result is not GetRatesResult getRatesResult)
         {

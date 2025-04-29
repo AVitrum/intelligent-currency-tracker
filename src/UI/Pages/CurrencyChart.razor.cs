@@ -21,21 +21,6 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
     {
         await LoadCurrencyListAsync();
         await LoadRatesAsync();
-        
-        await JS.InvokeVoidAsync("eval", @"
-            window.addEventListener('resize', function() {
-                DotNet.invokeMethodAsync('TriggerResize');
-            });
-        ");
-    }
-
-    [JSInvokable]
-    public Task TriggerResize()
-    {
-        JS?.InvokeVoidAsync("drawChart", _chartData, _dates);
-        
-        StateHasChanged();
-        return Task.CompletedTask;
     }
     
     private async Task LoadCurrencyListAsync()
