@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddShared();
 
         services.AddScoped<IRateHelper, RateHelper>();
+        services.AddScoped<IMinioHelper, MinioHelper>();
         
         services.AddScoped<ICsvService, CsvService>();
         services.AddScoped<IRateService, RateService>();

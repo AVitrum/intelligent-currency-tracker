@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services;
 using Domain.Common;
 using Infrastructure.Identity.Results;
+using Infrastructure.Utils.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Dtos;
 using Shared.Payload.Requests;
@@ -14,11 +15,13 @@ public class IdentityController : ControllerBase
 {
     private readonly IAdminService _adminService;
     private readonly IUserService _userService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public IdentityController(IUserService userService, IAdminService adminService)
+    public IdentityController(IUserService userService, IAdminService adminService, IHttpContextAccessor httpContextAccessor)
     {
         _userService = userService;
         _adminService = adminService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [HttpPost("register")]
@@ -64,6 +67,64 @@ public class IdentityController : ControllerBase
         }
 
         return Unauthorized();
+    }
+    
+    [HttpGet("profile")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetProfile()
+    {
+        string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        BaseResult result = await _userService.GetProfileAsync(userId);
+
+        if (result is ProfileResult profileResult)
+        {
+            return Ok(profileResult.Profile);
+        }
+
+        return BadRequest(result.Errors);
+    }
+    
+    [HttpPut("upload-photo")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadPhoto(IFormFile? file)
+    {
+        string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        if (file is null || file.Length == 0)
+        {
+            return BadRequest("File is empty");
+        }
+
+        string filePath = Path.GetTempFileName();
+        await using (FileStream stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+        
+        string fileExtension = Path.GetExtension(file.FileName);
+        BaseResult result = await _userService.UploadPhotoAsync(filePath, fileExtension, userId);
+        
+        if (result.Success)
+        {
+            return Ok("Photo uploaded successfully.");
+        }
+
+        return BadRequest(result.Errors);
     }
 
     [HttpPost("create-admin")]

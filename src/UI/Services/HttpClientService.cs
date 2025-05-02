@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Domain.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Shared.Helpers;
@@ -16,7 +17,11 @@ public class HttpClientService : IHttpClientService
     private readonly NavigationManager _navigation;
     private readonly IUISettings _settings;
 
-    public HttpClientService(HttpClient http, IJSRuntime js, NavigationManager navigation, IUISettings settings)
+    public HttpClientService(
+        HttpClient http,
+        IJSRuntime js,
+        NavigationManager navigation,
+        IUISettings settings)
     {
         _http = http;
         _js = js;
@@ -37,6 +42,10 @@ public class HttpClientService : IHttpClientService
             {
                 response = await requestFunc();
             }
+            else
+            {
+                await JwtTokenHelper.RemoveJwtTokensFromCookiesAsync(_js, _navigation);
+            }
         }
 
         return response;
@@ -52,7 +61,7 @@ public class HttpClientService : IHttpClientService
         }
 
         RefreshTokenRequest refreshRequest = new RefreshTokenRequest
-            { RefreshToken = refreshToken, Provider = "DevUI" };
+            { RefreshToken = refreshToken, Provider = nameof(LoginManagerProvider.Default) };
         HttpResponseMessage response =
             await _http.PostAsJsonAsync($"{_settings.ApiUrl}/Identity/refresh-token", refreshRequest);
 

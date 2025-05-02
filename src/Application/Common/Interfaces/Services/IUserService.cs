@@ -9,4 +9,6 @@ public interface IUserService
     Task<BaseResult> CreateAsync(CreateUserDto dto);
     Task<BaseResult> LoginAsync(LoginRequest request);
     Task<BaseResult> LoginWithRefreshTokenAsync(RefreshTokenRequest request);
+    Task<BaseResult> UploadPhotoAsync(string filePath, string fileExtension, string userId);
+    Task<BaseResult> GetProfileAsync(string userId);
 }

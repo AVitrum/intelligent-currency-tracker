@@ -33,7 +33,7 @@ public class JwtService : IJwtService
             _issuer,
             _audience,
             claims,
-            expires: DateTime.UtcNow.AddDays(2),
+            expires: DateTime.UtcNow.AddHours(12),
             signingCredentials: credentials) ?? throw new JwtException("Token generation failed");
 
         return token;
@@ -52,7 +52,7 @@ public class JwtService : IJwtService
         {
             UserId = userId,
             Token = GenerateRefreshToken(),
-            ExpiresOnUtc = DateTime.UtcNow.AddMinutes(30)
+            ExpiresOnUtc = DateTime.UtcNow.AddDays(7)
         };
         await _refreshTokenRepository.AddAsync(refreshToken);
 

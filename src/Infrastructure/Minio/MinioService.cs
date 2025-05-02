@@ -1,9 +1,7 @@
-using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
-using Domain.Constants;
 using Domain.Enums;
 
 namespace Infrastructure.Minio;
@@ -12,8 +10,9 @@ public class MinioService : IMinioService
 {
     private readonly string _bucketName;
     private readonly IAmazonS3 _s3Client;
+    private readonly IMinioHelper _minioHelper;
 
-    public MinioService(IAppSettings appSettings)
+    public MinioService(IAppSettings appSettings, IMinioHelper minioHelper)
     {
         _s3Client = new AmazonS3Client(
             appSettings.AwsAccessKey,
@@ -23,14 +22,15 @@ public class MinioService : IMinioService
                 ServiceURL = appSettings.AwsEndpoint, ForcePathStyle = true
             });
         _bucketName = appSettings.AwsBucket;
+        _minioHelper = minioHelper;
     }
 
     public async Task<string> UploadFileAsync(string filePath, string key, Dictionary<FileTag, string>? tags = null)
     {
         key = key.Replace(" ", "_");
-        key = await EnsureUniqueKeyAsync(key);
+        key = await _minioHelper.EnsureUniqueKeyAsync(key);
 
-        ConvertTypeIntoTags(key, ref tags);
+        _minioHelper.ConvertTypeIntoTags(key, ref tags);
 
         PutObjectRequest putRequest = new PutObjectRequest
         {
@@ -87,61 +87,5 @@ public class MinioService : IMinioService
         }
 
         return tagResponse.Tagging.ToDictionary(t => Enum.Parse<FileTag>(t.Key), t => t.Value);
-    }
-
-    private async Task<string> EnsureUniqueKeyAsync(string key)
-    {
-        int counter = 1;
-        string extension = Path.GetExtension(key);
-        string baseName = Path.GetFileNameWithoutExtension(key);
-
-        while (await FileExistsAsync(key))
-        {
-            key = $"{baseName}_{counter}{extension}";
-            counter++;
-        }
-
-        return key;
-    }
-
-    private async Task<bool> FileExistsAsync(string key)
-    {
-        try
-        {
-            GetObjectMetadataRequest metadataRequest = new GetObjectMetadataRequest
-            {
-                BucketName = _bucketName,
-                Key = key
-            };
-
-            await _s3Client.GetObjectMetadataAsync(metadataRequest);
-            return true;
-        }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-        {
-            return false;
-        }
-    }
-
-    private static void ConvertTypeIntoTags(string key, ref Dictionary<FileTag, string>? tags)
-    {
-        tags ??= new Dictionary<FileTag, string>();
-
-        string extension = Path.GetExtension(key);
-
-        if (!string.IsNullOrEmpty(extension))
-        {
-            extension = extension.TrimStart('.');
-
-            tags.TryAdd(FileTag.Extension, extension);
-
-            if (!tags.ContainsKey(FileTag.FileType))
-            {
-                if (FileConstants.ExtensionToType.TryGetValue(extension, out string? value))
-                {
-                    tags.Add(FileTag.FileType, value);
-                }
-            }
-        }
     }
 }

@@ -1,0 +1,39 @@
+@page "/profile"
+@using UI.Configurations
+@using UI.Services
+@inject IUISettings UISettings
+@inject IHttpClientService HttpClientService
+@inject HttpClient Http
+@inject IToastService ToastService
+
+<div class="page-container">
+    <div class="header-section">
+        <h2>Profile</h2>
+    </div>
+    <div class="profile-content">
+        <div class="profile-image-section">
+            @if (!string.IsNullOrEmpty(_profileImageSrc))
+            {
+                <img src="@_profileImageSrc" alt="Profile Photo" />
+            }
+            else
+            {
+                <p>No photo available.</p>
+            }
+        </div>
+        <div class="profile-info-section">
+            @if (_profile is not null)
+            {
+                <p><strong>User ID:</strong> @_profile.UserId</p>
+                <p><strong>Name:</strong> @_profile.UserName</p>
+                <p><strong>Email:</strong> @_profile.Email</p>
+                <p><strong>Phone:</strong> @_profile.PhoneNumber</p>
+            }
+        </div>
+
+        <div class="profile-actions">
+            <button class="btn-primary" >Modify Information</button>
+            <button class="btn-secondary" >Change Password</button>
+        </div>
+    </div>
+</div>
