@@ -102,6 +102,19 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         return rates;
     }
 
+    public async Task<IEnumerable<Rate>> GetLastUpdatedAsync()
+    {
+        List<Rate> rates = await _context.Rates
+            .AsNoTracking()
+            .Include(x => x.Currency)
+            .Where(x => x.Date.Date == DateTime.UtcNow.Date)
+            .OrderBy(x => x.Date)
+            .AsSplitQuery()
+            .ToListAsync();
+
+        return rates;
+    }
+
 
     public async Task<DateTime> GetLastDateAsync()
     {

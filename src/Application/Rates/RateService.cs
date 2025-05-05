@@ -66,6 +66,32 @@ public class RateService : IRateService
         return GetAllCurrenciesResult.SuccessResult(currenciesDto);
     }
 
+    public async Task<BaseResult> GetLastUpdatedCurrenciesAsync()
+    {
+        List<Rate> rates = (List<Rate>)await _rateRepository.GetLastUpdatedAsync();
+        
+        if (rates.Count == 0)
+        {
+            return BaseResult.FailureResult(["No rates found."]);
+        }
+
+        ICollection<Currency> currencies = [];
+        
+        foreach (Rate rate in rates)
+        {
+            Currency? currency = await _currencyRepository.GetByIdAsync(rate.CurrencyId);
+            if (currency is null)
+            {
+                throw new EntityNotFoundException<Currency>();
+            }
+
+            currencies.Add(currency);
+        }
+        
+        IEnumerable<CurrencyDto> currencyDtos = _rateHelper.ConvertCurrenciesToDtoAsync(currencies);
+        return GetAllCurrenciesResult.SuccessResult(currencyDtos);
+    }
+
     public async Task<BaseResult> DeleteRatesAsync(string date)
     {
         DateTime dateTime = DateHelper.ParseDdMmYyyy(date);

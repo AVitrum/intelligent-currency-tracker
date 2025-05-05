@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Utils;
+using Domain.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +18,10 @@ public class ExchangeRateSyncService : BackgroundService
     private readonly ILogger<ExchangeRateSyncService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly TimeSpan _updateInterval;
+    
+    private List<int> _r030 = [];
+
+    public event ExchangeRatesFetchedEventHandler? ExchangeRatesFetched;
 
     public ExchangeRateSyncService(
         IHttpClientFactory httpClientFactory,
@@ -24,8 +29,7 @@ public class ExchangeRateSyncService : BackgroundService
         IServiceScopeFactory scopeFactory,
         IConfiguration configuration)
     {
-        _updateInterval =
-            TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
+        _updateInterval = TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _scopeFactory = scopeFactory;
@@ -38,6 +42,11 @@ public class ExchangeRateSyncService : BackgroundService
         do
         {
             await FetchAndStoreExchangeRates(stoppingToken);
+
+            if (_r030.Count != 0 && ExchangeRatesFetched != null)
+            {
+                await ExchangeRatesFetched.Invoke(this, new ExchangeRatesFetchedEventArgs(_r030));
+            }
         } while (await timer.WaitForNextTickAsync(stoppingToken));
     }
 
@@ -145,6 +154,11 @@ public class ExchangeRateSyncService : BackgroundService
                 Value = rateValue,
                 Date = date
             });
+            
+            if (!_r030.Contains(currency.R030))
+            {
+                _r030.Add(currency.R030);
+            }
         }
 
         return rates;

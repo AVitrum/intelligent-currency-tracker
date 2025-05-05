@@ -71,8 +71,8 @@ public class IdentityController : ControllerBase
     
     [HttpGet("profile")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetProfile()
     {
         string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
@@ -94,8 +94,8 @@ public class IdentityController : ControllerBase
     
     [HttpPut("upload-photo")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UploadPhoto(IFormFile? file)
     {
         string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
@@ -127,6 +127,31 @@ public class IdentityController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    [HttpPost("change-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+    {
+        string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        BaseResult result = await _userService.ChangePasswordAsync(
+            request.OldPassword, request.ConfirmPassword, request.NewPassword, userId);
+
+        if (result.Success)
+        {
+            return Ok("Password changed successfully.");
+        }
+
+        return BadRequest(result.Errors);
+    }
+    
+    
     [HttpPost("create-admin")]
     [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status201Created)]

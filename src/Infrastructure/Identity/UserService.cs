@@ -133,4 +133,18 @@ public class UserService : IUserService
 
         return ProfileResult.SuccessResult(new ProfileResponse(userId, user.UserName!, user.Email!, user.PhoneNumber, photoBytes));
     }
+
+    public async Task<BaseResult> ChangePasswordAsync(string oldPassword, string confirmPassword, string newPassword, string userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(["User not found"]);
+        }
+
+        IdentityResult result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+        return !result.Succeeded 
+            ? BaseResult.FailureResult(result.Errors.Select(e => e.Description).ToList()) 
+            : BaseResult.SuccessResult();
+    }
 }

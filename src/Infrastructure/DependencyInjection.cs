@@ -52,15 +52,17 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IMinioService, MinioService>();
         services.AddScoped<ITraceableCurrencyService, TraceableCurrencyService>();
-
+        
         //Repositories
         services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         services.AddScoped<IRateRepository, RateRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<ITraceableCurrencyRepository, TraceableCurrencyRepository>();
-
+        
         //Background Services
-        services.AddHostedService<ExchangeRateSyncService>();
+        services.AddSingleton<ExchangeRateSyncService>();
+        services.AddHostedService(provider => provider.GetRequiredService<ExchangeRateSyncService>());
+        services.AddHostedService<ExchangeRateFetchedLogger>();
 
         if (appSettings.IsDocker())
         {

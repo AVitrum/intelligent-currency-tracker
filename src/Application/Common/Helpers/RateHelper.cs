@@ -60,4 +60,13 @@ public class RateHelper : IRateHelper
         _logger.LogInformation("Successfully converted rates to DTO");
         return ratesDto;
     }
+
+    public IEnumerable<CurrencyDto> ConvertCurrenciesToDtoAsync(IEnumerable<Currency> rates)
+    {
+        List<CurrencyDto> currenciesDto = [];
+        currenciesDto.AddRange(rates.Select(currency => _mapper.Map<CurrencyDto>(currency)));
+
+        _logger.LogInformation("Successfully converted currencies to DTO");
+        return currenciesDto;
+    }
 }

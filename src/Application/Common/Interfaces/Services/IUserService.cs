@@ -11,4 +11,5 @@ public interface IUserService
     Task<BaseResult> LoginWithRefreshTokenAsync(RefreshTokenRequest request);
     Task<BaseResult> UploadPhotoAsync(string filePath, string fileExtension, string userId);
     Task<BaseResult> GetProfileAsync(string userId);
+    Task<BaseResult> ChangePasswordAsync(string oldPassword, string confirmPassword, string newPassword, string userId);
 }

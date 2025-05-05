@@ -3,8 +3,9 @@
 @using UI.Services
 @inject IUISettings UISettings
 @inject IHttpClientService HttpClientService
-@inject HttpClient Http
 @inject IToastService ToastService
+@inject NavigationManager Navigation
+@inject HttpClient Http
 
 <div class="page-container">
     <div class="header-section">
@@ -33,7 +34,7 @@
 
         <div class="profile-actions">
             <button class="btn-primary" >Modify Information</button>
-            <button class="btn-secondary" >Change Password</button>
+            <button class="btn-secondary" @onclick="OnPasswordChange">Change Password</button>
         </div>
     </div>
 </div>

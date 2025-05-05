@@ -41,6 +41,11 @@ public partial class Profile : ComponentBase, IPageComponent
             await HandleInvalidResponse($"Error: {ex.Message}");
         }
     }
+    
+    private void OnPasswordChange()
+    {
+        Navigation.NavigateTo("/change-password");
+    }
 
     public Task HandleInvalidResponse(string message = "An error occurred while processing your request. Try again later.")
     {
