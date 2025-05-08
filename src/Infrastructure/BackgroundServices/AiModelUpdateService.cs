@@ -8,15 +8,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.BackgroundServices;
 
-public class ExchangeRateFetchedLogger : IHostedService
+public class AiModelUpdateService : IHostedService
 {
     private readonly ExchangeRateSyncService _syncService;
-    private readonly ILogger<ExchangeRateFetchedLogger> _logger;
+    private readonly ILogger<AiModelUpdateService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public ExchangeRateFetchedLogger(
+    public AiModelUpdateService(
         ExchangeRateSyncService syncService,
-        ILogger<ExchangeRateFetchedLogger> logger,
+        ILogger<AiModelUpdateService> logger,
         IServiceScopeFactory scopeFactory)
     {
         _syncService = syncService;

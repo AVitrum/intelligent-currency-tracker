@@ -62,7 +62,7 @@ public static class DependencyInjection
         //Background Services
         services.AddSingleton<ExchangeRateSyncService>();
         services.AddHostedService(provider => provider.GetRequiredService<ExchangeRateSyncService>());
-        services.AddHostedService<ExchangeRateFetchedLogger>();
+        services.AddHostedService<AiModelUpdateService>();
 
         if (appSettings.IsDocker())
         {
