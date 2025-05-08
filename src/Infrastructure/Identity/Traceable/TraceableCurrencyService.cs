@@ -25,9 +25,9 @@ public class TraceableCurrencyService : ITraceableCurrencyService
         _mapper = mapper;
     }
 
-    public async Task<BaseResult> TrackCurrencyAsync(string userId, int currencyR030)
+    public async Task<BaseResult> TrackCurrencyAsync(string userId, string currencyCode)
     {
-        Currency? currency = await _currencyRepository.GetByR030Async(currencyR030);
+        Currency? currency = await _currencyRepository.GetByCodeAsync(currencyCode);
 
         if (currency is null)
         {
@@ -40,8 +40,14 @@ public class TraceableCurrencyService : ITraceableCurrencyService
             UserId = userId
         };
 
-        await _traceableCurrencyRepository.AddAsync(newTraceableCurrency);
+        bool exists = await _traceableCurrencyRepository.ExistsAsync(userId, currency.Id);
 
+        if (exists)
+        {
+            return BaseResult.FailureResult(["Currency already tracked"]);
+        }
+
+        await _traceableCurrencyRepository.AddAsync(newTraceableCurrency);
         return BaseResult.SuccessResult();
     }
 
@@ -61,5 +67,18 @@ public class TraceableCurrencyService : ITraceableCurrencyService
             .ToList();
 
         return GetAllResult.SuccessResult(currencies);
+    }
+
+    public async Task<BaseResult> RemoveTrackedCurrency(string userId, string currencyCode)
+    {
+        Currency? currency = await _currencyRepository.GetByCodeAsync(currencyCode);
+
+        if (currency is null)
+        {
+            return BaseResult.FailureResult(["Currency not found"]);
+        }
+
+        await _traceableCurrencyRepository.RemoveAsync(userId, currency.Id);
+        return BaseResult.SuccessResult();
     }
 }

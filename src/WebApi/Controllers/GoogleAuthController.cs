@@ -3,7 +3,7 @@ using Domain.Common;
 using Infrastructure.GoogleAuth.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
-using Shared.Payload.Responses;
+using Shared.Payload.Responses.Identity;
 
 namespace WebApi.Controllers;
 
@@ -33,7 +33,7 @@ public class GoogleAuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> GoogleResponse()
+    public async Task<ActionResult<BaseResponse>> GoogleResponse()
     {
         AuthenticateResult authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
         BaseResult result = await _service.HandleGoogleResponse(authResult);
@@ -50,6 +50,14 @@ public class GoogleAuthController : ControllerBase
             Secure = true
         });
 
-        return Ok(new LoginResponse(googleAuthResult.Token, ""));
+        BaseResponse response = new LoginResponse(
+            true,
+            "Login successful",
+            StatusCodes.Status200OK,
+            new List<string>(),
+            googleAuthResult.Token,
+            googleAuthResult.RefreshToken);
+
+        return Ok(response);
     }
 }

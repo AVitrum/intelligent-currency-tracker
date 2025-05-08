@@ -1,17 +1,19 @@
 using Domain.Common;
 
-namespace Infrastructure.Identity.Results;
+namespace Shared.Payload.Responses.Identity;
 
-public class ProfileResult : BaseResult
+public class ProfileResponse : BaseResponse
 {
-    private ProfileResult(
+    public ProfileResponse(
         bool success,
+        string message,
+        int statusCode,
         IEnumerable<string> errors,
         string userId,
         string userName,
         string email,
         string? phoneNumber,
-        byte[] photo) : base(success, errors)
+        byte[] photo) : base(success, message, statusCode, errors)
     {
         UserId = userId;
         UserName = userName;
@@ -25,14 +27,4 @@ public class ProfileResult : BaseResult
     public string Email { get; }
     public string? PhoneNumber { get; }
     public byte[] Photo { get; }
-
-    public static ProfileResult SuccessResult(
-        string userId,
-        string userName,
-        string email,
-        string? phoneNumber,
-        byte[] photo)
-    {
-        return new ProfileResult(true, [], userId, userName, email, phoneNumber, photo);
-    }
 }

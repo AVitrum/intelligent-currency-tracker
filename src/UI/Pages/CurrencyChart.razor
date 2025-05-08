@@ -15,13 +15,16 @@
             Select a currency and date range to view the exchange rate dynamics.
         </p>
     </div>
-    
+
     <div class="content-section">
         <div class="form-container">
             <div class="form-card">
                 <div class="form-group">
                     <label for="currencySelect">Currency:</label>
-                    <select id="currencySelect" @bind="_selectedCurrency" @bind:after="LoadRatesAsync" class="form-control">
+                    <select id="currencySelect"
+                            @bind="_selectedCurrency"
+                            @bind:after="LoadRatesAsync"
+                            class="form-control">
                         @foreach (string c in _currencies)
                         {
                             <option value="@c">@c</option>
@@ -30,12 +33,23 @@
                 </div>
                 <div class="form-group">
                     <label for="startDate">Start Date:</label>
-                    <input id="startDate" type="date" @bind="_startDate" @bind:after="LoadRatesAsync" class="form-control" />
+                    <input id="startDate"
+                           type="date"
+                           @bind="_startDate"
+                           @bind:after="LoadRatesAsync"
+                           class="form-control"/>
                 </div>
                 <div class="form-group">
                     <label for="endDate">End Date:</label>
-                    <input id="endDate" type="date" @bind="_endDate" @bind:after="LoadRatesAsync" class="form-control" />
+                    <input id="endDate"
+                           type="date"
+                           @bind="_endDate"
+                           @bind:after="LoadRatesAsync"
+                           class="form-control"/>
                 </div>
+                <button class="form-control" @onclick="PinCurrentCurrency">
+                    Pin this currency
+                </button>
             </div>
         </div>
         <div class="chart-section">
@@ -51,4 +65,29 @@
             </div>
         </div>
     </div>
+
+    @if (_pinnedCurrencies.Count > 0)
+    {
+        <div class="pinned-container">
+            <h3>Pinned Charts</h3>
+            <div class="pinned-charts-section">
+                @foreach (string c in _pinnedCurrencies)
+                {
+                    <div class="pinned-card">
+                        <div class="currency-label">@c</div>
+                        <button type="button" class="mini-chart-close" @onclick="() => RemovePinnedCurrency(c)">
+                            <svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor">
+                                <path
+                                    d="M135.2 17.69C142.5 7.93 153.4 0 166.4 0h115.1c13 0 23.9 7.93 31.2 17.69L370.1 48H432c8.837 0 16 7.162 16 16s-7.163 16-16 16H16C7.163 80 0 72.84 0 64S7.163 48 16 48h61.9l57.3-30.31zM32 128h384l-21.33 338.6c-1.414 22.4-20.69 41.4-43.07 41.4H96.4c-22.38 0-41.66-19.03-43.07-41.4L32 128z"/>
+                            </svg>
+                        </button>
+                        <div class="mini-chart-container">
+                            <canvas id="miniChart-@c"></canvas>
+                            <div id="miniTooltip-@c" class="chart-tooltip"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>

@@ -1,7 +1,9 @@
 using System.Net.Http.Json;
-using System.Text.Json;
+using System.Text;
+using Domain.Common;
 using Microsoft.AspNetCore.Components;
 using Shared.Payload.Requests;
+using Shared.Payload.Responses.Identity;
 
 namespace UI.Pages;
 
@@ -12,54 +14,47 @@ public partial class ChangePassword : ComponentBase, IPageComponent
     [Inject]
     protected HttpClient Http { get; set; } = null!;
 
-    public async Task<string> HandleResponse(HttpResponseMessage response)
+    public Task<string> HandleResponse(BaseResponse? response)
     {
-        string errorResponse = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrWhiteSpace(errorResponse))
+        if (response is null)
         {
-            return "Something went wrong. Please try again.";
+            return Task.FromResult("An error occurred while processing your request. Try again later.");
         }
 
-        try
-        {
-            using JsonDocument doc = JsonDocument.Parse(errorResponse);
-            if (doc.RootElement.TryGetProperty("title", out JsonElement titleElement))
-            {
-                return titleElement.GetString() ?? errorResponse;
-            }
+        StringBuilder errorMessage = new StringBuilder();
 
-            if (doc.RootElement.TryGetProperty("message", out JsonElement messageElement))
-            {
-                return messageElement.GetString() ?? errorResponse;
-            }
+        errorMessage.AppendLine($"Message: {response.Message}");
+        errorMessage.AppendLine($"Status Code: {response.StatusCode}");
 
-            return errorResponse;
-        }
-        catch (JsonException)
+        if (response.Errors.Any())
         {
-            return errorResponse;
+            errorMessage.AppendLine($"Errors: {string.Join(", ", response.Errors)}");
         }
+
+        return Task.FromResult(errorMessage.ToString());
     }
 
-    public Task HandleInvalidResponse(string message = "An error occurred while processing your request. Try again later.")
+    public Task HandleInvalidResponse(
+        string message = "An error occurred while processing your request. Try again later.")
     {
         ToastService.ShowError(message);
         return Task.CompletedTask;
     }
 
-    protected async Task HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
-        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() =>
+        HttpResponseMessage res = await HttpClientService.SendRequestAsync(() =>
             Http.PostAsJsonAsync($"{UISettings.ApiUrl}/Identity/change-password", Request));
-        
-        if (!response.IsSuccessStatusCode)
+        ChangePasswordResponse? response = await res.Content.ReadFromJsonAsync<ChangePasswordResponse>();
+
+        if (!res.IsSuccessStatusCode)
         {
             string errorResponse = await HandleResponse(response);
             await HandleInvalidResponse(errorResponse);
         }
         else
         {
-            ToastService.ShowSuccess("Password changed successfully.");
+            ToastService.ShowSuccess(response!.Message);
             ResetForm();
         }
     }

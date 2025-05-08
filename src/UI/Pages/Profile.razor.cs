@@ -1,7 +1,8 @@
 using System.Net.Http.Json;
-using System.Text.Json;
+using System.Text;
+using Domain.Common;
 using Microsoft.AspNetCore.Components;
-using Shared.Payload.Responses;
+using Shared.Payload.Responses.Identity;
 
 namespace UI.Pages;
 
@@ -9,6 +10,33 @@ public partial class Profile : ComponentBase, IPageComponent
 {
     private ProfileResponse? _profile;
     private string _profileImageSrc = string.Empty;
+
+    public Task<string> HandleResponse(BaseResponse? response)
+    {
+        if (response is null)
+        {
+            return Task.FromResult("An error occurred while processing your request. Try again later.");
+        }
+
+        StringBuilder errorMessage = new StringBuilder();
+
+        errorMessage.AppendLine($"Message: {response.Message}");
+        errorMessage.AppendLine($"Status Code: {response.StatusCode}");
+
+        if (response.Errors.Any())
+        {
+            errorMessage.AppendLine($"Errors: {string.Join(", ", response.Errors)}");
+        }
+
+        return Task.FromResult(errorMessage.ToString());
+    }
+
+    public Task HandleInvalidResponse(
+        string message = "An error occurred while processing your request. Try again later.")
+    {
+        ToastService.ShowError(message);
+        return Task.CompletedTask;
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -20,10 +48,12 @@ public partial class Profile : ComponentBase, IPageComponent
         string url = $"{UISettings.ApiUrl}/Identity/profile";
         try
         {
-            HttpResponseMessage response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
-            if (response.IsSuccessStatusCode)
+            HttpResponseMessage res = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+            ProfileResponse? response = await res.Content.ReadFromJsonAsync<ProfileResponse>();
+
+            if (res.IsSuccessStatusCode)
             {
-                _profile = await response.Content.ReadFromJsonAsync<ProfileResponse>();
+                _profile = response;
                 if (_profile?.Photo is { Length: > 0 })
                 {
                     string base64Image = Convert.ToBase64String(_profile.Photo);
@@ -41,44 +71,9 @@ public partial class Profile : ComponentBase, IPageComponent
             await HandleInvalidResponse($"Error: {ex.Message}");
         }
     }
-    
+
     private void OnPasswordChange()
     {
         Navigation.NavigateTo("/change-password");
-    }
-
-    public Task HandleInvalidResponse(string message = "An error occurred while processing your request. Try again later.")
-    {
-        ToastService.ShowError(message);
-        return Task.CompletedTask;
-    }
-
-    public async Task<string> HandleResponse(HttpResponseMessage response)
-    {
-        string errorResponse = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrWhiteSpace(errorResponse))
-        {
-            return "Something went wrong. Please try again.";
-        }
-
-        try
-        {
-            using JsonDocument doc = JsonDocument.Parse(errorResponse);
-            if (doc.RootElement.TryGetProperty("title", out JsonElement titleElement))
-            {
-                return titleElement.GetString() ?? errorResponse;
-            }
-
-            if (doc.RootElement.TryGetProperty("message", out JsonElement messageElement))
-            {
-                return messageElement.GetString() ?? errorResponse;
-            }
-
-            return errorResponse;
-        }
-        catch (JsonException)
-        {
-            return errorResponse;
-        }
     }
 }

@@ -8,18 +8,17 @@ using Infrastructure.Identity.Results;
 using Microsoft.AspNetCore.Identity;
 using Shared.Dtos;
 using Shared.Payload.Requests;
-using Shared.Payload.Responses;
 
 namespace Infrastructure.Identity;
 
 public class UserService : IUserService
 {
-    private readonly ILoginManagerFactory _loginManagerFactory;
-    private readonly IAmazonS3 _s3Client;
-    private readonly IMinioHelper _minioHelper;
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly string _bucketName;
-    
+    private readonly ILoginManagerFactory _loginManagerFactory;
+    private readonly IMinioHelper _minioHelper;
+    private readonly IAmazonS3 _s3Client;
+    private readonly UserManager<ApplicationUser> _userManager;
+
     public UserService(
         UserManager<ApplicationUser> userManager,
         ILoginManagerFactory loginManagerFactory,
@@ -83,25 +82,25 @@ public class UserService : IUserService
 
     public async Task<BaseResult> UploadPhotoAsync(string filePath, string fileExtension, string userId)
     {
-        string prefix = $"users/{userId}/photo/{userId}";   
-        
+        string prefix = $"users/{userId}/photo/{userId}";
+
         string? existingKey = await _minioHelper.FindKeyWithPrefixAsync(prefix);
         if (existingKey is not null)
         {
             await _s3Client.DeleteObjectAsync(_bucketName, existingKey);
         }
-        
+
         string key = $"{prefix}{fileExtension}";
-        
+
         PutObjectRequest putRequest = new PutObjectRequest
         {
             BucketName = _bucketName,
             Key = key,
             FilePath = filePath
         };
-        
+
         await _s3Client.PutObjectAsync(putRequest);
-        
+
         return BaseResult.SuccessResult();
     }
 
@@ -131,10 +130,14 @@ public class UserService : IUserService
             photoBytes = ms.ToArray();
         }
 
-        return ProfileResult.SuccessResult(new ProfileResponse(userId, user.UserName!, user.Email!, user.PhoneNumber, photoBytes));
+        return ProfileResult.SuccessResult(userId, user.UserName!, user.Email!, user.PhoneNumber, photoBytes);
     }
 
-    public async Task<BaseResult> ChangePasswordAsync(string oldPassword, string confirmPassword, string newPassword, string userId)
+    public async Task<BaseResult> ChangePasswordAsync(
+        string oldPassword,
+        string confirmPassword,
+        string newPassword,
+        string userId)
     {
         ApplicationUser? user = await _userManager.FindByIdAsync(userId);
         if (user is null)
@@ -143,8 +146,8 @@ public class UserService : IUserService
         }
 
         IdentityResult result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
-        return !result.Succeeded 
-            ? BaseResult.FailureResult(result.Errors.Select(e => e.Description).ToList()) 
+        return !result.Succeeded
+            ? BaseResult.FailureResult(result.Errors.Select(e => e.Description).ToList())
             : BaseResult.SuccessResult();
     }
 }

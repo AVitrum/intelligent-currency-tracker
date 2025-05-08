@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Services;
 using Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Payload.Requests;
+using Shared.Payload.Responses.AiModel;
 
 namespace WebApi.Controllers;
 
@@ -19,28 +20,55 @@ public class AiModelController : ControllerBase
     }
 
     [HttpPost("train")]
-    public async Task<IActionResult> Train(TrainModelRequest request)
+    public async Task<ActionResult<BaseResponse>> Train(TrainModelRequest request)
     {
+        BaseResponse response;
         BaseResult result = await _aiModelService.TrainModelAsync(request.CurrencyR030);
 
         if (result is TrainResult trainResult)
         {
-            return Ok(trainResult.Message);
+            response = new TrainResponse(
+                trainResult.Success,
+                trainResult.Message,
+                StatusCodes.Status200OK,
+                trainResult.Errors);
+
+            return Ok(response);
         }
 
-        return BadRequest(result);
+        response = new TrainResponse(
+            result.Success,
+            "Model not trained.",
+            StatusCodes.Status400BadRequest,
+            result.Errors);
+
+        return BadRequest(response);
     }
 
     [HttpPost("predict")]
-    public async Task<IActionResult> Predict(PredictRequest request)
+    public async Task<ActionResult<BaseResponse>> Predict(PredictRequest request)
     {
+        BaseResponse response;
         BaseResult result = await _aiModelService.PredictAsync(request.CurrencyR030, request.Date);
 
         if (result is PredictResult predictResult)
         {
-            return Ok(predictResult.Prediction);
+            response = new PredictResponse(
+                predictResult.Success,
+                "Prediction successful.",
+                StatusCodes.Status200OK,
+                predictResult.Errors,
+                predictResult.Prediction);
+            return Ok(response);
         }
 
-        return BadRequest(result);
+        response = new PredictResponse(
+            result.Success,
+            "Prediction failed.",
+            StatusCodes.Status400BadRequest,
+            result.Errors,
+            null);
+
+        return BadRequest(response);
     }
 }

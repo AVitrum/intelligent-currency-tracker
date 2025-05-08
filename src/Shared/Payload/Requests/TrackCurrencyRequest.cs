@@ -2,5 +2,5 @@ namespace Shared.Payload.Requests;
 
 public class TrackCurrencyRequest
 {
-    public required int R030 { get; init; }
+    public required string Currency { get; set; }
 }

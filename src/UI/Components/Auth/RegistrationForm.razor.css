@@ -2,12 +2,12 @@
     font-size: 1.75rem;
     margin-bottom: 0.5rem;
     font-weight: 300;
-    color: #3D3D3D;
+    color: #FE7743;
 }
 
 .form-subtitle {
     font-size: 1rem;
-    color: #578E7E;
+    color: #EFEEEA;
     margin-bottom: 1.5rem;
 }
 
@@ -19,14 +19,14 @@
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
-    color: #3D3D3D;
+    color: #EFEEEA;
 }
 
 .form-control {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    border: 1px solid #578E7E;
+    border: 1px solid #FE7743;
     border-radius: 12px;
     background-color: #F5ECD5;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -42,8 +42,8 @@
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    color: #FFFAEC;
-    background-color: #578E7E;
+    color: #EFEEEA;
+    background-color: #FE7743;
     border: none;
     border-radius: 16px;
     cursor: pointer;
@@ -52,7 +52,7 @@
 }
 
 .btn-primary:hover {
-    background-color: #3D3D3D;
+    background-color: #000000;
     transform: translateY(-2px);
 }
 
@@ -64,9 +64,9 @@
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    color: #578E7E;
-    background-color: #F5ECD5;
-    border: 1px solid #578E7E;
+    color: #FE7743;
+    background-color: #EFEEEA;
+    border: 1px solid #FE7743;
     border-radius: 16px;
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.3s ease;
@@ -74,8 +74,8 @@
 }
 
 .btn-secondary:hover {
-    background-color: #FFFAEC;
-    color: #3D3D3D;
+    background-color: #EFEEEA;
+    color: #000000;
     transform: translateY(-2px);
 }
 

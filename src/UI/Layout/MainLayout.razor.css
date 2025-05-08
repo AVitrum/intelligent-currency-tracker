@@ -2,32 +2,32 @@
     display: flex;
     flex-direction: row;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    background-color: #FFFAEC;
+    background-color: #EFEEEA;
 }
 
 main {
     flex: 1;
-    background-color: #FFFAEC;
-    color: #578E7E;
+    background-color: #EFEEEA;
+    color: #000000;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #FFFAEC;
-    color: #3D3D3D;
+    background-color: #EFEEEA;
+    color: #000000;
     margin: 0;
     padding: 0;
 }
 
 .top-row {
-    background-color: #F5ECD5;
-    border-bottom: 1px solid #578E7E;
+    background-color: #EFEEEA;
+    border-bottom: 1px solid #273F4F;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
-    color: #578E7E;
+    color: #EFEEEA;
     transition: background-color 0.4s ease;
 }
 
@@ -36,14 +36,14 @@ body {
     white-space: nowrap;
     margin-left: 1.5rem;
     text-decoration: none;
-    color: #578E7E;
+    color: #FE7743;
     transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
 .top-row ::deep a:hover,
 .top-row ::deep .btn-link:hover {
     text-decoration: underline;
-    color: #3D3D3D;
+    color: #000000;
 }
 
 .sidebar-header {
@@ -54,7 +54,7 @@ body {
 
 .sidebar-toggle-btn {
     background: none;
-    color: #FFFAEC;
+    color: #EFEEEA;
     border: none;
     font-size: 24px;
     cursor: pointer;
@@ -71,7 +71,7 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    background-color: #578E7E;
+    background-color: #273F4F;
     padding-top: 1rem;
     position: sticky;
     top: 0;
@@ -80,13 +80,13 @@ body {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, #578E7E 0%, #F5ECD5 40%, #FFFAEC 100%);
+    background-image: linear-gradient(180deg, #273F4F 0%, #FE7743 40%, #EFEEEA 100%);
     width: 250px;
     height: 100vh;
     position: sticky;
     top: 0;
     overflow: hidden;
-    color: #FFFAEC;
+    color: #EFEEEA;
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.5s ease,
     transform 0.5s ease;

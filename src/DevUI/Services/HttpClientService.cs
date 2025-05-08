@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Shared.Helpers;
 using Shared.Payload.Requests;
-using Shared.Payload.Responses;
+using Shared.Payload.Responses.Identity;
 
 namespace DevUI.Services;
 

@@ -2,51 +2,91 @@
     padding: 2rem;
     max-width: 1600px;
     margin: 0 auto;
-    background-color: #FFFAEC;
+    background-color: #EFEEEA;
 }
+
 .header-section {
     text-align: center;
     margin-bottom: 2rem;
 }
+
 .header-section h2 {
     margin-bottom: 1rem;
-    color: #3D3D3D;
+    color: #273F4F;
     font-size: 2rem;
 }
+
 .description {
-    color: #3D3D3D;
+    color: #000000;
     max-width: 800px;
     margin: 0 auto;
     line-height: 1.6;
     font-size: 1.1rem;
 }
+
 .content-section {
     display: flex;
     gap: 2rem;
     justify-content: space-between;
     flex-wrap: wrap;
 }
+
 .form-container {
     flex: 0 0 300px;
     min-width: 280px;
 }
+
 .form-card {
-    background: #F5ECD5;
+    background: #273F4F;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0px 4px 6px -2px,
     rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
     backdrop-filter: blur(10px);
+    color: #EFEEEA;
 }
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #EFEEEA;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #273F4F;
+    border-radius: 6px;
+    background: #EFEEEA;
+    transition: all 0.2s ease;
+    color: #000000;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #273F4F;
+    box-shadow: 0 0 0 2px rgba(39, 63, 79, 0.2);
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
 .chart-section {
     flex: 1;
-    background: #F5ECD5;
+    background: #273F4F;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0px 4px 6px -2px,
     rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    color: #EFEEEA;
 }
 
 .chart-container {
@@ -54,16 +94,19 @@
     width: 100%;
     aspect-ratio: 16/9;
 }
+
 .chart-container canvas {
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: block;
 }
+
 .chart-tooltip {
     position: fixed;
-    background-color: #3D3D3D;
+    background-color: #273F4F;
     color: #FFF;
     padding: 8px 12px;
     border-radius: 8px;
@@ -77,75 +120,137 @@
 
 .chart-footer {
     text-align: center;
-    color: #3D3D3D;
+    color: #EFEEEA;
 }
-.form-group {
+
+.pinned-container {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    background: #EFEEEA;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pinned-container h3 {
     margin-bottom: 1rem;
+    color: #273F4F;
+    font-size: 1.5rem;
+    text-align: center;
 }
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #3D3D3D;
-    font-weight: 500;
+
+.pinned-charts-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
 }
-.form-control {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #578E7E;
-    border-radius: 6px;
-    background: #FFFAEC;
-    transition: all 0.2s ease;
-    color: #3D3D3D;
+
+.pinned-card {
+    position: relative;
+    background: #273F4F;
+    padding: 1rem;
+    border-radius: 12px;
+    width: 520px;
+    color: #EFEEEA;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
-.form-control:focus {
-    outline: none;
-    border-color: #578E7E;
-    box-shadow: 0 0 0 2px rgba(87, 142, 126, 0.2);
-}
-select.form-control {
+
+.mini-chart-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
     cursor: pointer;
+    z-index: 20;
+    padding: 4px;
 }
+
+.mini-chart-close:hover {
+    color: #ff0000;
+}
+
+.currency-label {
+    text-align: center;
+    font-weight: 600;
+    color: #EFEEEA;
+    margin-bottom: 0.5rem;
+}
+
+.mini-chart-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+}
+
+.mini-chart-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 @media (max-width: 768px) {
     .content-section {
         flex-direction: column;
         align-items: center;
     }
+
     .form-container {
         flex: auto;
         margin-bottom: 2rem;
         width: 100%;
     }
+
     .header-section h2 {
         font-size: 1.5rem;
     }
+
     .description {
         font-size: 1rem;
     }
-    .form-group {
-        width: 100%;
-    }
+
     .chart-section {
         width: 100%;
         margin-top: 2rem;
     }
+
+    .pinned-card {
+        width: 48%;
+    }
 }
+
 @media (max-width: 480px) {
     .page-container {
         padding: 1rem;
     }
+
     .header-section h2 {
         font-size: 1.2rem;
     }
+
     .description {
         font-size: 0.9rem;
     }
-    .form-card, .chart-section {
+
+    .form-card, .chart-section, .pinned-card {
         padding: 1rem;
     }
+
     .form-control {
         font-size: 0.9rem;
     }
+
     .chart-footer {
         font-size: 0.8rem;
+    }
+
+    .pinned-card {
+        width: 100%;
     }
 }
