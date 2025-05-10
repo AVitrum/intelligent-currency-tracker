@@ -9,27 +9,22 @@ using Shared.Helpers;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.Rate;
 using Shared.Payload.Responses.UserRate;
-using UI.Services;
 
 namespace UI.Pages;
 
-public partial class CurrencyChart : ComponentBase, IPageComponent
+public partial class TrackedCharts : ComponentBase, IPageComponent
 {
-    private readonly List<string> _currencies = [];
+    private readonly DateTime _endDate = DateTime.Today;
+
     private readonly List<string> _pinnedCurrencies = [];
 
     private readonly Dictionary<string, (decimal[] Data, string[] Dates)> _pinnedData =
         new Dictionary<string, (decimal[] Data, string[] Dates)>();
 
-    private decimal[] _chartData = [];
-    private string[] _dates = [];
-    private DateTime _endDate = DateTime.Today;
-
+    private readonly DateTime _startDate = DateTime.Today.AddMonths(-1);
     private string? _lastPinnedCurrency;
-    private string _selectedCurrency = "USD";
+
     private bool _shouldDrawNewPin;
-    private DateTime _startDate = DateTime.Today.AddMonths(-1);
-    [Inject] private WebSocketService WebSocketService { get; set; } = null!;
 
     public Task<string> HandleResponse(BaseResponse? response)
     {
@@ -60,16 +55,9 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
 
     protected override async Task OnInitializedAsync()
     {
-        await WebSocketService.ConnectAsync();
-        await LoadTrackedCurrenciesAsync();
+        await LoadPinnedCurrenciesAsync();
         await RequestDataForPinnedCurrenciesAsync();
         await DrawPinnedChartsAsync();
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await LoadCurrencyListAsync();
-        await LoadRatesAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -90,19 +78,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
         }
     }
 
-    private async Task DrawPinnedChartsAsync()
-    {
-        foreach (string currency in _pinnedCurrencies)
-        {
-            _lastPinnedCurrency = currency;
-            _shouldDrawNewPin = true;
-            StateHasChanged();
-        }
-
-        await Task.CompletedTask;
-    }
-
-    private async Task LoadTrackedCurrenciesAsync()
+    private async Task LoadPinnedCurrenciesAsync()
     {
         string url = $"{UISettings.ApiUrl}/userRate/tracked-currencies";
 
@@ -170,104 +146,16 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
         }
     }
 
-    private async Task LoadCurrencyListAsync()
+    private async Task DrawPinnedChartsAsync()
     {
-        string url = $"{UISettings.ApiUrl}/Rate/get-all-currencies";
-
-        try
+        foreach (string currency in _pinnedCurrencies)
         {
-            HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
-            GetAllCurrenciesResponse? response = await resp.Content.ReadFromJsonAsync<GetAllCurrenciesResponse>();
-
-            if (resp.IsSuccessStatusCode)
-            {
-                List<CurrencyDto> list = (List<CurrencyDto>)response!.Currencies!;
-
-                if (list.Count > 0)
-                {
-                    _currencies.AddRange(list.Select(c => c.Code));
-                    _currencies.Sort();
-                }
-                else
-                {
-                    await HandleInvalidResponse("No currencies available.");
-                }
-            }
-            else
-            {
-                string err = await HandleResponse(response);
-                await HandleInvalidResponse(err);
-            }
+            _lastPinnedCurrency = currency;
+            _shouldDrawNewPin = true;
+            StateHasChanged();
         }
-        catch (Exception ex)
-        {
-            await HandleInvalidResponse($"Error: {ex.Message}");
-        }
-    }
 
-    private async Task LoadRatesAsync()
-    {
-        string start = _startDate.ToString(DateHelper.GetDateFormat());
-        string end = _endDate.ToString(DateHelper.GetDateFormat());
-
-        try
-        {
-            ExchangeRateRequest request = new ExchangeRateRequest
-            {
-                StartDateString = start,
-                EndDateString = end,
-                Currency = _selectedCurrency
-            };
-
-            GetRatesResponse? response = await WebSocketService.RequestRatesAsync(request);
-
-            if (response is { Success: true, Rates: not null })
-            {
-                List<RateDto> rates = (List<RateDto>)response.Rates;
-                _chartData = rates.Select(r => r.Value).ToArray();
-                _dates = rates.Select(r => r.Date).ToArray();
-
-                await JS.InvokeVoidAsync("drawChart", _chartData, _dates);
-            }
-            else
-            {
-                string err = await HandleResponse(response);
-                await HandleInvalidResponse(err);
-            }
-        }
-        catch (Exception ex)
-        {
-            await HandleInvalidResponse($"WebSocket error: {ex.Message}");
-        }
-    }
-
-    private async Task PinCurrentCurrency()
-    {
-        string url = $"{UISettings.ApiUrl}/userRate/track-currency";
-
-        try
-        {
-            HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() =>
-                Http.PostAsJsonAsync(url, new TrackCurrencyRequest { Currency = _selectedCurrency }));
-            TrackCurrencyResponse? response = await resp.Content.ReadFromJsonAsync<TrackCurrencyResponse>();
-
-            if (resp.IsSuccessStatusCode)
-            {
-                ToastService.ShowSuccess("Currency pinned successfully.");
-                _pinnedCurrencies.Add(_selectedCurrency);
-                await RequestDataForPinnedCurrenciesAsync();
-                await DrawPinnedChartsAsync();
-            }
-            else
-            {
-                string err = await HandleResponse(response);
-                await HandleInvalidResponse(err);
-            }
-        }
-        catch (Exception ex)
-        {
-            await HandleInvalidResponse($"Error: {ex.Message}");
-        }
+        await Task.CompletedTask;
     }
 
     private async Task RemovePinnedCurrency(string code)

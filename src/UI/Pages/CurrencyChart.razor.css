@@ -37,14 +37,14 @@
 }
 
 .form-card {
-    background: #273F4F;
+    background-color: #FFEBE0;
+    color: #EFEEEA;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0px 4px 6px -2px,
     rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
     backdrop-filter: blur(10px);
-    color: #EFEEEA;
 }
 
 .form-group {
@@ -54,7 +54,7 @@
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #EFEEEA;
+    color: #000000;
     font-weight: 500;
 }
 
@@ -74,13 +74,29 @@
     box-shadow: 0 0 0 2px rgba(39, 63, 79, 0.2);
 }
 
+button.form-control {
+    background-color: #FE7743;
+    color: #EFEEEA;
+    border: 1px solid #000000;
+    border-radius: 6px;
+    padding: 0.5rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+}
+
+button.form-control:hover {
+    background-color: #273F4F;
+    color: #FE7743;
+    border-color: #EFEEEA;
+}
+
 select.form-control {
     cursor: pointer;
 }
 
 .chart-section {
     flex: 1;
-    background: #273F4F;
+    background: #FE7743;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
@@ -156,43 +172,11 @@ select.form-control {
     rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
 
-.mini-chart-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 1.2rem;
-    cursor: pointer;
-    z-index: 20;
-    padding: 4px;
-}
-
-.mini-chart-close:hover {
-    color: #ff0000;
-}
-
 .currency-label {
     text-align: center;
     font-weight: 600;
     color: #EFEEEA;
     margin-bottom: 0.5rem;
-}
-
-.mini-chart-container {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4/3;
-}
-
-.mini-chart-container canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
 }
 
 @media (max-width: 768px) {

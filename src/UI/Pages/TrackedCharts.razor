@@ -1,0 +1,38 @@
+@page "/tracked-charts"
+@using UI.Components.Chart
+@using UI.Configurations
+@using UI.Services
+@inject HttpClient Http
+@inject IUISettings UISettings
+@inject IJSRuntime JS
+@inject IHttpClientService HttpClientService
+@inject IToastService ToastService
+
+<PageTitle>Tracked Currency</PageTitle>
+
+<div class="mini-charts-page">
+    <h2 class="page-title">Pinned Currency Charts</h2>
+
+    @if (_pinnedCurrencies.Count > 0)
+    {
+        <div class="charts-container">
+            @foreach (string c in _pinnedCurrencies)
+            {
+                if (_pinnedData.TryGetValue(c, out (decimal[] Data, string[] Dates) chartInfo))
+                {
+                    <MiniChart Currency="@c"
+                               Data="chartInfo.Data"
+                               Dates="chartInfo.Dates"
+                               OnRemove="() => RemovePinnedCurrency(c)"/>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-charts-message">
+            <p>No pinned charts available. Would you like to add some?</p>
+            <a class="go-to-charts-btn" href="/currency-chart">Go to Currency Charts</a>
+        </div>
+    }
+</div>

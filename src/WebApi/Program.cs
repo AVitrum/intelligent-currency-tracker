@@ -1,4 +1,5 @@
 using Application;
+using Application.Common.Interfaces.Utils;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
 using WebApi.Configurations;
@@ -19,6 +20,9 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddCustomCorsPolicy();
 
+builder.Services.AddScoped<IRateWebSocketHandler, RateWebSocketHandler>();
+
+
 builder.Services
     .AddInfrastructure()
     .AddCustomAuthentication()
@@ -34,5 +38,6 @@ if (args.Length == 1 && args[0].Equals("seeddata", StringComparison.CurrentCultu
     // await RateSeeder.SeedRatesAsync(app);
 }
 
+app.ConfigureWebSocket();
 app.UseCustomMiddlewares();
 app.Run();

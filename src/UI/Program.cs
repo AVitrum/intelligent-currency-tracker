@@ -15,5 +15,6 @@ builder.Services.AddBlazoredToast();
 
 builder.Services.AddScoped<IUISettings, UISettings>();
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
+builder.Services.AddSingleton<WebSocketService>();
 
 await builder.Build().RunAsync();

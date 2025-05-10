@@ -1,8 +1,17 @@
-﻿@inherits LayoutComponentBase
+﻿@using Shared.Helpers
+@inherits LayoutComponentBase
+@inject IJSRuntime Js
+@inject NavigationManager Navigation
 
 @code {
     private bool _isSidebarVisible;
     private bool _hideNavItems;
+    private bool _isTokenPresent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+    }
 
     private void ToggleSidebar()
     {
@@ -27,7 +36,10 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="/profile" target="_blank">Profile</a>
+            @if (_isTokenPresent)
+            {
+                <a href="/profile" target="_blank">Profile</a>
+            }
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
         </div>
 

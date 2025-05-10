@@ -7,6 +7,8 @@
 @inject NavigationManager Navigation
 @inject HttpClient Http
 
+<PageTitle>User Profile</PageTitle>
+
 <div class="page-container">
     <div class="header-section">
         <h2>Profile</h2>
@@ -15,7 +17,7 @@
         <div class="profile-image-section">
             @if (!string.IsNullOrEmpty(_profileImageSrc))
             {
-                <img src="@_profileImageSrc" alt="Profile Photo" />
+                <img src="@_profileImageSrc" alt="Profile Photo"/>
             }
             else
             {
@@ -33,7 +35,7 @@
         </div>
 
         <div class="profile-actions">
-            <button class="btn-primary" >Modify Information</button>
+            <button class="btn-primary">Modify Information</button>
             <button class="btn-secondary" @onclick="OnPasswordChange">Change Password</button>
         </div>
     </div>
