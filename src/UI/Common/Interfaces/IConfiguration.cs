@@ -1,6 +1,6 @@
-namespace UI.Configurations;
+namespace UI.Common.Interfaces;
 
-public interface IUISettings
+public interface IConfiguration
 {
     string ApiUrl { get; }
     string WebSocketUrl { get; }

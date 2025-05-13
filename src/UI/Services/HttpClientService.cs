@@ -6,7 +6,8 @@ using Microsoft.JSInterop;
 using Shared.Helpers;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.Identity;
-using UI.Configurations;
+using UI.Common.Interfaces;
+using IConfiguration = UI.Common.Interfaces.IConfiguration;
 
 namespace UI.Services;
 
@@ -15,13 +16,13 @@ public class HttpClientService : IHttpClientService
     private readonly HttpClient _http;
     private readonly IJSRuntime _js;
     private readonly NavigationManager _navigation;
-    private readonly IUISettings _settings;
+    private readonly IConfiguration _settings;
 
     public HttpClientService(
         HttpClient http,
         IJSRuntime js,
         NavigationManager navigation,
-        IUISettings settings)
+        IConfiguration settings)
     {
         _http = http;
         _js = js;

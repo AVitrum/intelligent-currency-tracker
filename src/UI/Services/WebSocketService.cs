@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.Rate;
-using UI.Configurations;
+using IConfiguration = UI.Common.Interfaces.IConfiguration;
 
 namespace UI.Services;
 
@@ -14,8 +14,8 @@ public class WebSocketService : IAsyncDisposable
 
     public WebSocketService(IServiceScopeFactory scopeFactory)
     {
-        IUISettings uiSettings = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUISettings>();
-        _serverUri = new Uri(uiSettings.WebSocketUrl);
+        IConfiguration configuration = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IConfiguration>();
+        _serverUri = new Uri(configuration.WebSocketUrl);
     }
 
     public async ValueTask DisposeAsync()

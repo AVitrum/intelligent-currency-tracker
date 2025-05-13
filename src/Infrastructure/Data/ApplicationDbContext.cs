@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Rate> Rates => Set<Rate>();
     public DbSet<ApiRequestLog> ApiRequestLogs => Set<ApiRequestLog>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<UserSettings> UserSettings => Set<UserSettings>();
     public DbSet<TraceableCurrency> TraceableCurrencies => Set<TraceableCurrency>();
 
     protected override void OnModelCreating(ModelBuilder builder)

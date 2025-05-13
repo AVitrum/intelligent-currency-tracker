@@ -9,12 +9,14 @@ using Shared.Helpers;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.Rate;
 using Shared.Payload.Responses.UserRate;
+using UI.Common.Interfaces;
 using UI.Services;
 
 namespace UI.Pages;
 
 public partial class CurrencyChart : ComponentBase, IPageComponent
 {
+    // Fields
     private readonly List<string> _currencies = [];
     private readonly List<string> _pinnedCurrencies = [];
 
@@ -24,13 +26,15 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
     private decimal[] _chartData = [];
     private string[] _dates = [];
     private DateTime _endDate = DateTime.Today;
-
     private string? _lastPinnedCurrency;
     private string _selectedCurrency = "USD";
     private bool _shouldDrawNewPin;
     private DateTime _startDate = DateTime.Today.AddMonths(-1);
+
+    // Injected services
     [Inject] private WebSocketService WebSocketService { get; set; } = null!;
 
+    // Public methods
     public Task<string> HandleResponse(BaseResponse? response)
     {
         if (response is null)
@@ -58,6 +62,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
         return Task.CompletedTask;
     }
 
+    // Lifecycle methods
     protected override async Task OnInitializedAsync()
     {
         await WebSocketService.ConnectAsync();
@@ -90,6 +95,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
         }
     }
 
+    // Private methods
     private async Task DrawPinnedChartsAsync()
     {
         foreach (string currency in _pinnedCurrencies)
@@ -104,7 +110,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
 
     private async Task LoadTrackedCurrenciesAsync()
     {
-        string url = $"{UISettings.ApiUrl}/userRate/tracked-currencies";
+        string url = $"{Configuration.ApiUrl}/userRate/tracked-currencies";
 
         try
         {
@@ -142,13 +148,12 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
             string end = _endDate.ToString(DateHelper.GetDateFormat());
 
             string url =
-                $"{UISettings.ApiUrl}/Rate/get-range?StartDateString={start}&EndDateString={end}&Currency={currency}";
+                $"{Configuration.ApiUrl}/Rate/get-range?StartDateString={start}&EndDateString={end}&Currency={currency}";
 
             try
             {
                 HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
                 GetRatesResponse? response = await resp.Content.ReadFromJsonAsync<GetRatesResponse>();
-
 
                 if (resp.IsSuccessStatusCode)
                 {
@@ -172,7 +177,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
 
     private async Task LoadCurrencyListAsync()
     {
-        string url = $"{UISettings.ApiUrl}/Rate/get-all-currencies";
+        string url = $"{Configuration.ApiUrl}/Rate/get-all-currencies";
 
         try
         {
@@ -243,7 +248,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
 
     private async Task PinCurrentCurrency()
     {
-        string url = $"{UISettings.ApiUrl}/userRate/track-currency";
+        string url = $"{Configuration.ApiUrl}/userRate/track-currency";
 
         try
         {
@@ -272,7 +277,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
 
     private async Task RemovePinnedCurrency(string code)
     {
-        string url = $"{UISettings.ApiUrl}/userRate/remove-tracked-currency";
+        string url = $"{Configuration.ApiUrl}/userRate/remove-tracked-currency";
 
         try
         {

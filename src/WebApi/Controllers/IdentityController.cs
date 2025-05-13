@@ -2,8 +2,10 @@ using Application.Common.Interfaces.Services;
 using Domain.Common;
 using Infrastructure.Identity.Results;
 using Infrastructure.Utils.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Shared.Dtos;
 using Shared.Payload.Requests;
+using Shared.Payload.Responses;
 using Shared.Payload.Responses.Identity;
 
 namespace WebApi.Controllers;
@@ -31,27 +33,22 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<BaseResponse>> Register(CreateUserDto dto)
     {
-        BaseResponse response;
         BaseResult result = await _userService.CreateAsync(dto);
 
         if (result.Success)
         {
-            response = new RegistrationResponse(
+            return Ok(new RegistrationResponse(
                 true,
                 "User created successfully",
                 StatusCodes.Status201Created,
-                new List<string>());
-
-            return Ok(response);
+                new List<string>()));
         }
 
-        response = new RegistrationResponse(
+        return Conflict(new RegistrationResponse(
             false,
             "User creation failed",
             StatusCodes.Status409Conflict,
-            result.Errors);
-
-        return Conflict(response);
+            result.Errors));
     }
 
     [HttpPost("login")]
@@ -63,18 +60,16 @@ public class IdentityController : ControllerBase
 
         if (result is not UserServiceResult extendedResult)
         {
-            return Unauthorized();
+            return UnauthorizedResponse("Login failed");
         }
 
-        BaseResponse response = new LoginResponse(
+        return Ok(new LoginResponse(
             true,
             "Login successful",
             StatusCodes.Status200OK,
             new List<string>(),
             extendedResult.Token,
-            extendedResult.RefreshToken);
-
-        return Ok(response);
+            extendedResult.RefreshToken));
     }
 
     [HttpPost("refresh-token")]
@@ -86,39 +81,36 @@ public class IdentityController : ControllerBase
 
         if (result is not UserServiceResult extendedResult)
         {
-            return Unauthorized();
+            return UnauthorizedResponse("Token refresh failed");
         }
 
-        BaseResponse response = new LoginResponse(
+        return Ok(new LoginResponse(
             true,
             "Token refreshed successfully",
             StatusCodes.Status200OK,
             new List<string>(),
             extendedResult.Token,
-            extendedResult.RefreshToken);
-
-        return Ok(response);
+            extendedResult.RefreshToken));
     }
 
     [HttpGet("profile")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<BaseResponse>> GetProfile()
     {
-        BaseResponse response;
-        string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
-
+        string? userId = GetUserId();
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized();
+            return UnauthorizedResponse("User not found");
         }
 
         BaseResult result = await _userService.GetProfileAsync(userId);
 
         if (result is ProfileResult profileResult)
         {
-            response = new ProfileResponse(
+            return Ok(new ProfileResponse(
                 true,
                 "Profile retrieved successfully",
                 StatusCodes.Status200OK,
@@ -127,12 +119,10 @@ public class IdentityController : ControllerBase
                 profileResult.UserName,
                 profileResult.Email,
                 profileResult.PhoneNumber,
-                profileResult.Photo);
-
-            return Ok(response);
+                profileResult.Photo));
         }
 
-        response = new ProfileResponse(
+        return BadRequest(new ProfileResponse(
             false,
             "Profile retrieval failed",
             StatusCodes.Status400BadRequest,
@@ -141,34 +131,25 @@ public class IdentityController : ControllerBase
             string.Empty,
             string.Empty,
             string.Empty,
-            []);
-
-        return BadRequest(response);
+            []));
     }
 
     [HttpPut("upload-photo")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<BaseResponse>> UploadPhoto(IFormFile? file)
     {
-        BaseResponse response;
-        string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
-
+        string? userId = GetUserId();
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized();
+            return UnauthorizedResponse("User not found");
         }
 
         if (file is null || file.Length == 0)
         {
-            response = new UploadPhotoResponse(
-                false,
-                "File is empty",
-                StatusCodes.Status400BadRequest,
-                new List<string> { "File is empty" });
-
-            return BadRequest(response);
+            return BadRequestResponse("File is empty");
         }
 
         string filePath = Path.GetTempFileName();
@@ -182,36 +163,90 @@ public class IdentityController : ControllerBase
 
         if (!result.Success)
         {
-            response = new UploadPhotoResponse(
-                false,
-                "Photo upload failed",
-                StatusCodes.Status400BadRequest,
-                result.Errors);
-
-            return BadRequest(response);
+            return BadRequestResponse("Photo upload failed", result.Errors);
         }
 
-        response = new UploadPhotoResponse(
+        return Ok(new UploadPhotoResponse(
             true,
             "Photo uploaded successfully",
             StatusCodes.Status200OK,
-            new List<string>());
+            new List<string>()));
+    }
 
-        return Ok(response);
+    [HttpPost("save-settings")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<BaseResponse>> SaveSettings(SettingsDto dto)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return UnauthorizedResponse("User not found");
+        }
+
+        BaseResult result = await _userService.SaveSettingsAsync(dto, userId);
+        if (result.Success)
+        {
+            return Ok(new SaveSettingsResponse(
+                true,
+                "Settings saved successfully",
+                StatusCodes.Status200OK,
+                new List<string>()));
+        }
+
+        return BadRequest(new SaveSettingsResponse(
+            false,
+            "Settings save failed",
+            StatusCodes.Status400BadRequest,
+            result.Errors));
+    }
+
+    [HttpGet("get-settings")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<BaseResponse>?> GetSettings()
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return UnauthorizedResponse("User not found");
+        }
+
+        BaseResult result = await _userService.GetSettingsAsync(userId);
+        if (result is not GetSettingsResult extendedResult)
+        {
+            return NotFound(new GetSettingsResponse(
+                false,
+                "Settings retrieval failed",
+                StatusCodes.Status404NotFound,
+                result.Errors,
+                null));
+        }
+
+        return Ok(new GetSettingsResponse(
+            true,
+            "Settings retrieved successfully",
+            StatusCodes.Status200OK,
+            new List<string>(),
+            extendedResult.Settings));
     }
 
     [HttpPost("change-password")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<BaseResponse>> ChangePassword(ChangePasswordRequest request)
     {
-        BaseResponse response;
-        string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
-
+        string? userId = GetUserId();
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized();
+            return UnauthorizedResponse("User not found");
         }
 
         BaseResult result = await _userService.ChangePasswordAsync(
@@ -219,20 +254,18 @@ public class IdentityController : ControllerBase
 
         if (result.Success)
         {
-            response = new ChangePasswordResponse(
+            return Ok(new ChangePasswordResponse(
                 true,
                 "Password changed successfully",
                 StatusCodes.Status200OK,
-                new List<string>());
-            return Ok(response);
+                new List<string>()));
         }
 
-        response = new ChangePasswordResponse(
+        return BadRequest(new ChangePasswordResponse(
             false,
             "Password change failed",
             StatusCodes.Status400BadRequest,
-            result.Errors);
-        return BadRequest(response);
+            result.Errors));
     }
 
 
@@ -320,4 +353,21 @@ public class IdentityController : ControllerBase
     //
     //     return NotFound(result.Errors);
     // }
+
+    private string? GetUserId()
+    {
+        return _httpContextAccessor.HttpContext?.User.GetUserId();
+    }
+
+    private UnauthorizedObjectResult UnauthorizedResponse(string message)
+    {
+        return Unauthorized(new DefaultResponse(false, message, StatusCodes.Status401Unauthorized,
+            new List<string> { message }));
+    }
+
+    private BadRequestObjectResult BadRequestResponse(string message, IEnumerable<string>? errors = null)
+    {
+        return BadRequest(new DefaultResponse(false, message, StatusCodes.Status400BadRequest,
+            errors ?? new List<string> { message }));
+    }
 }

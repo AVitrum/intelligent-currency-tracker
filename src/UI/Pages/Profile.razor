@@ -1,7 +1,6 @@
 @page "/profile"
-@using UI.Configurations
-@using UI.Services
-@inject IUISettings UISettings
+@using UI.Common.Interfaces
+@inject IConfiguration Configuration
 @inject IHttpClientService HttpClientService
 @inject IToastService ToastService
 @inject NavigationManager Navigation

@@ -1,10 +1,9 @@
 @page "/currency-chart"
+@using UI.Common.Interfaces
 @using UI.Components.Chart
-@using UI.Configurations
-@using UI.Services
 @inject HttpClient Http
 @inject IToastService ToastService
-@inject IUISettings UISettings
+@inject IConfiguration Configuration
 @inject IHttpClientService HttpClientService
 @inject IJSRuntime JS
 

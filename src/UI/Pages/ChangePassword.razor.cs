@@ -4,6 +4,7 @@ using Domain.Common;
 using Microsoft.AspNetCore.Components;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.Identity;
+using UI.Common.Interfaces;
 
 namespace UI.Pages;
 
@@ -44,7 +45,7 @@ public partial class ChangePassword : ComponentBase, IPageComponent
     private async Task HandleValidSubmit()
     {
         HttpResponseMessage res = await HttpClientService.SendRequestAsync(() =>
-            Http.PostAsJsonAsync($"{UISettings.ApiUrl}/Identity/change-password", Request));
+            Http.PostAsJsonAsync($"{Configuration.ApiUrl}/Identity/change-password", Request));
         ChangePasswordResponse? response = await res.Content.ReadFromJsonAsync<ChangePasswordResponse>();
 
         if (!res.IsSuccessStatusCode)

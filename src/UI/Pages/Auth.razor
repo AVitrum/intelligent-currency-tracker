@@ -1,10 +1,12 @@
 @page "/auth"
+@using UI.Common.Interfaces
 @using UI.Components.Auth
-@using UI.Configurations
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IToastService ToastService
-@inject IUISettings UISettings
+@inject IHttpClientService HttpClientService
+@inject IUserSettingsService UserSettingsService
+@inject IConfiguration Configuration
 
 <PageTitle>Auth</PageTitle>
 

@@ -4,6 +4,8 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
 using Application.Rates.Results;
 using Domain.Common;
+using Domain.Events;
+using Infrastructure.BackgroundServices;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.Rate;
 
@@ -11,17 +13,26 @@ namespace WebApi.Configurations;
 
 public class RateWebSocketHandler : IRateWebSocketHandler
 {
+    private readonly ExchangeRateSyncService _exchangeRateSyncService;
     private readonly ILogger<RateWebSocketHandler> _logger;
     private readonly IRateService _rateService;
+    private WebSocket? _socket;
 
-    public RateWebSocketHandler(IRateService rateService, ILogger<RateWebSocketHandler> logger)
+    public RateWebSocketHandler(
+        IRateService rateService,
+        ILogger<RateWebSocketHandler> logger,
+        ExchangeRateSyncService exchangeRateSyncService)
     {
         _rateService = rateService;
         _logger = logger;
+        _exchangeRateSyncService = exchangeRateSyncService;
     }
 
     public async Task HandleAsync(WebSocket socket)
     {
+        _socket = socket;
+        _exchangeRateSyncService.ExchangeRatesFetched += OnExchangeRatesFetched;
+
         byte[] buffer = new byte[128 * 1024 * 1024];
         _logger.LogInformation("Started handling WebSocket connection.");
 
@@ -51,6 +62,22 @@ public class RateWebSocketHandler : IRateWebSocketHandler
                 await CloseSocketWithMessage(socket, WebSocketCloseStatus.NormalClosure, "Closing");
             }
         }
+    }
+
+    private async Task OnExchangeRatesFetched(object? sender, ExchangeRatesFetchedEventArgs e)
+    {
+        if (_socket is not { State: WebSocketState.Open })
+        {
+            return;
+        }
+
+        UpdateRateDataResponse response = new UpdateRateDataResponse(
+            true,
+            "Exchange rates updated successfully.",
+            StatusCodes.Status205ResetContent,
+            new List<string>());
+
+        await SendResponseAsync(_socket, response);
     }
 
     private string GetStringFromBuffer(byte[] buffer, int count)
@@ -136,9 +163,19 @@ public class RateWebSocketHandler : IRateWebSocketHandler
         }
     }
 
-    private async Task SendResponseAsync(WebSocket socket, GetRatesResponse response)
+    private async Task SendResponseAsync(WebSocket socket, BaseResponse response)
     {
-        string responseJson = JsonSerializer.Serialize(response);
+        string responseJson;
+
+        if (response is GetRatesResponse getRatesResponse)
+        {
+            responseJson = JsonSerializer.Serialize(getRatesResponse);
+        }
+        else
+        {
+            responseJson = JsonSerializer.Serialize(response);
+        }
+
         byte[] responseBytes = Encoding.UTF8.GetBytes(responseJson);
         _logger.LogDebug("Sending response");
         await socket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true,

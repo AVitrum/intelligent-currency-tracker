@@ -1,9 +1,8 @@
 @page "/tracked-charts"
+@using UI.Common.Interfaces
 @using UI.Components.Chart
-@using UI.Configurations
-@using UI.Services
 @inject HttpClient Http
-@inject IUISettings UISettings
+@inject IConfiguration Configuration
 @inject IJSRuntime JS
 @inject IHttpClientService HttpClientService
 @inject IToastService ToastService

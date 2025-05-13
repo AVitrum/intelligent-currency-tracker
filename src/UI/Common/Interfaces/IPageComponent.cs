@@ -1,6 +1,6 @@
 using Domain.Common;
 
-namespace UI.Pages;
+namespace UI.Common.Interfaces;
 
 public interface IPageComponent
 {

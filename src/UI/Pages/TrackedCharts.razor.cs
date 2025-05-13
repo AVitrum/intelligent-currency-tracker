@@ -9,6 +9,7 @@ using Shared.Helpers;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.Rate;
 using Shared.Payload.Responses.UserRate;
+using UI.Common.Interfaces;
 
 namespace UI.Pages;
 
@@ -80,7 +81,7 @@ public partial class TrackedCharts : ComponentBase, IPageComponent
 
     private async Task LoadPinnedCurrenciesAsync()
     {
-        string url = $"{UISettings.ApiUrl}/userRate/tracked-currencies";
+        string url = $"{Configuration.ApiUrl}/userRate/tracked-currencies";
 
         try
         {
@@ -118,7 +119,7 @@ public partial class TrackedCharts : ComponentBase, IPageComponent
             string end = _endDate.ToString(DateHelper.GetDateFormat());
 
             string url =
-                $"{UISettings.ApiUrl}/Rate/get-range?StartDateString={start}&EndDateString={end}&Currency={currency}";
+                $"{Configuration.ApiUrl}/Rate/get-range?StartDateString={start}&EndDateString={end}&Currency={currency}";
 
             try
             {
@@ -160,7 +161,7 @@ public partial class TrackedCharts : ComponentBase, IPageComponent
 
     private async Task RemovePinnedCurrency(string code)
     {
-        string url = $"{UISettings.ApiUrl}/userRate/remove-tracked-currency";
+        string url = $"{Configuration.ApiUrl}/userRate/remove-tracked-currency";
 
         try
         {

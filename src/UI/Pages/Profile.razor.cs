@@ -3,6 +3,7 @@ using System.Text;
 using Domain.Common;
 using Microsoft.AspNetCore.Components;
 using Shared.Payload.Responses.Identity;
+using UI.Common.Interfaces;
 
 namespace UI.Pages;
 
@@ -45,7 +46,7 @@ public partial class Profile : ComponentBase, IPageComponent
 
     private async Task LoadProfileAsync()
     {
-        string url = $"{UISettings.ApiUrl}/Identity/profile";
+        string url = $"{Configuration.ApiUrl}/Identity/profile";
         try
         {
             HttpResponseMessage res = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));

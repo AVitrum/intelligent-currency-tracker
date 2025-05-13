@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Amazon.S3.Model;
+using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
 using Domain.Common;
@@ -18,12 +19,14 @@ public class UserService : IUserService
     private readonly IMinioHelper _minioHelper;
     private readonly IAmazonS3 _s3Client;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUserSettingsRepository _userSettingsRepository;
 
     public UserService(
         UserManager<ApplicationUser> userManager,
         ILoginManagerFactory loginManagerFactory,
         IAppSettings appSettings,
-        IMinioHelper minioHelper)
+        IMinioHelper minioHelper,
+        IUserSettingsRepository userSettingsRepository)
     {
         _loginManagerFactory = loginManagerFactory;
         _s3Client = new AmazonS3Client(
@@ -34,6 +37,7 @@ public class UserService : IUserService
                 ServiceURL = appSettings.AwsEndpoint, ForcePathStyle = true
             });
         _minioHelper = minioHelper;
+        _userSettingsRepository = userSettingsRepository;
         _userManager = userManager;
         _bucketName = appSettings.AwsBucket;
     }
@@ -131,6 +135,50 @@ public class UserService : IUserService
         }
 
         return ProfileResult.SuccessResult(userId, user.UserName!, user.Email!, user.PhoneNumber, photoBytes);
+    }
+
+    public async Task<BaseResult> SaveSettingsAsync(SettingsDto dto, string userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(new List<string> { "User not found" });
+        }
+
+        UserSettings settings = new UserSettings
+        {
+            Language = Enum.Parse<Language>(dto.Language, true),
+            Theme = Enum.Parse<Theme>(dto.Theme, true),
+            NotificationsEnabled = dto.NotificationsEnabled,
+            UserId = userId
+        };
+
+        await _userSettingsRepository.AddOrUpdateAsync(settings);
+        return BaseResult.SuccessResult();
+    }
+
+    public async Task<BaseResult> GetSettingsAsync(string userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(new List<string> { "User not found" });
+        }
+
+        UserSettings? settings = await _userSettingsRepository.GetByUserIdAsync(userId);
+        if (settings is null)
+        {
+            return BaseResult.FailureResult(new List<string> { "User settings not found" });
+        }
+
+        SettingsDto dto = new SettingsDto
+        {
+            Language = settings.Language.ToString(),
+            Theme = settings.Theme.ToString(),
+            NotificationsEnabled = settings.NotificationsEnabled
+        };
+
+        return GetSettingsResult.SuccessResult(dto);
     }
 
     public async Task<BaseResult> ChangePasswordAsync(

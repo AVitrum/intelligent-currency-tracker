@@ -52,13 +52,14 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IMinioService, MinioService>();
         services.AddScoped<ITraceableCurrencyService, TraceableCurrencyService>();
-        
+
         //Repositories
         services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         services.AddScoped<IRateRepository, RateRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
         services.AddScoped<ITraceableCurrencyRepository, TraceableCurrencyRepository>();
-        
+
         //Background Services
         services.AddSingleton<ExchangeRateSyncService>();
         services.AddHostedService(provider => provider.GetRequiredService<ExchangeRateSyncService>());

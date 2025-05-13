@@ -20,6 +20,23 @@ body {
     padding: 0;
 }
 
+.settings-link {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.7rem;
+    padding: 0.2rem;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.settings-link:hover {
+    background: #FFEBE0;
+}
+
+.settings-link svg {
+    display: block;
+}
+
 .top-row {
     background-color: #EFEEEA;
     border-bottom: 1px solid #273F4F;

@@ -1,4 +1,4 @@
-namespace UI.Services;
+namespace UI.Common.Interfaces;
 
 public interface IHttpClientService
 {

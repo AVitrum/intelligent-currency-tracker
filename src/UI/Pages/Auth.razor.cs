@@ -7,7 +7,9 @@ using Microsoft.JSInterop;
 using Shared.Dtos;
 using Shared.Helpers;
 using Shared.Payload.Requests;
+using Shared.Payload.Responses;
 using Shared.Payload.Responses.Identity;
+using UI.Common.Interfaces;
 
 namespace UI.Pages;
 
@@ -58,12 +60,15 @@ public partial class Auth : ComponentBase, IPageComponent
     {
         try
         {
-            HttpResponseMessage res = await Http.PostAsJsonAsync($"{UISettings.ApiUrl}/Identity/login", _loginRequest);
+            HttpResponseMessage res =
+                await Http.PostAsJsonAsync($"{Configuration.ApiUrl}/Identity/login", _loginRequest);
             LoginResponse? response = await res.Content.ReadFromJsonAsync<LoginResponse>();
 
             if (res.IsSuccessStatusCode)
             {
                 await JwtTokenHelper.SetJwtTokensInCookiesAsync(response!.Token, response.RefreshToken, Js);
+                await GetSettings();
+
                 ToastService.ShowSuccess("User successfully login!");
                 Navigation.NavigateTo("/", true);
             }
@@ -82,7 +87,7 @@ public partial class Auth : ComponentBase, IPageComponent
     private async Task HandleRegistrationValidSubmit()
     {
         HttpResponseMessage res =
-            await Http.PostAsJsonAsync($"{UISettings.ApiUrl}/Identity/register", _registrationRequest);
+            await Http.PostAsJsonAsync($"{Configuration.ApiUrl}/Identity/register", _registrationRequest);
         RegistrationResponse? response = await res.Content.ReadFromJsonAsync<RegistrationResponse>();
 
         if (res.IsSuccessStatusCode)
@@ -94,6 +99,32 @@ public partial class Auth : ComponentBase, IPageComponent
         {
             string err = await HandleResponse(response);
             await HandleInvalidResponse(err);
+        }
+    }
+
+    private async Task GetSettings()
+    {
+        string url =
+            $"{Configuration.ApiUrl}/Identity/get-settings";
+
+        try
+        {
+            HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+            GetSettingsResponse? response =
+                await resp.Content.ReadFromJsonAsync<GetSettingsResponse>();
+
+            if (resp.IsSuccessStatusCode)
+            {
+                await UserSettingsService.SaveSettingsAsync(response!.Settings!, Js);
+            }
+            else
+            {
+                await UserSettingsService.SetDefaultSettingsAsync(Js);
+            }
+        }
+        catch (Exception ex)
+        {
+            await HandleInvalidResponse($"Error: {ex.Message}");
         }
     }
 
