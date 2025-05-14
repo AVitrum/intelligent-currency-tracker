@@ -85,7 +85,7 @@
       - ./logs:/app/logs
     depends_on:
       - db
-#      - kafka
+    #      - kafka
     networks:
       - test-network
   
@@ -132,41 +132,41 @@
       - devui
     networks:
       - test-network
+  
+  zoo:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zoo
+    container_name: zoo
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zoo:2888:3888
+    networks:
+      - test-network
 
-#  zoo:
-#    image: confluentinc/cp-zookeeper:latest
-#    hostname: zoo
-#    container_name: zoo
-#    ports:
-#      - "2181:2181"
-#    environment:
-#      ZOOKEEPER_CLIENT_PORT: 2181
-#      ZOOKEEPER_SERVER_ID: 1
-#      ZOOKEEPER_SERVERS: zoo:2888:3888
-#    networks:
-#      - test-network
-#  
-#  kafka:
-#    image: confluentinc/cp-kafka:latest
-#    ports:
-#      - "9092:9092"
-#      - "29092:29092"
-#    depends_on:
-#      - zoo
-#    environment:
-#      - KAFKA_ZOOKEEPER_CONNECT=zoo:2181
-#      - KAFKA_BROKERID=1
-#      - ALLOW_PLAINTEXT_LISTENER="yes"
-#      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-#      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-#      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
-#      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-#      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-#      - KAFKA_MESSAGE_MAX_BYTES=10485760
-#    networks:
-#      - test-network
-#    entrypoint: /bin/sh -c "sleep 30 && /etc/confluent/docker/run"
-    
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    depends_on:
+      - zoo
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zoo:2181
+      - KAFKA_BROKERID=1
+      - ALLOW_PLAINTEXT_LISTENER="yes"
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_MESSAGE_MAX_BYTES=10485760
+    networks:
+      - test-network
+    entrypoint: /bin/sh -c "sleep 30 && /etc/confluent/docker/run"
+
 volumes:
   pgdata:
 

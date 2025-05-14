@@ -4,14 +4,14 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/all-users">DevUI</a>
+        <a class="navbar-brand" href="/all-users">Currency Tracker</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="() => OnToggleSidebar.InvokeAsync()">
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
 </div>
 
-<div class="nav-scrollable" @onclick="ToggleNavMenu">
+<div class="nav-scrollable @(HideNavItems ? "nav-hidden" : "")" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
         @if (!_isTokenPresent)
         {
@@ -31,6 +31,19 @@
         else
         {
             <div class="nav-item">
+                <NavLink class="nav-link" href="currency-chart">
+                    <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
+                    Charts
+                </NavLink>
+            </div>
+            <div class="nav-item">
+                <NavLink class="nav-link" href="tracked-charts">
+                    <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
+                    Tracked Charts
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
                 <button class="nav-link" @onclick="Logout">
                     <span class="bi bi-logout-nav-menu" aria-hidden="true"></span>
                     Logout
@@ -42,8 +55,9 @@
 
 @code {
     [Parameter] public EventCallback OnToggleSidebar { get; set; }
+    [Parameter] public bool HideNavItems { get; set; }
 
-    private bool _collapseNavMenu = false;
+    private bool _collapseNavMenu;
     private bool _isTokenPresent;
 
     private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
@@ -62,4 +76,5 @@
     {
         await JwtTokenHelper.RemoveJwtTokensFromCookiesAsync(Js, Navigation);
     }
+
 }

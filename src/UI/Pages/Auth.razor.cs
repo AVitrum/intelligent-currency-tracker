@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using System.Text;
+using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -6,94 +8,124 @@ using Shared.Dtos;
 using Shared.Helpers;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses;
+using Shared.Payload.Responses.Identity;
+using UI.Common.Interfaces;
 
 namespace UI.Pages;
 
 public partial class Auth : ComponentBase, IPageComponent
 {
-    private readonly LoginRequest _loginRequest = new LoginRequest
-    {
-        Provider = LoginManagerProvider.Default.ToString()
-    };
+    private readonly LoginRequest _loginRequest = new LoginRequest { Provider = nameof(LoginManagerProvider.Default) };
 
     private readonly CreateUserDto _registrationRequest = new CreateUserDto
-    {
-        Provider = UserServiceProvider.DEFAULT.ToString()
-    };
-    
+        { Provider = nameof(UserServiceProvider.DEFAULT) };
+
+    private string? _errorMessage;
     private bool IsLogin { get; set; } = true;
 
     [Inject] private IJSRuntime Js { get; set; } = null!;
-    private string? _errorMessage;
-    
-    private async Task HandleLoginValidSubmit()
+
+    public Task<string> HandleResponse(BaseResponse? response)
     {
-        if (_loginRequest.Email is not null && !_loginRequest.Email.Contains("@"))
+        if (response is null)
         {
-            _loginRequest.UserName = _loginRequest.Email;
-            _loginRequest.Email = string.Empty;
+            return Task.FromResult("An error occurred while processing your request. Try again later.");
         }
 
+        StringBuilder errorMessage = new StringBuilder();
+
+        errorMessage.AppendLine($"Message: {response.Message}");
+        errorMessage.AppendLine($"Status Code: {response.StatusCode}");
+
+        if (response.Errors.Any())
+        {
+            errorMessage.AppendLine($"Errors: {string.Join(", ", response.Errors)}");
+        }
+
+        return Task.FromResult(errorMessage.ToString());
+    }
+
+    public Task HandleInvalidResponse(
+        string message = "An error occurred while processing your request. Try again later.")
+    {
+        ToastService.ShowError(message);
+
+        _errorMessage = null;
+        _loginRequest.Identifier = string.Empty;
+        _loginRequest.Password = string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleLoginValidSubmit()
+    {
         try
         {
-            HttpResponseMessage response = await Http.PostAsJsonAsync($"{UISettings.ApiUrl}/Identity/login", _loginRequest);
-            if (response.IsSuccessStatusCode)
+            HttpResponseMessage res =
+                await Http.PostAsJsonAsync($"{Configuration.ApiUrl}/Identity/login", _loginRequest);
+            LoginResponse? response = await res.Content.ReadFromJsonAsync<LoginResponse>();
+
+            if (res.IsSuccessStatusCode)
             {
-                LoginResponse? responseContent = await response.Content.ReadFromJsonAsync<LoginResponse>();
-                if (responseContent?.Token is not null)
-                {
-                    await JwtTokenHelper.SetJwtTokensInCookiesAsync(responseContent.Token, responseContent.RefreshToken, Js);
-                    ToastService.ShowSuccess("User successfully login!");
-                    Navigation.NavigateTo("/all-users", true);
-                }
+                await JwtTokenHelper.SetJwtTokensInCookiesAsync(response!.Token, response.RefreshToken, Js);
+                await GetSettings();
+
+                ToastService.ShowSuccess("User successfully login!");
+                Navigation.NavigateTo("/", true);
             }
             else
             {
-                string errorResponse = await response.Content.ReadAsStringAsync();
-                string errorMessage = !string.IsNullOrEmpty(errorResponse)
-                    ? errorResponse
-                    : "Login failed. Please try again.";
-                
-                await HandleInvalidResponse(errorMessage);
+                string err = await HandleResponse(response);
+                await HandleInvalidResponse(err);
             }
         }
-        catch (Exception)
+        catch
         {
             await HandleInvalidResponse();
         }
     }
-    
+
     private async Task HandleRegistrationValidSubmit()
     {
-        HttpResponseMessage response = await Http.PostAsJsonAsync(
-            $"{UISettings.ApiUrl}/Identity/register", _registrationRequest);
-        
-        if (response.IsSuccessStatusCode)
+        HttpResponseMessage res =
+            await Http.PostAsJsonAsync($"{Configuration.ApiUrl}/Identity/register", _registrationRequest);
+        RegistrationResponse? response = await res.Content.ReadFromJsonAsync<RegistrationResponse>();
+
+        if (res.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("User successfully registered!");
-            Navigation.NavigateTo("/login", forceLoad: true);
-            
+            Navigation.NavigateTo("/auth", true);
         }
         else
         {
-            string errorResponse = await response.Content.ReadAsStringAsync();
-            string errorMessage = !string.IsNullOrEmpty(errorResponse)
-                ? errorResponse
-                : "Registration failed. Please try again.";
-            
-            await HandleInvalidResponse(errorMessage);
+            string err = await HandleResponse(response);
+            await HandleInvalidResponse(err);
         }
     }
-    
-    public async Task HandleInvalidResponse(string message = "An error occurred while processing your request. Try again later.")
+
+    private async Task GetSettings()
     {
-        ToastService.ShowError(message);
-        
-        await Task.Delay(3000);
-        _errorMessage = null;
-        _loginRequest.Email = string.Empty;
-        _loginRequest.UserName = string.Empty;
-        _loginRequest.Password = string.Empty;
+        string url =
+            $"{Configuration.ApiUrl}/Identity/get-settings";
+
+        try
+        {
+            HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+            GetSettingsResponse? response =
+                await resp.Content.ReadFromJsonAsync<GetSettingsResponse>();
+
+            if (resp.IsSuccessStatusCode)
+            {
+                await UserSettingsService.SaveSettingsAsync(response!.Settings!, Js);
+            }
+            else
+            {
+                await UserSettingsService.SetDefaultSettingsAsync(Js);
+            }
+        }
+        catch (Exception ex)
+        {
+            await HandleInvalidResponse($"Error: {ex.Message}");
+        }
     }
 
     private void ToggleLoginMode()

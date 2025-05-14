@@ -1,6 +1,6 @@
 using Domain.Entities;
 using Infrastructure.Data;
-using Infrastructure.Utils;
+using Infrastructure.Utils.Extensions;
 using Microsoft.Extensions.Primitives;
 
 namespace WebApi.Configurations;

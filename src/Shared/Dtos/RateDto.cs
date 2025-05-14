@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Domain.Constants;
 using Domain.Entities;
@@ -6,17 +7,31 @@ namespace Shared.Dtos;
 
 public class RateDto
 {
-    public decimal Value { get; init; }
-    public decimal ValueCompareToPrevious { get; init; }
-    public required string Date { get; init; }
-    public int Year { get; init; }
-    public int Month { get; init; }
-    public int Day { get; init; }
-    public int WeekNumber { get; init; }
+    [JsonInclude]
+    public decimal Value { get; set; }
+
+    [JsonInclude]
+    public decimal ValueCompareToPrevious { get; set; }
+
+    [JsonInclude]
+    public required string Date { get; set; }
+
+    [JsonInclude]
+    public int Year { get; set; }
+
+    [JsonInclude]
+    public int Month { get; set; }
+
+    [JsonInclude]
+    public int Day { get; set; }
+
+    [JsonInclude]
+    public int WeekNumber { get; set; }
 
     // public bool IsHoliday { get; init; }
 
-    public required CurrencyDto Currency { get; init; }
+    [JsonInclude]
+    public required CurrencyDto Currency { get; set; }
 
     private class Mapping : Profile
     {

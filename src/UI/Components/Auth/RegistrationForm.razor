@@ -1,0 +1,45 @@
+@using Shared.Dtos
+<h3 class="form-title">Create your account</h3>
+<p class="form-subtitle">Begin with the future.</p>
+
+<EditForm Model="@RegistrationRequest" OnValidSubmit="@OnValidSubmit" class="sub-form">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div class="form-group">
+        <label for="email" class="form-label">Email*</label>
+        <InputText id="email" @bind-Value="RegistrationRequest.Email" class="form-control"
+                   placeholder="Enter your email"/>
+        <ValidationMessage For="@(() => RegistrationRequest.Email)"/>
+    </div>
+
+    <div class="form-group">
+        <label for="username" class="form-label">Username*</label>
+        <InputText id="username" @bind-Value="RegistrationRequest.UserName" class="form-control"
+                   placeholder="Choose a username"/>
+        <ValidationMessage For="@(() => RegistrationRequest.UserName)"/>
+    </div>
+
+    <div class="form-group">
+        <label for="phoneNumber" class="form-label">Phone Number</label>
+        <InputText id="phoneNumber" @bind-Value="RegistrationRequest.PhoneNumber" class="form-control"
+                   placeholder="Enter your phone number"/>
+        <ValidationMessage For="@(() => RegistrationRequest.PhoneNumber)"/>
+    </div>
+
+    <div class="form-group">
+        <label for="password" class="form-label">Password*</label>
+        <InputText id="password" @bind-Value="RegistrationRequest.Password" type="password" class="form-control"
+                   placeholder="Create a password"/>
+        <ValidationMessage For="@(() => RegistrationRequest.Password)"/>
+    </div>
+
+    <button type="submit" class="btn-primary">Finish</button>
+    <button @onclick="OnToggleMode" class="btn-secondary">Switch to Login</button>
+</EditForm>
+
+@code {
+    [Parameter] public CreateUserDto RegistrationRequest { get; set; }
+    [Parameter] public EventCallback<EditContext> OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnToggleMode { get; set; }
+}

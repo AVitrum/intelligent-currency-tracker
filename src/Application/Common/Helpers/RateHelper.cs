@@ -5,7 +5,6 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Microsoft.Extensions.Logging;
 using Shared.Dtos;
-using Shared.Payload.Requests;
 
 namespace Application.Common.Helpers;
 
@@ -26,31 +25,6 @@ public class RateHelper : IRateHelper
         _rateRepository = rateRepository;
         _mapper = mapper;
         _logger = logger;
-    }
-
-    public async Task<IEnumerable<Rate>> GetRatesAsync(DateTime start, DateTime end, string? currencyString, int page, int pageSize)
-    {
-        IEnumerable<Rate> rates;
-        if (currencyString is null)
-        {
-            if (start.Date == end.Date)
-            {
-                rates = await _rateRepository.GetRangeAsync(start);
-            }
-            else
-            {
-                rates = await _rateRepository.GetRangeAsync(start, end, page, pageSize);
-            }
-        }
-        else
-        {
-            Currency currency = await _currencyRepository.GetByCodeAsync(currencyString)
-                                ?? throw new EntityNotFoundException<Currency>();
-
-            rates = await _rateRepository.GetRangeAsync(start, end, currency, page, pageSize);
-        }
-
-        return rates;
     }
 
     public async Task<IEnumerable<Rate>> GetRatesAsync(DateTime start, DateTime end, int currencyR030)
@@ -85,5 +59,14 @@ public class RateHelper : IRateHelper
 
         _logger.LogInformation("Successfully converted rates to DTO");
         return ratesDto;
+    }
+
+    public IEnumerable<CurrencyDto> ConvertCurrenciesToDtoAsync(IEnumerable<Currency> rates)
+    {
+        List<CurrencyDto> currenciesDto = [];
+        currenciesDto.AddRange(rates.Select(currency => _mapper.Map<CurrencyDto>(currency)));
+
+        _logger.LogInformation("Successfully converted currencies to DTO");
+        return currenciesDto;
     }
 }

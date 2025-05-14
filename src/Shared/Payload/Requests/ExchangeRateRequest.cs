@@ -1,6 +1,6 @@
-using System.Globalization;
 using System.Text.Json.Serialization;
 using Domain.Constants;
+using Shared.Helpers;
 using Shared.Validation;
 
 namespace Shared.Payload.Requests;
@@ -11,8 +11,8 @@ public class ExchangeRateRequest
     private DateTime _end;
     private DateTime _start;
 
-    public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
+    public int Page { get; set; }
+    public int PageSize { get; set; }
 
     public required string StartDateString { get; init; }
     public required string EndDateString { get; set; }
@@ -25,12 +25,7 @@ public class ExchangeRateRequest
         {
             if (_start == default)
             {
-                _start = DateTime.ParseExact(
-                    StartDateString,
-                    DateConstants.DateFormat,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal
-                );
+                _start = DateHelper.ParseDdMmYyyy(StartDateString);
             }
 
             return _start;
@@ -49,12 +44,7 @@ public class ExchangeRateRequest
 
             if (_end == default)
             {
-                _end = DateTime.ParseExact(
-                    EndDateString,
-                    DateConstants.DateFormat,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal
-                );
+                _end = DateHelper.ParseDdMmYyyy(EndDateString);
             }
 
             return _end;

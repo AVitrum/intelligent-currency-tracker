@@ -10,7 +10,7 @@ public static class JwtTokenHelper
     {
         await js.InvokeVoidAsync("eval",
             """
-            
+
                         window.setCookie = function(name, value, days) {
                             let expires = '';
                             if (days) {
@@ -20,7 +20,7 @@ public static class JwtTokenHelper
                             }
                             document.cookie = name + '=' + value + expires + '; path=/';
                         };
-            
+
                         window.getCookie = function(name) {
                             let nameEQ = name + '=';
                             let ca = document.cookie.split(';');
@@ -31,7 +31,7 @@ public static class JwtTokenHelper
                             }
                             return null;
                         };
-            
+
                         window.deleteCookie = function(name) {
                             document.cookie = name + '=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/;';
                         };
@@ -51,7 +51,7 @@ public static class JwtTokenHelper
         await EnsureJsFunctionsExistAsync(js);
         await js.InvokeVoidAsync("deleteCookie", "jwtToken");
         await js.InvokeVoidAsync("deleteCookie", "refreshToken");
-        navigation.NavigateTo("/", true);
+        navigation.NavigateTo("/auth", true);
     }
 
     public static async Task SetJwtTokenInHeaderAsync(HttpClient http, IJSRuntime js, NavigationManager navigation)
@@ -60,7 +60,7 @@ public static class JwtTokenHelper
         string? jwtToken = await js.InvokeAsync<string?>("getCookie", "jwtToken");
         if (string.IsNullOrEmpty(jwtToken))
         {
-            navigation.NavigateTo("/", true);
+            navigation.NavigateTo("/auth", true);
             return;
         }
 

@@ -11,5 +11,7 @@ public interface IRateRepository : IBaseRepository<Rate>
     Task<IEnumerable<Rate>> GetRangeAsync(DateTime start, DateTime end, Currency currency);
     Task<IEnumerable<Rate>> GetRangeAsync(DateTime start, DateTime end, int page, int pageSize);
     Task<IEnumerable<Rate>> GetRangeAsync(DateTime start, DateTime end, Currency currency, int page, int pageSize);
+    Task<IEnumerable<Rate>> GetLastUpdatedAsync();
     Task<DateTime> GetLastDateAsync();
+    Task<bool> RemoveByDateAsync(DateTime date);
 }

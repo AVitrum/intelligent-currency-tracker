@@ -9,11 +9,12 @@ public class BaseResult
     }
 
     public bool Success { get; }
+
     public string[] Errors { get; }
 
     public static BaseResult SuccessResult()
     {
-        return new BaseResult(true, Array.Empty<string>());
+        return new BaseResult(true, []);
     }
 
     public static BaseResult FailureResult(IEnumerable<string> errors)

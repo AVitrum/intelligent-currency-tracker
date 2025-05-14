@@ -1,7 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Utils;
 using Domain.Common;
-using Infrastructure.Utils;
+using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Shared.Payload.Requests;
 
@@ -25,12 +25,18 @@ public class DevUILoginManager : ILoginManager
 
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
-        UserLookupDelegate lookupDelegate = _userHelper.GetUserLookupDelegate(request);
-        string identifier = request.UserName ?? request.Email
-            ?? throw new ArgumentException("Username or Email must be provided");
+        ApplicationUser user;
 
-        ApplicationUser user = await lookupDelegate(identifier)
-                               ?? throw new UserNotFoundException("User not found");
+        if (request.Identifier.Contains('@'))
+        {
+            user = await _userManager.FindByEmailAsync(request.Identifier)
+                   ?? throw new UserNotFoundException("Wrong email.");
+        }
+        else
+        {
+            user = await _userManager.FindByNameAsync(request.Identifier)
+                   ?? throw new UserNotFoundException("Wrong username.");
+        }
 
         await _userHelper.CheckIfUserIsAdmin(user);
         await _userHelper.ValidatePasswordAsync(user, request.Password);

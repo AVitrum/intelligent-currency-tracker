@@ -1,0 +1,106 @@
+.page-container {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #EFEEEA;
+    border-radius: 20px;
+    box-shadow: 0 0 12px rgba(39, 63, 79, 0.15);
+    animation: fadeIn 0.6s ease-out;
+}
+
+.header-section h2 {
+    font-size: 1.75rem;
+    color: #273F4F;
+    font-weight: 300;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #FE7743;
+    padding-bottom: 0.5rem;
+}
+
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 1rem;
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.profile-image-section img {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #FE7743;
+    background-color: #EFEEEA;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-section p {
+    color: #000000;
+    font-size: 1rem;
+}
+
+.profile-info-section p {
+    font-size: 1rem;
+    color: #000000;
+    margin-bottom: 0.75rem;
+}
+
+.profile-info-section strong {
+    color: #FE7743;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #EFEEEA;
+    background-color: #FE7743;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background-color: #273F4F;
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #273F4F;
+    background-color: #EFEEEA;
+    border: 1px solid #FE7743;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-secondary:hover {
+    background-color: #FE7743;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}

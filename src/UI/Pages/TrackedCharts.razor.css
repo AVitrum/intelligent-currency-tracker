@@ -1,0 +1,98 @@
+.mini-charts-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #EFEEEA;
+}
+
+.page-title {
+    text-align: center;
+    color: #273F4F;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.mini-chart-container {
+    background: #273F4F;
+    padding: 1rem;
+    border-radius: 12px;
+    width: 250px;
+    text-align: center;
+    color: #EFEEEA;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px;
+}
+
+.currency-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.remove-chart-btn {
+    background-color: #FE7743;
+    color: #EFEEEA;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.remove-chart-btn:hover {
+    background-color: #EFEEEA;
+    color: #273F4F;
+}
+
+.mini-chart-canvas {
+    width: 100%;
+    height: 150px;
+}
+
+.no-charts-message {
+    text-align: center;
+    background-color: #FFEBE0;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px;
+}
+
+.no-charts-message p {
+    font-size: 1.2rem;
+    color: #273F4F;
+}
+
+.go-to-charts-btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background-color: #FE7743;
+    color: #EFEEEA;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.go-to-charts-btn:hover {
+    background-color: #EFEEEA;
+    color: #273F4F;
+    transform: translateY(-3px);
+}
+
+@media (max-width: 768px) {
+    .mini-chart-container {
+        width: 48%;
+    }
+}
+
+@media (max-width: 480px) {
+    .mini-chart-container {
+        width: 100%;
+    }
+}

@@ -1,17 +1,30 @@
-﻿@inherits LayoutComponentBase
+﻿@using Shared.Helpers
+@inherits LayoutComponentBase
+@inject IJSRuntime Js
+@inject NavigationManager Navigation
 
 @code {
-    private bool _isSidebarVisible = false;
+    private bool _isSidebarVisible;
+    private bool _hideNavItems;
+    private bool _isTokenPresent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+    }
 
     private void ToggleSidebar()
     {
+        _hideNavItems = _isSidebarVisible;
         _isSidebarVisible = !_isSidebarVisible;
     }
+
 }
 
+
 <div class="page">
-    <div class="sidebar @( _isSidebarVisible ? "" : "collapsing" )">
-        <NavMenu OnToggleSidebar="ToggleSidebar" />
+    <div class="sidebar @(_isSidebarVisible ? "" : "collapsing")">
+        <NavMenu OnToggleSidebar="ToggleSidebar" HideNavItems="@_hideNavItems"/>
     </div>
 
     @if (!_isSidebarVisible)
@@ -23,12 +36,26 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            @if (_isTokenPresent)
+            {
+                <a href="/profile">Profile</a>
+            }
+            <a href="">API</a>
+            <a href="/contacts">Contacts</a>
+            <a href="">About</a>
+            <a href="/settings" class="settings-link" title="Settings">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#273F4F" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 11 3.09V3a2 2 0 1 1 4 0v.09c0 .66.39 1.26 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c0 .66.39 1.26 1 1.51H21a2 2 0 1 1 0 4h-.09c-.66 0-1.26.39-1.51 1z"/>
+                </svg>
+            </a>
         </div>
 
         <article class="content px-4">
             @Body
         </article>
     </main>
-    <BlazoredToasts />
+    <BlazoredToasts/>
 </div>

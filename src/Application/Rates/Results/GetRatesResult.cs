@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Domain.Common;
 using Shared.Dtos;
 
@@ -10,10 +11,11 @@ public class GetRatesResult : BaseResult
         Rates = rates;
     }
 
-    public IEnumerable<RateDto> Rates { get; }
+    [JsonInclude]
+    public IEnumerable<RateDto> Rates { get; set; }
 
     public static GetRatesResult SuccessResult(IEnumerable<RateDto> rates)
     {
-        return new GetRatesResult(true, Array.Empty<string>(), rates);
+        return new GetRatesResult(true, [], rates);
     }
 }

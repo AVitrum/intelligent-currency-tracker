@@ -2,10 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Common.Exceptions;
 using Infrastructure.Identity;
-using Infrastructure.Identity.Jwt;
 using Infrastructure.Identity.Results;
+using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Shared.Payload.Requests;
 
 namespace Infrastructure.Utils;
 
@@ -18,15 +17,6 @@ public class UserHelper : IUserHelper
     {
         _userManager = userManager;
         _jwtService = jwtService;
-    }
-
-    public UserLookupDelegate GetUserLookupDelegate(LoginRequest request)
-    {
-        return request.UserName is not null
-            ? _userManager.FindByNameAsync
-            : request.Email is not null
-                ? _userManager.FindByEmailAsync
-                : throw new ArgumentException("Username or Email must be provided");
     }
 
     public async Task ValidatePasswordAsync(ApplicationUser user, string password)

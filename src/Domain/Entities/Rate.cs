@@ -9,7 +9,7 @@ public class Rate : BaseEntity
 
     public required Guid CurrencyId { get; init; }
     public Currency? Currency { get; init; }
-    public decimal Value { get; init; }
+    public decimal Value { get; set; }
     public decimal ValueCompareToPrevious { get; set; }
     public int Year => Date.Year;
     public int Month => Date.Month;

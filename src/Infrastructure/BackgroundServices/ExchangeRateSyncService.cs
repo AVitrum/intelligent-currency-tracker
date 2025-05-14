@@ -1,10 +1,14 @@
-using System.Net;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Utils;
+using Domain.Events;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Polly;
+using Polly.Retry;
+using Policy = Polly.Policy;
 
 namespace Infrastructure.BackgroundServices;
 
@@ -12,25 +16,38 @@ public class ExchangeRateSyncService : BackgroundService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExchangeRateSyncService> _logger;
+
+    private readonly List<int> _r030 = [];
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly TimeSpan _updateInterval;
 
     public ExchangeRateSyncService(
         IHttpClientFactory httpClientFactory,
         ILogger<ExchangeRateSyncService> logger,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        IConfiguration configuration)
     {
+        _updateInterval =
+            TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _scopeFactory = scopeFactory;
     }
 
+    public event ExchangeRatesFetchedEventHandler? ExchangeRatesFetched;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromDays(1));
+        using PeriodicTimer timer = new PeriodicTimer(_updateInterval);
 
         do
         {
             await FetchAndStoreExchangeRates(stoppingToken);
+
+            if (_r030.Count != 0 && ExchangeRatesFetched != null)
+            {
+                await ExchangeRatesFetched.Invoke(this, new ExchangeRatesFetchedEventArgs(_r030));
+            }
         } while (await timer.WaitForNextTickAsync(stoppingToken));
     }
 
@@ -41,7 +58,6 @@ public class ExchangeRateSyncService : BackgroundService
             using IServiceScope scope = _scopeFactory.CreateScope();
             IAppSettings appSettings = scope.ServiceProvider.GetRequiredService<IAppSettings>();
             IRateRepository rateRepository = scope.ServiceProvider.GetRequiredService<IRateRepository>();
-            ICurrencyRepository currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
 
             DateTime lastProcessedDate = await rateRepository.GetLastDateAsync();
             DateTime startDate = lastProcessedDate.AddDays(1);
@@ -55,10 +71,26 @@ public class ExchangeRateSyncService : BackgroundService
 
             HttpClient client = _httpClientFactory.CreateClient();
 
-            for (DateTime date = startDate; date <= currentDate; date = date.AddDays(1))
+            const int batchSize = 10;
+            List<DateTime> datesToProcess = Enumerable
+                .Range(0, (currentDate - startDate).Days + 1)
+                .Select(offset => startDate.AddDays(offset))
+                .ToList();
+
+            foreach (DateTime[] batch in datesToProcess.Chunk(batchSize))
             {
-                string url = BuildNbuApiUrl(appSettings.NbuUrl, date);
-                await HandleApiResponseAsync(client, url, date, rateRepository, currencyRepository, stoppingToken);
+                IEnumerable<Task> tasks = batch.Select(async date =>
+                {
+                    using IServiceScope innerScope = _scopeFactory.CreateScope();
+                    IRateRepository rateRepo = innerScope.ServiceProvider.GetRequiredService<IRateRepository>();
+                    ICurrencyRepository currencyRepo =
+                        innerScope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
+
+                    await HandleApiResponseAsync(client, BuildNbuApiUrl(appSettings.NbuUrl, date),
+                        date, rateRepo, currencyRepo, stoppingToken);
+                });
+
+                await Task.WhenAll(tasks);
             }
         }
         catch (Exception ex)
@@ -75,17 +107,15 @@ public class ExchangeRateSyncService : BackgroundService
         ICurrencyRepository currencyRepository,
         CancellationToken stoppingToken)
     {
-        try
+        AsyncRetryPolicy? policy = Policy
+            .Handle<HttpRequestException>()
+            .Or<TimeoutException>()
+            .WaitAndRetryAsync(3, retryAttempt =>
+                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        await policy.ExecuteAsync(async () =>
         {
             HttpResponseMessage response = await client.GetAsync(url, stoppingToken);
-
-            if (response.StatusCode == HttpStatusCode.GatewayTimeout)
-            {
-                _logger.LogWarning("Received 504 Gateway Timeout. Retrying for {Date}", date);
-                await HandleApiResponseAsync(client, url, date, rateRepository, currencyRepository, stoppingToken);
-                return;
-            }
-
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync(stoppingToken);
@@ -93,15 +123,11 @@ public class ExchangeRateSyncService : BackgroundService
 
             ICollection<Rate> rates = await ParseExchangeRatesAsync(ratesData, date, currencyRepository);
             rates = await CompareToPreviousAsync(rates, rateRepository);
-            
+
             await rateRepository.AddRangeAsync(rates);
 
             _logger.LogInformation("Exchange rates for {Date} were successfully stored.", date);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error processing API response for {Date}", date);
-        }
+        });
     }
 
     private async Task<ICollection<Rate>> ParseExchangeRatesAsync(
@@ -130,6 +156,11 @@ public class ExchangeRateSyncService : BackgroundService
                 Value = rateValue,
                 Date = date
             });
+
+            if (!_r030.Contains(currency.R030))
+            {
+                _r030.Add(currency.R030);
+            }
         }
 
         return rates;
@@ -150,7 +181,7 @@ public class ExchangeRateSyncService : BackgroundService
             Rate lastRate = await rateRepository.GetLastByCurrencyIdAsync(rate.CurrencyId);
             rate.ValueCompareToPrevious = rate.Value - lastRate.Value;
         }
-        
+
         return rates;
     }
 

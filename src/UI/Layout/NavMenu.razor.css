@@ -5,17 +5,17 @@
 
 .top-row {
     min-height: 3.5rem;
-    background-color: #578E7E;
-    color: #FFFAEC;
+    background-color: #273F4F;
+    color: #EFEEEA;
 }
 
 .navbar-brand {
     font-size: 1.1rem;
-    color: #FFFAEC;
+    color: #EFEEEA;
 }
 
 .nav-item ::deep a {
-    color: #3D3D3D;
+    color: #000000;
     border-radius: 4px;
     height: 3rem;
     display: flex;
@@ -27,23 +27,24 @@
 }
 
 .nav-item ::deep a.active {
-    background-color: #3D3D3D;
-    color: #FFFAEC;
+    background-color: #FE7743;
+    color: #FFFFFF;
 }
 
 .nav-item ::deep a:hover {
-    background-color: #F5ECD5;
-    color: #578E7E;
+    background-color: #EFEEEA;
+    color: #FE7743;
 }
 
 .nav-scrollable {
-    background-color: #FFFAEC;
-    color: #3D3D3D;
+    background-color: #EFEEEA;
+    color: #000000;
     overflow-y: auto;
     max-height: calc(100vh - 3.5rem);
     border-radius: 20px;
     padding: 15px 1rem 1rem;
     margin: 2.5%;
+    transition: opacity 0.2s ease-in-out;
 }
 
 .nav-item {
@@ -53,12 +54,18 @@
 .nav-item ::deep button {
     background-color: transparent;
     border: none;
-    color: #FFFAEC;
+    color: #000000;
     cursor: pointer;
     padding: 0;
     font-size: 1rem;
 }
 
 .nav-item ::deep button:hover {
-    color: #F5ECD5;
+    color: #FE7743;
+}
+
+.nav-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
 }

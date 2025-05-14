@@ -1,14 +1,16 @@
 import os
 import shutil
+import logging
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
-
 from payload.requests.forecast_request import ForecastRequest
 from payload.requests.predict_request import PredictRequest
 from services.model_service import load_and_prepare_data, train_prophet_model, save_model, load_model, predict_rate, \
     forecast_periods
-    
-import logging
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -23,8 +25,8 @@ def read_root():
 
 @router.post("/train")
 async def train_model(
-    currency_r030: int = Form(...),
-    file: UploadFile = File(None)
+        currency_r030: int = Form(...),
+        file: UploadFile = File(None)
 ):
     logger.info(f"Received currency_r030: {currency_r030}")
     if file:

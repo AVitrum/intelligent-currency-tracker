@@ -1,0 +1,124 @@
+.settings-page {
+    max-width: 500px;
+    margin: 2.5rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #EFEEEA 80%, #FFEBE0 100%);
+    border-radius: 22px;
+    box-shadow: 0 8px 32px rgba(39, 63, 79, 0.12), 0 1.5px 6px rgba(254, 119, 67, 0.08);
+    animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.settings-header h2 {
+    color: #273F4F;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+}
+
+.settings-description {
+    color: #222;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 14px;
+    padding: 0.5rem 1rem;
+    margin: 0 auto;
+    max-width: 350px;
+}
+
+.settings-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(39, 63, 79, 0.08);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    border: 1.5px solid #FFB88C;
+}
+
+.settings-group label {
+    color: #273F4F;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
+    letter-spacing: 0.2px;
+}
+
+.settings-control {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border: 1.5px solid #FE7743;
+    border-radius: 10px;
+    background: #F9F7F3;
+    color: #273F4F;
+    font-size: 1.05rem;
+    margin-top: 0.3rem;
+    transition: border 0.2s;
+}
+
+.settings-control:focus {
+    outline: none;
+    border-color: #273F4F;
+    background: #fff;
+}
+
+.settings-checkbox {
+    accent-color: #FE7743;
+    margin-right: 0.6rem;
+    transform: scale(1.2);
+}
+
+.settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.settings-save-btn {
+    background: linear-gradient(90deg, #273F4F 60%, #FE7743 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.7rem 2.2rem;
+    font-weight: 600;
+    font-size: 1.08rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(254, 119, 67, 0.13);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.settings-save-btn:hover, .settings-save-btn:focus {
+    background: linear-gradient(90deg, #FE7743 60%, #273F4F 100%);
+    color: #fff;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 16px rgba(39, 63, 79, 0.13);
+}
+
+@media (max-width: 600px) {
+    .settings-page {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .settings-card {
+        padding: 1rem;
+        border-radius: 10px;
+    }
+}

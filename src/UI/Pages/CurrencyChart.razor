@@ -1,0 +1,89 @@
+@page "/currency-chart"
+@using UI.Common.Interfaces
+@using UI.Components.Chart
+@inject HttpClient Http
+@inject IToastService ToastService
+@inject IConfiguration Configuration
+@inject IHttpClientService HttpClientService
+@inject IJSRuntime JS
+
+<PageTitle>Charts</PageTitle>
+
+<div class="page-container">
+    <div class="header-section">
+        <h2>Currency Exchange Rate Chart</h2>
+        <p class="description">
+            Historical exchange rates data provided by the National Bank of Ukraine.
+            Select a currency and date range to view the exchange rate dynamics.
+        </p>
+    </div>
+
+    <div class="content-section">
+        <div class="form-container">
+            <div class="form-card">
+                <div class="form-group">
+                    <label for="currencySelect">Currency:</label>
+                    <select id="currencySelect"
+                            @bind="_selectedCurrency"
+                            @bind:after="LoadRatesAsync"
+                            class="form-control">
+                        @foreach (string c in _currencies)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input id="startDate"
+                           type="date"
+                           @bind="_startDate"
+                           @bind:after="LoadRatesAsync"
+                           class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input id="endDate"
+                           type="date"
+                           @bind="_endDate"
+                           @bind:after="LoadRatesAsync"
+                           class="form-control"/>
+                </div>
+                <button class="form-control" @onclick="PinCurrentCurrency">
+                    Pin this currency
+                </button>
+            </div>
+        </div>
+        <div class="chart-section">
+            <div class="chart-container">
+                <canvas id="currencyChart"></canvas>
+                <div id="chartTooltip" class="chart-tooltip"></div>
+            </div>
+            <div class="chart-footer">
+                <small>
+                    Chart shows exchange rates against Ukrainian Hryvnia (UAH).
+                    Data is updated daily on business days.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    @if (_pinnedCurrencies.Count > 0)
+    {
+        <div class="pinned-container">
+            <h3>Pinned Charts</h3>
+            <div class="pinned-charts-section">
+                @foreach (string c in _pinnedCurrencies)
+                {
+                    if (_pinnedData.TryGetValue(c, out (decimal[] Data, string[] Dates) chartInfo))
+                    {
+                        <MiniChart Currency="@c"
+                                   Data="chartInfo.Data"
+                                   Dates="chartInfo.Dates"
+                                   OnRemove="() => RemovePinnedCurrency(c)"/>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>
