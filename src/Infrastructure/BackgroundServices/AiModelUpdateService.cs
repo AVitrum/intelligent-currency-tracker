@@ -10,9 +10,9 @@ namespace Infrastructure.BackgroundServices;
 
 public class AiModelUpdateService : IHostedService
 {
-    private readonly ExchangeRateSyncService _syncService;
     private readonly ILogger<AiModelUpdateService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ExchangeRateSyncService _syncService;
 
     public AiModelUpdateService(
         ExchangeRateSyncService syncService,
@@ -42,9 +42,7 @@ public class AiModelUpdateService : IHostedService
         IAiModelService aiModelService = scope.ServiceProvider.GetRequiredService<IAiModelService>();
 
         foreach (int r030 in e.R030)
-        {
             await TryTrainWithRetryAsync(aiModelService, r030);
-        }
     }
 
     private async Task TryTrainWithRetryAsync(IAiModelService aiModelService, int r030)
@@ -63,7 +61,7 @@ public class AiModelUpdateService : IHostedService
                 await Task.Delay(TimeSpan.FromMinutes(15));
                 continue;
             }
-            
+
             break;
         }
     }

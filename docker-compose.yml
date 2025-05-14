@@ -132,7 +132,7 @@
       - devui
     networks:
       - test-network
-    
+  
   zoo:
     image: confluentinc/cp-zookeeper:latest
     hostname: zoo

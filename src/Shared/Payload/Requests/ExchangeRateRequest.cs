@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json.Serialization;
 using Domain.Constants;
 using Shared.Helpers;
@@ -12,8 +11,8 @@ public class ExchangeRateRequest
     private DateTime _end;
     private DateTime _start;
 
-    public int Page { get; set; } 
-    public int PageSize { get; set; } 
+    public int Page { get; set; }
+    public int PageSize { get; set; }
 
     public required string StartDateString { get; init; }
     public required string EndDateString { get; set; }

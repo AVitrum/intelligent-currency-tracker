@@ -16,12 +16,10 @@ public class ExchangeRateSyncService : BackgroundService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExchangeRateSyncService> _logger;
+
+    private readonly List<int> _r030 = [];
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly TimeSpan _updateInterval;
-    
-    private List<int> _r030 = [];
-
-    public event ExchangeRatesFetchedEventHandler? ExchangeRatesFetched;
 
     public ExchangeRateSyncService(
         IHttpClientFactory httpClientFactory,
@@ -29,11 +27,14 @@ public class ExchangeRateSyncService : BackgroundService
         IServiceScopeFactory scopeFactory,
         IConfiguration configuration)
     {
-        _updateInterval = TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
+        _updateInterval =
+            TimeSpan.Parse(configuration.GetValue<string>("ExchangeRateSync:UpdateInterval") ?? "01:00:00");
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _scopeFactory = scopeFactory;
     }
+
+    public event ExchangeRatesFetchedEventHandler? ExchangeRatesFetched;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -82,7 +83,8 @@ public class ExchangeRateSyncService : BackgroundService
                 {
                     using IServiceScope innerScope = _scopeFactory.CreateScope();
                     IRateRepository rateRepo = innerScope.ServiceProvider.GetRequiredService<IRateRepository>();
-                    ICurrencyRepository currencyRepo = innerScope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
+                    ICurrencyRepository currencyRepo =
+                        innerScope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
 
                     await HandleApiResponseAsync(client, BuildNbuApiUrl(appSettings.NbuUrl, date),
                         date, rateRepo, currencyRepo, stoppingToken);
@@ -154,7 +156,7 @@ public class ExchangeRateSyncService : BackgroundService
                 Value = rateValue,
                 Date = date
             });
-            
+
             if (!_r030.Contains(currency.R030))
             {
                 _r030.Add(currency.R030);

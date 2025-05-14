@@ -149,6 +149,9 @@ public class UserService : IUserService
         {
             Language = Enum.Parse<Language>(dto.Language, true),
             Theme = Enum.Parse<Theme>(dto.Theme, true),
+            SummaryType = !string.IsNullOrEmpty(dto.SummaryType)
+                ? Enum.Parse<SummaryType>(dto.SummaryType, true)
+                : null,
             NotificationsEnabled = dto.NotificationsEnabled,
             UserId = userId
         };
@@ -175,6 +178,7 @@ public class UserService : IUserService
         {
             Language = settings.Language.ToString(),
             Theme = settings.Theme.ToString(),
+            SummaryType = settings.SummaryType?.ToString(),
             NotificationsEnabled = settings.NotificationsEnabled
         };
 

@@ -15,7 +15,7 @@ public class EmailSender : IEmailSender
         _password = appSettings.GmailPassword;
     }
 
-    public Task SendEmailAsync(string email, string subject, string message)
+    public Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
         SmtpClient client = GetSmtpClient();
 
@@ -24,17 +24,7 @@ public class EmailSender : IEmailSender
             From = new MailAddress(_email),
             Subject = subject,
             To = { email },
-            Body = $"""
-                    <html>
-                    <body style='font-family: Arial, sans-serif;'>
-                        <div style='background-color: #f4f4f4; padding: 20px;'>
-                            <h2 style='color: #333;'>Hello, User!</h2>
-                            <p style='color: #555;'>{message}</p>
-                            <p style='color: #777;'>Best regards,<br>Company Name</p>
-                        </div>
-                    </body>
-                    </html>
-                    """,
+            Body = htmlMessage,
             IsBodyHtml = true
         };
         return client.SendMailAsync(msg);

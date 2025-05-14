@@ -11,7 +11,7 @@ public class DateHelper
         {
             throw new ArgumentException("Date cannot be null or empty.", nameof(date));
         }
-        
+
         DateTime dateTime = DateTime.ParseExact(
             date,
             DateConstants.DateFormat,
@@ -21,5 +21,8 @@ public class DateHelper
         return dateTime;
     }
 
-    public static string GetDateFormat() => DateConstants.DateFormat;
+    public static string GetDateFormat()
+    {
+        return DateConstants.DateFormat;
+    }
 }

@@ -9,8 +9,8 @@ namespace Infrastructure.Minio;
 public class MinioService : IMinioService
 {
     private readonly string _bucketName;
-    private readonly IAmazonS3 _s3Client;
     private readonly IMinioHelper _minioHelper;
+    private readonly IAmazonS3 _s3Client;
 
     public MinioService(IAppSettings appSettings, IMinioHelper minioHelper)
     {

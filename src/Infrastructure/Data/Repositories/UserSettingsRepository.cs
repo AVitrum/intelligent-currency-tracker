@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repositories;
+using Domain.Enums;
 
 namespace Infrastructure.Data.Repositories;
 
@@ -20,6 +21,7 @@ public class UserSettingsRepository : BaseRepository<UserSettings>, IUserSetting
         {
             existingSettings.Language = settings.Language;
             existingSettings.Theme = settings.Theme;
+            existingSettings.SummaryType = settings.SummaryType;
             existingSettings.NotificationsEnabled = settings.NotificationsEnabled;
         }
         else
@@ -34,5 +36,13 @@ public class UserSettingsRepository : BaseRepository<UserSettings>, IUserSetting
     {
         return await _context.UserSettings
             .FirstOrDefaultAsync(us => us.UserId == userId);
+    }
+
+    public async Task<IEnumerable<UserSettings>> GetUserSettingsRangeBySummaryTypeAsync(SummaryType summaryType)
+    {
+        return await _context.UserSettings
+            .Where(us => us.SummaryType == summaryType && us.NotificationsEnabled)
+            .OrderBy(us => us.TimeStamp)
+            .ToListAsync();
     }
 }

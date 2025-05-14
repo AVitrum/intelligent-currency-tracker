@@ -14,17 +14,17 @@ namespace Application.Rates;
 
 public class RateService : IRateService
 {
-    private readonly IRateRepository _rateRepository;
     private readonly ICurrencyRepository _currencyRepository;
-    private readonly IRateHelper _rateHelper;
     private readonly ILogger<RateService> _logger;
     private readonly IMapper _mapper;
-    
+    private readonly IRateHelper _rateHelper;
+    private readonly IRateRepository _rateRepository;
+
     public RateService(
         IRateRepository rateRepository,
         ICurrencyRepository currencyRepository,
         IRateHelper rateHelper,
-        ILogger<RateService> logger, 
+        ILogger<RateService> logger,
         IMapper mapper)
     {
         _rateRepository = rateRepository;
@@ -42,7 +42,7 @@ public class RateService : IRateService
         int pageSize)
     {
         IEnumerable<Rate> rates = await GetRatesFromDbAsync(start, end, currencyString, page, pageSize);
-        
+
         IEnumerable<RateDto> ratesDto = _rateHelper.ConvertRatesToDtoAsync(rates);
 
         return GetRatesResult.SuccessResult(ratesDto);
@@ -50,8 +50,8 @@ public class RateService : IRateService
 
     public async Task<BaseResult> GetAllCurrenciesAsync()
     {
-        ICollection<Currency> currencies = (ICollection<Currency>) await _currencyRepository.GetAllAsync();
-        
+        ICollection<Currency> currencies = (ICollection<Currency>)await _currencyRepository.GetAllAsync();
+
         if (currencies is null || currencies.Count == 0)
         {
             throw new EntityNotFoundException<Currency>();
@@ -62,21 +62,21 @@ public class RateService : IRateService
         currenciesDto = currenciesDto.OrderBy(c => c.Code).ToList();
 
         _logger.LogInformation("Successfully retrieved all currencies");
-        
+
         return GetAllCurrenciesResult.SuccessResult(currenciesDto);
     }
 
     public async Task<BaseResult> GetLastUpdatedCurrenciesAsync()
     {
         List<Rate> rates = (List<Rate>)await _rateRepository.GetLastUpdatedAsync();
-        
+
         if (rates.Count == 0)
         {
             return BaseResult.FailureResult(["No rates found."]);
         }
 
         ICollection<Currency> currencies = [];
-        
+
         foreach (Rate rate in rates)
         {
             Currency? currency = await _currencyRepository.GetByIdAsync(rate.CurrencyId);
@@ -87,7 +87,7 @@ public class RateService : IRateService
 
             currencies.Add(currency);
         }
-        
+
         IEnumerable<CurrencyDto> currencyDtos = _rateHelper.ConvertCurrenciesToDtoAsync(currencies);
         return GetAllCurrenciesResult.SuccessResult(currencyDtos);
     }
@@ -96,7 +96,7 @@ public class RateService : IRateService
     {
         DateTime dateTime = DateHelper.ParseDdMmYyyy(date);
         bool isDeleted = await _rateRepository.RemoveByDateAsync(dateTime);
-        
+
         return isDeleted ? BaseResult.SuccessResult() : BaseResult.FailureResult(["Failed to delete rates."]);
     }
 
@@ -128,7 +128,7 @@ public class RateService : IRateService
             {
                 rates = await _rateRepository.GetRangeAsync(start, end, currency);
             }
-            else 
+            else
             {
                 rates = await _rateRepository.GetRangeAsync(start, end, currency, page, pageSize);
             }

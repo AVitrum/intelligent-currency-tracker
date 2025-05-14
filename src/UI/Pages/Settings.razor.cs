@@ -61,6 +61,7 @@ public partial class Settings : ComponentBase, IPageComponent
             {
                 Theme = "default",
                 Language = "en-US",
+                SummaryType = null,
                 NotificationsEnabled = true
             };
         }

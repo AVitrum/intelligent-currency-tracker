@@ -2,11 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Common.Exceptions;
 using Infrastructure.Identity;
-using Infrastructure.Identity.Jwt;
 using Infrastructure.Identity.Results;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Shared.Payload.Requests;
 
 namespace Infrastructure.Utils;
 

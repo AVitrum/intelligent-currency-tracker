@@ -7,7 +7,6 @@ using Application.Kafka;
 using Application.Rates;
 using Microsoft.Extensions.DependencyInjection;
 using Shared;
-using Shared.Helpers;
 
 namespace Application;
 
@@ -20,7 +19,7 @@ public static class DependencyInjection
 
         services.AddScoped<IRateHelper, RateHelper>();
         services.AddScoped<IMinioHelper, MinioHelper>();
-        
+
         services.AddScoped<ICsvService, CsvService>();
         services.AddScoped<IRateService, RateService>();
         services.AddScoped<IAiModelService, AiModelService>();

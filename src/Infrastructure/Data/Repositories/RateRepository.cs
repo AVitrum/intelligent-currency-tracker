@@ -19,7 +19,7 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         await _context.Rates.AddRangeAsync(rates);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task<Rate> GetLastByCurrencyIdAsync(Guid currencyId)
     {
         Rate rate = await _context.Rates
@@ -140,7 +140,7 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         {
             _context.Rates.RemoveRange(rates);
             await _context.SaveChangesAsync();
-            
+
             return true;
         }
 

@@ -26,11 +26,11 @@ public class DefaultLoginManager : ILoginManager
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
         ApplicationUser user;
-        
+
         if (request.Identifier.Contains('@'))
         {
             user = await _userManager.FindByEmailAsync(request.Identifier)
-                ?? throw new UserNotFoundException("Wrong email.");
+                   ?? throw new UserNotFoundException("Wrong email.");
         }
         else
         {

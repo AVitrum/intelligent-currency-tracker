@@ -11,6 +11,7 @@ using Infrastructure.Identity.Jwt;
 using Infrastructure.Identity.Traceable;
 using Infrastructure.Interfaces;
 using Infrastructure.Minio;
+using Infrastructure.Summary;
 using Infrastructure.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +53,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IMinioService, MinioService>();
         services.AddScoped<ITraceableCurrencyService, TraceableCurrencyService>();
+        services.AddScoped<ISummaryService, SummaryService>();
 
         //Repositories
         services.AddScoped<ICurrencyRepository, CurrencyRepository>();
@@ -64,6 +66,7 @@ public static class DependencyInjection
         services.AddSingleton<ExchangeRateSyncService>();
         services.AddHostedService(provider => provider.GetRequiredService<ExchangeRateSyncService>());
         services.AddHostedService<AiModelUpdateService>();
+        services.AddHostedService<SummarySenderService>();
 
         if (appSettings.IsDocker())
         {

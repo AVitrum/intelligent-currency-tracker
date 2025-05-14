@@ -11,7 +11,7 @@ public class MinioHelper : IMinioHelper
 {
     private readonly string _bucketName;
     private readonly IAmazonS3 _s3Client;
-    
+
     public MinioHelper(IAppSettings appSettings)
     {
         _s3Client = new AmazonS3Client(
@@ -23,7 +23,7 @@ public class MinioHelper : IMinioHelper
             });
         _bucketName = appSettings.AwsBucket;
     }
-    
+
     public async Task<string> EnsureUniqueKeyAsync(string key)
     {
         int counter = 1;

@@ -19,6 +19,7 @@ public class UserSettingsServiceService : IUserSettingsService
         await EnsureJsFunctionsExistAsync(js);
         string language = await js.InvokeAsync<string>("getCookie", "language");
         string theme = await js.InvokeAsync<string>("getCookie", "theme");
+        string? summaryType = await js.InvokeAsync<string?>("getCookie", "summaryType");
         string notificationsEnabled = await js.InvokeAsync<string>("getCookie", "notificationsEnabled");
 
         if (string.IsNullOrEmpty(language) || string.IsNullOrEmpty(theme) ||
@@ -31,6 +32,7 @@ public class UserSettingsServiceService : IUserSettingsService
         {
             Language = language,
             Theme = theme,
+            SummaryType = summaryType,
             NotificationsEnabled = bool.Parse(notificationsEnabled)
         };
     }
@@ -61,6 +63,15 @@ public class UserSettingsServiceService : IUserSettingsService
         await js.InvokeVoidAsync("setCookie", "theme", settings.Theme, ExpirationDays);
         await js.InvokeVoidAsync("setCookie", "notificationsEnabled", settings.NotificationsEnabled.ToString(),
             ExpirationDays);
+
+        if (!string.IsNullOrEmpty(settings.SummaryType))
+        {
+            await js.InvokeVoidAsync("setCookie", "summaryType", settings.SummaryType, ExpirationDays);
+        }
+        else
+        {
+            await js.InvokeVoidAsync("deleteCookie", "summaryType");
+        }
     }
 
     private async Task EnsureJsFunctionsExistAsync(IJSRuntime js)

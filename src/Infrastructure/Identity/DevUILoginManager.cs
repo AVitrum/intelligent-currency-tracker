@@ -26,7 +26,7 @@ public class DevUILoginManager : ILoginManager
     public async Task<BaseResult> LoginAsync(LoginRequest request)
     {
         ApplicationUser user;
-        
+
         if (request.Identifier.Contains('@'))
         {
             user = await _userManager.FindByEmailAsync(request.Identifier)

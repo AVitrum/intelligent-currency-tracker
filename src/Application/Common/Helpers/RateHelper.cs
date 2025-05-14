@@ -11,9 +11,9 @@ namespace Application.Common.Helpers;
 public class RateHelper : IRateHelper
 {
     private readonly ICurrencyRepository _currencyRepository;
-    private readonly IRateRepository _rateRepository;
     private readonly ILogger<RateHelper> _logger;
     private readonly IMapper _mapper;
+    private readonly IRateRepository _rateRepository;
 
     public RateHelper(
         ICurrencyRepository currencyRepository,
@@ -26,7 +26,7 @@ public class RateHelper : IRateHelper
         _mapper = mapper;
         _logger = logger;
     }
-    
+
     public async Task<IEnumerable<Rate>> GetRatesAsync(DateTime start, DateTime end, int currencyR030)
     {
         IEnumerable<Rate> rates;
