@@ -92,6 +92,59 @@ public class RateService : IRateService
         return GetAllCurrenciesResult.SuccessResult(currencyDtos);
     }
 
+    public async Task<BaseResult> GetDetailsAsync(string currencyCode, DateTime start, DateTime end)
+    {
+        Currency currency = await _currencyRepository.GetByCodeAsync(currencyCode) ??
+                            throw new EntityNotFoundException<Currency>();
+        List<Rate> rates = (List<Rate>)await _rateRepository.GetRangeAsync(start, end, currency);
+
+        if (rates.Count == 0)
+        {
+            return BaseResult.FailureResult(["No rates found for the specified currency and date range."]);
+        }
+
+        SingleCurrencyAnalyticsDto analysisDto = _rateHelper.AnalyzeCurrency(rates, currency.Code);
+        return GetDetailsResult.SuccessResult(analysisDto);
+    }
+
+    public async Task<BaseResult> CompareCurrenciesAsync(List<string> currencyCodes, DateTime start, DateTime end)
+    {
+        if (currencyCodes.Count < 2)
+        {
+            return BaseResult.FailureResult(["At least two currency codes are required for comparison."]);
+        }
+
+        List<Currency> currencies = [];
+        List<List<Rate>> ratesLists = [];
+        List<SingleCurrencyAnalyticsDto> analysis = [];
+
+        foreach (string code in currencyCodes)
+        {
+            Currency? currency = await _currencyRepository.GetByCodeAsync(code);
+            if (currency is null)
+            {
+                return BaseResult.FailureResult([$"Currency with code {code} not found."]);
+            }
+
+            currencies.Add(currency);
+            List<Rate> rates = (List<Rate>)await _rateRepository.GetRangeAsync(start, end, currency);
+            if (rates.Count == 0)
+            {
+                return BaseResult.FailureResult([$"No rates found for currency {code} in the specified date range."]);
+            }
+
+            ratesLists.Add(rates);
+        }
+
+        analysis.AddRange(from currency in currencies
+            let index = currencies.IndexOf(currency)
+            let rates = ratesLists[index]
+            select _rateHelper.AnalyzeCurrency(rates, currency.Code));
+
+        ComparativeAnalyticsDto comparativeAnalytics = _rateHelper.CompareCurrencies(analysis, ratesLists, start, end);
+        return CompareCurrenciesResult.SuccessResult(comparativeAnalytics);
+    }
+
     public async Task<BaseResult> DeleteRatesAsync(string date)
     {
         DateTime dateTime = DateHelper.ParseDdMmYyyy(date);

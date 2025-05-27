@@ -1,3 +1,3 @@
 namespace Domain.Exceptions;
 
-public class EntityNotFoundException<T>() : Exception($"{nameof(T)} not found");
+public class EntityNotFoundException<T>() : Exception($"{typeof(T)} not found");

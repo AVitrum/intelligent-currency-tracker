@@ -23,6 +23,7 @@ public partial class TrackedCharts : ComponentBase, IPageComponent
         new Dictionary<string, (decimal[] Data, string[] Dates)>();
 
     private readonly DateTime _startDate = DateTime.Today.AddMonths(-1);
+
     private string? _lastPinnedCurrency;
 
     private bool _shouldDrawNewPin;

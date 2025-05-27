@@ -1,0 +1,222 @@
+.details-page-container {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 2rem auto;
+    background-color: #EFEEEA;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 20px -5px;
+}
+
+.details-page-title {
+    text-align: center;
+    color: #273F4F;
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.loading-message,
+.no-data-message-container {
+    text-align: center;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    padding: 2.5rem;
+    margin: 2rem auto;
+    max-width: 600px;
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+    color: #273F4F;
+}
+
+.loading-message p,
+.no-data-message-container p {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+}
+
+.analytics-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.analytics-card {
+    background: #FFFFFF;
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    color: #273F4F;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 10px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+}
+
+.card-section-title {
+    font-size: 1.6rem;
+    color: #273F4F;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #FE7743;
+    font-weight: 500;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item,
+.ma-item {
+    background-color: #F8F8F7;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #E0E0E0;
+}
+
+.stat-label,
+.ma-label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.stat-value,
+.ma-value {
+    font-weight: 600;
+    color: #273F4F;
+    font-size: 1rem;
+}
+
+.moving-averages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.no-ma-data {
+    font-style: italic;
+    color: #777;
+    padding: 1rem 0;
+}
+
+.action-button {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.8rem 1.8rem;
+    background-color: #FE7743;
+    color: #EFEEEA;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1rem;
+}
+
+.action-button:hover {
+    background-color: #273F4F;
+    color: #EFEEEA;
+    transform: translateY(-2px);
+}
+
+.back-button {
+    display: block;
+    width: fit-content;
+    margin: 2.5rem auto 0 auto;
+}
+
+.mini-chart-wrapper {
+    margin-top: 1rem;
+    position: relative;
+}
+
+.currency-detail-mini-chart-canvas {
+    width: 100%;
+    max-width: 100%;
+    height: 220px;
+    background-color: #fdfdfd;
+    border-radius: 4px;
+    border: 1px solid #e7e7e7;
+}
+
+.no-chart-data {
+    font-style: italic;
+    color: #777;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+.chart-tooltip {
+    opacity: 0;
+    position: absolute;
+    background-color: rgba(39, 63, 79, 0.9);
+    color: #EFEEEA;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    transition: opacity 0.15s ease-in-out;
+}
+
+
+@media (max-width: 768px) {
+    .details-page-title {
+        font-size: 1.8rem;
+    }
+
+    .card-section-title {
+        font-size: 1.4rem;
+    }
+
+    .stats-grid,
+    .moving-averages-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-card {
+        padding: 1rem 1.5rem;
+    }
+
+    .currency-detail-mini-chart-canvas {
+        height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .details-page-container {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    .details-page-title {
+        font-size: 1.6rem;
+    }
+
+    .stat-item,
+    .ma-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+
+    .stat-label, .ma-label {
+        font-size: 0.9rem;
+    }
+
+    .stat-value, .ma-value {
+        font-size: 0.95rem;
+    }
+
+    .action-button {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .currency-detail-mini-chart-canvas {
+        height: 150px;
+    }
+}

@@ -88,6 +88,7 @@ public partial class Settings : ComponentBase, IPageComponent
             if (resp.IsSuccessStatusCode)
             {
                 ToastService.ShowSuccess("Settings saved successfully!");
+                await Task.Delay(2000);
                 await Js.InvokeVoidAsync("eval", "location.reload()");
             }
             else

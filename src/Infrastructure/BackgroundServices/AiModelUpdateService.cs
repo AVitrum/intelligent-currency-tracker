@@ -36,7 +36,7 @@ public class AiModelUpdateService : IHostedService
         return Task.CompletedTask;
     }
 
-    private async Task OnFetchedAsync(object sender, ExchangeRatesFetchedEventArgs e)
+    private async Task OnFetchedAsync(object sender, AiModelUpdateEventArgs e)
     {
         using IServiceScope scope = _scopeFactory.CreateScope();
         IAiModelService aiModelService = scope.ServiceProvider.GetRequiredService<IAiModelService>();

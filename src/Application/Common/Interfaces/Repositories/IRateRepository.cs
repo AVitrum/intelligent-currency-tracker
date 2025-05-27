@@ -6,6 +6,7 @@ public interface IRateRepository : IBaseRepository<Rate>
 {
     Task AddRangeAsync(ICollection<Rate> rates);
     Task<Rate> GetLastByCurrencyIdAsync(Guid currencyId);
+    Task<Rate> GetPreviousByCurrencyIdAsync(Guid currencyId, DateTime lastRateDate);
     Task<IEnumerable<Rate>> GetRangeAsync(DateTime date);
     Task<IEnumerable<Rate>> GetRangeAsync(DateTime start, DateTime end);
     Task<IEnumerable<Rate>> GetRangeAsync(DateTime start, DateTime end, Currency currency);

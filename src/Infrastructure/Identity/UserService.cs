@@ -1,3 +1,4 @@
+using System.Globalization;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Common.Interfaces.Repositories;
@@ -152,6 +153,7 @@ public class UserService : IUserService
             SummaryType = !string.IsNullOrEmpty(dto.SummaryType)
                 ? Enum.Parse<SummaryType>(dto.SummaryType, true)
                 : null,
+            PercentageToNotify = decimal.Parse(dto.PercentageToNotify),
             NotificationsEnabled = dto.NotificationsEnabled,
             UserId = userId
         };
@@ -179,6 +181,7 @@ public class UserService : IUserService
             Language = settings.Language.ToString(),
             Theme = settings.Theme.ToString(),
             SummaryType = settings.SummaryType?.ToString(),
+            PercentageToNotify = settings.PercentageToNotify.ToString(CultureInfo.CurrentCulture),
             NotificationsEnabled = settings.NotificationsEnabled
         };
 

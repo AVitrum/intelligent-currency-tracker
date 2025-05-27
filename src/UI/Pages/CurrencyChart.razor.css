@@ -62,7 +62,7 @@
     width: 100%;
     padding: 0.5rem;
     border: 1px solid #273F4F;
-    border-radius: 6px;
+    border-radius: 999px;
     background: #EFEEEA;
     transition: all 0.2s ease;
     color: #000000;
@@ -78,16 +78,36 @@ button.form-control {
     background-color: #FE7743;
     color: #EFEEEA;
     border: 1px solid #000000;
-    border-radius: 6px;
+    border-radius: 999px;
     padding: 0.5rem;
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     cursor: pointer;
+    margin-top: 0.5rem;
 }
+
+button.form-control.details-button {
+    background-color: #273F4F;
+    color: #EFEEEA;
+    border-color: #EFEEEA;
+}
+
+button.form-control.details-button:hover {
+    background-color: #EFEEEA;
+    color: #273F4F;
+    border-color: #273F4F;
+}
+
 
 button.form-control:hover {
     background-color: #273F4F;
     color: #FE7743;
     border-color: #EFEEEA;
+}
+
+button.form-control.details-button:hover {
+    background-color: #EFEEEA;
+    color: #273F4F;
+    border-color: #273F4F;
 }
 
 select.form-control {
@@ -98,7 +118,7 @@ select.form-control {
     flex: 1;
     background: #FE7743;
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: 25px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0px 4px 6px -2px,
     rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
@@ -139,6 +159,20 @@ select.form-control {
     color: #EFEEEA;
 }
 
+.inverted-btn {
+    background-color: #273F4F;
+    color: #fff;
+    border: 2px solid #FE7743;
+    border-radius: 999px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.inverted-btn:hover {
+    background-color: #fff;
+    color: #FE7743;
+    border: 2px solid #273F4F;
+}
+
 .pinned-container {
     margin-top: 2.5rem;
     padding: 1.5rem;
@@ -177,6 +211,25 @@ select.form-control {
     font-weight: 600;
     color: #EFEEEA;
     margin-bottom: 0.5rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table th, .table td {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
 }
 
 @media (max-width: 768px) {

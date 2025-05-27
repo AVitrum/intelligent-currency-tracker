@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Text.Json;
 using Amazon.S3;
 using Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Shared.Payload.Responses;
 
 namespace WebApi.Configurations;
 
@@ -31,16 +33,20 @@ public class CustomExceptionHandler : IExceptionHandler
             traceId
         );
 
-        (int statusCode, string? title) = MapException(exception);
+        (int statusCode, string title) = MapException(exception);
 
-        await Results.Problem(
-            title: title,
-            statusCode: statusCode,
-            extensions: new Dictionary<string, object?>
-            {
-                { "traceId", traceId }
-            }
-        ).ExecuteAsync(httpContext);
+        httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.ContentType = "application/json";
+
+        DefaultErrorResponse response = new DefaultErrorResponse(
+            false,
+            title,
+            statusCode,
+            [exception.Message],
+            traceId
+        );
+
+        await httpContext.Response.WriteAsync(JsonSerializer.Serialize(response), cancellationToken);
 
         return true;
     }

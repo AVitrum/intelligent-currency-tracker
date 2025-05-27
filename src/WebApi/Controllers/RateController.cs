@@ -85,6 +85,72 @@ public class RateController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("get-details")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<BaseResponse>> GetDetails([FromQuery] ExchangeRateRequest request)
+    {
+        BaseResponse response;
+
+        BaseResult result = await _rateService.GetDetailsAsync(request.Currency!, request.Start, request.End);
+        if (result is not GetDetailsResult getDetailsResult)
+        {
+            response = new GetDetailsResponse(
+                false,
+                "Failed to retrieve currency details.",
+                StatusCodes.Status400BadRequest,
+                result.Errors,
+                null
+            );
+
+            return BadRequest(response);
+        }
+
+        response = new GetDetailsResponse(
+            true,
+            "Currency details retrieved successfully.",
+            StatusCodes.Status200OK,
+            new List<string>(),
+            getDetailsResult.Details
+        );
+
+        return Ok(response);
+    }
+
+    [HttpGet("compare-currencies")]
+    public async Task<ActionResult<BaseResponse>> CompareCurrencies([FromQuery] CompareCurrenciesRequest request)
+    {
+        BaseResponse response;
+
+        List<string> codes = [request.CurrencyCode1, request.CurrencyCode2];
+
+        BaseResult result =
+            await _rateService.CompareCurrenciesAsync(codes, request.Start, request.End);
+        if (result is not CompareCurrenciesResult compareCurrenciesResult)
+        {
+            response = new CompareCurrenciesResponse(
+                false,
+                "Failed to compare currencies.",
+                StatusCodes.Status400BadRequest,
+                result.Errors,
+                null
+            );
+
+            return BadRequest(response);
+        }
+
+        response = new CompareCurrenciesResponse(
+            true,
+            "Currencies compared successfully.",
+            StatusCodes.Status200OK,
+            new List<string>(),
+            compareCurrenciesResult.ComparativeAnalytics
+        );
+
+        return Ok(response);
+    }
+
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
