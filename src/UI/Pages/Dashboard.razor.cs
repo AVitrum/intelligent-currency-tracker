@@ -17,24 +17,28 @@ using IConfiguration = UI.Common.Interfaces.IConfiguration;
 
 namespace UI.Pages;
 
-public partial class CurrencyChart : ComponentBase, IPageComponent
+public partial class Dashboard : ComponentBase, IPageComponent
 {
+    private DateTime _startDate = DateTime.Today.AddMonths(-1);
+    private DateTime _endDate = DateTime.Today;
+
+    private string _startDateString = string.Empty;
+    private string _endDateString = string.Empty;
+
     private readonly List<string> _currencies = [];
     private readonly List<string> _pinnedCurrencies = [];
-
     private readonly Dictionary<string, (decimal[] Data, string[] Dates)> _pinnedData =
         new Dictionary<string, (decimal[] Data, string[] Dates)>();
 
     private decimal[] _chartData = [];
     private string[] _dates = [];
-    private DateTime _endDate = DateTime.Today;
     private string? _lastPinnedCurrency;
 
     private string _selectedChartType = "line";
     private string _selectedCurrency = "USD";
     private bool _shouldDrawNewPin;
     private bool _showTable;
-    private DateTime _startDate = DateTime.Today.AddMonths(-1);
+    private bool _isLoadingChartData;
 
     [Inject] private WebSocketService WebSocketService { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -72,16 +76,16 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
 
     protected override async Task OnInitializedAsync()
     {
+        _isLoadingChartData = true;
+        SetStringDates();
         await WebSocketService.ConnectAsync();
         await LoadTrackedCurrenciesAsync();
-        await RequestDataForPinnedCurrenciesAsync();
-        await DrawPinnedChartsAsync();
-    }
 
-    protected override async Task OnParametersSetAsync()
-    {
         await LoadCurrencyListAsync();
-        await LoadRatesAsync();
+        await FetchMainChartRatesAsync();
+        await RequestDataForPinnedCurrenciesAsync();
+
+        _isLoadingChartData = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -99,7 +103,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
             _shouldDrawNewPin = false;
         }
 
-        if (!_showTable && _chartData is { Length: > 0 } && _dates is { Length: > 0 })
+        if (!_isLoadingChartData && !_showTable && _chartData is { Length: > 0 } && _dates is { Length: > 0 })
         {
             if (_selectedChartType == "candlestick")
             {
@@ -112,16 +116,10 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
         }
     }
 
-    private async Task DrawPinnedChartsAsync()
+    private void SetStringDates()
     {
-        foreach (string currency in _pinnedCurrencies.Where(currency => _pinnedData.ContainsKey(currency)))
-        {
-            _lastPinnedCurrency = currency;
-            _shouldDrawNewPin = true;
-            StateHasChanged();
-        }
-
-        await Task.CompletedTask;
+        _startDateString = _startDate.ToString(DateConstants.DateFormat);
+        _endDateString = _endDate.ToString(DateConstants.DateFormat);
     }
 
     private async Task LoadTrackedCurrenciesAsync()
@@ -135,7 +133,7 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
             if (resp.IsSuccessStatusCode && response?.Data != null)
             {
                 _pinnedCurrencies.Clear();
-                _pinnedCurrencies.AddRange(response.Data.Select(c => c.Code));
+                _pinnedCurrencies.AddRange(response.Data.Select(c => c.Code.Trim().ToUpperInvariant()));
             }
             else if (resp.StatusCode != HttpStatusCode.NotFound)
             {
@@ -153,10 +151,8 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
     {
         foreach (string currency in _pinnedCurrencies)
         {
-            string start = _startDate.ToString(DateHelper.GetDateFormat());
-            string end = _endDate.ToString(DateHelper.GetDateFormat());
             string url =
-                $"{Configuration.ApiUrl}/Rate/get-range?StartDateString={start}&EndDateString={end}&Currency={currency}";
+                $"{Configuration.ApiUrl}/Rate/get-range?StartDateString={_startDateString}&EndDateString={_endDateString}&Currency={currency}";
             try
             {
                 HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
@@ -170,10 +166,19 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
                         string[] dates = rates.Select(r => r.Date).ToArray();
                         _pinnedData[currency] = (data, dates);
                     }
+                    else
+                    {
+                        _pinnedData.Remove(currency);
+                    }
+                }
+                else
+                {
+                     _pinnedData.Remove(currency);
                 }
             }
             catch (Exception ex)
             {
+                _pinnedData.Remove(currency);
                 await HandleInvalidResponse($"Error requesting pinned data for {currency}: {ex.Message}");
             }
         }
@@ -181,39 +186,67 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
 
     private async Task LoadCurrencyListAsync()
     {
-        if (_currencies.Count != 0)
-        {
-            return;
-        }
+        string previouslySelectedCurrencyNormalized = string.IsNullOrEmpty(_selectedCurrency)
+            ? string.Empty
+            : _selectedCurrency.Trim().ToUpperInvariant();
 
-        string url = $"{Configuration.ApiUrl}/Rate/get-all-currencies";
+        _currencies.Clear();
+
+        string url =
+            $"{Configuration.ApiUrl}/Rate/get-all-currencies-in-range?StartDateString={_startDateString}&EndDateString={_endDateString}";
         try
         {
             HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
-            GetAllCurrenciesResponse? response = await resp.Content.ReadFromJsonAsync<GetAllCurrenciesResponse>();
-            if (resp.IsSuccessStatusCode && response?.Currencies != null)
+            GetAllCurrenciesResponse? apiResponse = await resp.Content.ReadFromJsonAsync<GetAllCurrenciesResponse>();
+
+            if (resp.IsSuccessStatusCode && apiResponse?.Currencies != null)
             {
-                _currencies.AddRange(response.Currencies.Select(c => c.Code));
-                _currencies.Sort();
-                if (_currencies.Count != 0 && string.IsNullOrEmpty(_selectedCurrency))
+                var normalizedNewCurrencies = apiResponse.Currencies
+                    .Where(c => !string.IsNullOrWhiteSpace(c.Code))
+                    .Select(c => c.Code.Trim().ToUpperInvariant())
+                    .Distinct()
+                    .ToList();
+                normalizedNewCurrencies.Sort();
+
+                _currencies.AddRange(normalizedNewCurrencies);
+
+                if (!string.IsNullOrEmpty(previouslySelectedCurrencyNormalized) && _currencies.Contains(previouslySelectedCurrencyNormalized))
+                {
+                    _selectedCurrency = _currencies.First(c => c == previouslySelectedCurrencyNormalized);
+                }
+                else if (_currencies.Count != 0)
                 {
                     _selectedCurrency = _currencies.First();
+                }
+                else
+                {
+                    _selectedCurrency = string.Empty;
                 }
             }
             else
             {
-                string err = await HandleResponse(response);
+                _selectedCurrency = string.Empty;
+                string err = await HandleResponse(apiResponse);
                 await HandleInvalidResponse(err);
             }
         }
         catch (Exception ex)
         {
+            _selectedCurrency = string.Empty;
             await HandleInvalidResponse($"Error loading currency list: {ex.Message}");
         }
     }
 
-    private async Task LoadRatesAsync()
+    private async Task FetchMainChartRatesAsync()
     {
+        if (string.IsNullOrEmpty(_selectedCurrency))
+        {
+            _chartData = [];
+            _dates = [];
+            ToastService.ShowInfo("No currency selected or available for the current date range.");
+            return;
+        }
+
         string start = _startDate.ToString(DateHelper.GetDateFormat());
         string end = _endDate.ToString(DateHelper.GetDateFormat());
         try
@@ -238,22 +271,74 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
                 string err = await HandleResponse(response);
                 await HandleInvalidResponse(err);
             }
-
-            StateHasChanged();
         }
         catch (Exception ex)
         {
             await HandleInvalidResponse($"WebSocket error loading rates: {ex.Message}");
+            _chartData = [];
+            _dates = [];
         }
+    }
+
+    private async Task OnDateChangedAsync()
+    {
+        _isLoadingChartData = true;
+        StateHasChanged();
+
+        SetStringDates();
+
+        string previousSelectedCurrencyValue = _selectedCurrency;
+        await LoadCurrencyListAsync();
+
+        bool currencySelectionChangedProgrammatically = previousSelectedCurrencyValue != _selectedCurrency;
+
+        StateHasChanged();
+
+        if (currencySelectionChangedProgrammatically)
+        {
+            await RequestDataForPinnedCurrenciesAsync();
+            return;
+        }
+
+        await FetchMainChartRatesAsync();
+        await RequestDataForPinnedCurrenciesAsync();
+        _isLoadingChartData = false;
+        StateHasChanged();
+    }
+
+    private async Task OnCurrencyChangedAsync()
+    {
+        _isLoadingChartData = true;
+        StateHasChanged();
+
+        await FetchMainChartRatesAsync();
+
+        _isLoadingChartData = false;
+        StateHasChanged();
+    }
+
+    private async Task OnChartTypeChangedAsync()
+    {
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task PinCurrentCurrency()
     {
-        if (string.IsNullOrEmpty(_selectedCurrency) || _pinnedCurrencies.Contains(_selectedCurrency))
+        if (string.IsNullOrEmpty(_selectedCurrency))
         {
-            ToastService.ShowInfo($"Currency '{_selectedCurrency}' is already pinned or invalid.");
+            ToastService.ShowInfo("Please select a currency to pin.");
             return;
         }
+        
+        string normalizedSelectedCurrency = _selectedCurrency.Trim().ToUpperInvariant();
+        if (_pinnedCurrencies.Contains(normalizedSelectedCurrency))
+        {
+            ToastService.ShowInfo($"Currency '{_selectedCurrency}' is already pinned.");
+            return;
+        }
+
+        _isLoadingChartData = true;
+        StateHasChanged();
 
         string url = $"{Configuration.ApiUrl}/userRate/track-currency";
         try
@@ -264,11 +349,30 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
             if (resp.IsSuccessStatusCode && response is { Success: true })
             {
                 ToastService.ShowSuccess($"Currency '{_selectedCurrency}' pinned successfully.");
-                _pinnedCurrencies.Add(_selectedCurrency);
-                await RequestDataForPinnedCurrenciesAsync();
-                _lastPinnedCurrency = _selectedCurrency;
+                if (!_pinnedCurrencies.Contains(normalizedSelectedCurrency)) 
+                {
+                    _pinnedCurrencies.Add(normalizedSelectedCurrency);
+                }
+
+                string rangedUrl =
+                    $"{Configuration.ApiUrl}/Rate/get-range?StartDateString={_startDateString}&EndDateString={_endDateString}&Currency={_selectedCurrency}";
+                HttpResponseMessage rateResp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(rangedUrl));
+                GetRatesResponse? rateDataResponse = await rateResp.Content.ReadFromJsonAsync<GetRatesResponse>();
+                if (rateResp.IsSuccessStatusCode && rateDataResponse?.Rates != null)
+                {
+                    List<RateDto> rates = (List<RateDto>)rateDataResponse.Rates;
+                    if (rates.Count != 0)
+                    {
+                        _pinnedData[normalizedSelectedCurrency] = (rates.Select(r => r.Value).ToArray(), rates.Select(r => r.Date).ToArray());
+                    }
+                    else
+                    {
+                        _pinnedData.Remove(normalizedSelectedCurrency);
+                    }
+                }
+
+                _lastPinnedCurrency = _selectedCurrency; 
                 _shouldDrawNewPin = true;
-                StateHasChanged();
             }
             else
             {
@@ -280,10 +384,19 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
         {
             await HandleInvalidResponse($"Error pinning currency: {ex.Message}");
         }
+        finally
+        {
+            _isLoadingChartData = false;
+            StateHasChanged();
+        }
     }
 
     private async Task RemovePinnedCurrency(string code)
     {
+        _isLoadingChartData = true;
+        StateHasChanged();
+
+        string normalizedCode = code.Trim().ToUpperInvariant();
         string url = $"{Configuration.ApiUrl}/userRate/remove-tracked-currency";
         try
         {
@@ -297,9 +410,8 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
             if (resp.IsSuccessStatusCode && response is { Success: true })
             {
                 ToastService.ShowSuccess(response.Message);
-                _pinnedCurrencies.Remove(code);
-                _pinnedData.Remove(code);
-                StateHasChanged();
+                _pinnedCurrencies.Remove(normalizedCode);
+                _pinnedData.Remove(normalizedCode);
             }
             else
             {
@@ -310,6 +422,11 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
         catch (Exception ex)
         {
             await HandleInvalidResponse($"Error removing pinned currency: {ex.Message}");
+        }
+        finally
+        {
+            _isLoadingChartData = false;
+            StateHasChanged();
         }
     }
 
@@ -332,8 +449,8 @@ public partial class CurrencyChart : ComponentBase, IPageComponent
             return;
         }
 
-        string startDateString = _startDate.ToString(DateConstants.DateFormat);
-        string endDateString = _endDate.ToString(DateConstants.DateFormat);
-        NavigationManager.NavigateTo($"/currency/{_selectedCurrency}/{startDateString}/{endDateString}");
+        string navStartDateString = _startDate.ToString(DateConstants.DateFormat);
+        string navEndDateString = _endDate.ToString(DateConstants.DateFormat);
+        NavigationManager.NavigateTo($"/currency/{_selectedCurrency}/{navStartDateString}/{navEndDateString}");
     }
 }

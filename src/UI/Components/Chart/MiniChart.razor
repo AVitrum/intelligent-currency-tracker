@@ -1,5 +1,3 @@
-@inject IJSRuntime JS
-
 <div class="mini-chart-card">
     <div class="mini-chart-header">
         <div class="currency-label">@Currency</div>
@@ -13,5 +11,8 @@
     <div class="mini-chart-container">
         <canvas id="miniChart-@Currency"></canvas>
         <div id="miniTooltip-@Currency" class="chart-tooltip"></div>
+    </div>
+    <div class="mini-chart-actions">
+        <button class="mini-chart-details-btn" @onclick="NavigateToDetails">View Details</button>
     </div>
 </div>

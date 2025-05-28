@@ -2,18 +2,17 @@
     max-width: 720px;
     margin: 2rem auto;
     padding: 2rem;
-    background-color: #EFEEEA;
-    border-radius: 20px;
-    box-shadow: 0 0 12px rgba(39, 63, 79, 0.15);
-    animation: fadeIn 0.6s ease-out;
+    background-color: #F0F2F5;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.07) 0px 8px 16px -4px;
 }
 
 .header-section h2 {
     font-size: 1.75rem;
-    color: #273F4F;
-    font-weight: 300;
+    color: #1D3557;
+    font-weight: 600;
     margin-bottom: 1rem;
-    border-bottom: 2px solid #FE7743;
+    border-bottom: 2px solid #4299E1;
     padding-bottom: 0.5rem;
 }
 
@@ -36,43 +35,45 @@
     height: 160px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid #FE7743;
-    background-color: #EFEEEA;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 3px solid #4299E1;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .profile-image-section p {
-    color: #000000;
+    color: #4A5568;
     font-size: 1rem;
 }
 
 .profile-info-section p {
     font-size: 1rem;
-    color: #000000;
+    color: #4A5568;
     margin-bottom: 0.75rem;
 }
 
 .profile-info-section strong {
-    color: #FE7743;
+    color: #1D3557;
+    font-weight: 600;
 }
 
 .btn-primary {
     display: inline-block;
-    padding: 0.75rem 1.5rem;
+    padding: 0.8rem 1.8rem;
     font-size: 1rem;
-    font-weight: 500;
-    color: #EFEEEA;
-    background-color: #FE7743;
+    font-weight: bold;
+    color: #FFFFFF;
+    background-color: #2B6CB0;
     border: none;
-    border-radius: 16px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.3s ease;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
     text-align: center;
     text-decoration: none;
 }
 
 .btn-primary:hover {
-    background-color: #273F4F;
+    background-color: #2C5282;
+    color: #FFFFFF;
     transform: translateY(-2px);
 }
 
@@ -82,22 +83,22 @@
 
 .btn-secondary {
     display: inline-block;
-    padding: 0.75rem 1.5rem;
+    padding: 0.8rem 1.8rem;
     font-size: 1rem;
     font-weight: 500;
-    color: #273F4F;
-    background-color: #EFEEEA;
-    border: 1px solid #FE7743;
-    border-radius: 16px;
+    color: #2B6CB0;
+    background-color: #FFFFFF;
+    border: 1px solid #2B6CB0;
+    border-radius: 6px;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.3s ease;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease;
     text-align: center;
     text-decoration: none;
 }
 
 .btn-secondary:hover {
-    background-color: #FE7743;
-    color: #FFFFFF;
+    background-color: #EBF4FF;
+    color: #2C5282;
     transform: translateY(-2px);
 }
 

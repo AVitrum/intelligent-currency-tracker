@@ -173,6 +173,6 @@ public partial class CurrencyDetails : ComponentBase, IPageComponent
 
     private void NavigateToDashboard()
     {
-        NavigationManager.NavigateTo("/currency-chart");
+        NavigationManager.NavigateTo("/dashboard");
     }
 }

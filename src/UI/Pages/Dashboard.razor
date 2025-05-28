@@ -1,0 +1,168 @@
+@page "/dashboard"
+@using UI.Components.Chart
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="page-container">
+    <div class="header-section">
+        <h2>Currency Exchange Rate Chart</h2>
+        <p class="description">
+            Historical exchange rates data provided by the National Bank of Ukraine.
+            Select a currency and date range to view the exchange rate dynamics.
+        </p>
+    </div>
+
+    <div class="content-section">
+        <div class="form-container">
+            <div class="form-card">
+                <div class="form-group">
+                    <label for="currencySelect">Currency:</label>
+                    <select id="currencySelect"
+                            @bind="_selectedCurrency"
+                            @bind:after="OnCurrencyChangedAsync" 
+                            class="form-control" disabled="@_isLoadingChartData">
+                        @foreach (string c in _currencies)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input id="startDate"
+                           type="date"
+                           @bind="_startDate"
+                           @bind:after="OnDateChangedAsync" 
+                           class="form-control" disabled="@_isLoadingChartData"/>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input id="endDate"
+                           type="date"
+                           @bind="_endDate"
+                           @bind:after="OnDateChangedAsync" 
+                           class="form-control" disabled="@_isLoadingChartData"/>
+                </div>
+                <div class="form-group">
+                    <label for="chartType">Chart Type:</label>
+                    <select id="chartType"
+                            class="form-control"
+                            @bind="_selectedChartType"
+                            @bind:after="OnChartTypeChangedAsync" 
+                            disabled="@_isLoadingChartData">
+                        <option value="line">Line</option>
+                        <option value="candlestick">Candlestick</option>
+                    </select>
+                </div>
+                <button class="form-control" @onclick="PinCurrentCurrency" disabled="@_isLoadingChartData">
+                    Pin this currency
+                </button>
+                <button class="form-control details-button" @onclick="NavigateToDetails" disabled="@_isLoadingChartData">
+                    View Details
+                </button>
+            </div>
+        </div>
+        <div class="chart-section">
+            <div style="text-align:right; margin-bottom: 1rem;">
+                <button class="inverted-btn" style="width:auto; display:inline-block; padding:0.3rem 1.2rem;"
+                        @onclick="ToggleTable" disabled="@_isLoadingChartData">
+                    @(_showTable ? "Show Chart" : "Show Table")
+                </button>
+            </div>
+
+            @if (_isLoadingChartData)
+            {
+                <div style="text-align:center; padding: 20px; color: #273F4F;">
+                    <p>Loading data...</p>
+                </div>
+            }
+            else
+            {
+                @if (_showTable)
+                {
+                    <div class="table-responsive">
+                        <table id="ratesTable" class="table table-striped"
+                               style="width:100%; background:#fff; color:#273F4F;">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Rate</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @if (_chartData.Length == 0)
+                            {
+                                <tr>
+                                    <td colspan="2" style="text-align:center;">No data available for the selected period.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @for (int i = 0; i < _dates.Length; i++)
+                                {
+                                    <tr>
+                                        <td>@_dates[i]</td>
+                                        <td>@_chartData[i]</td>
+                                    </tr>
+                                }
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (_chartData.Length > 0)
+                    {
+                        <div style="text-align:right; margin-top:0.5rem;">
+                            <button class="inverted-btn" style="width:auto; display:inline-block; padding:0.3rem 1.2rem;"
+                                    @onclick="DownloadTablePdf">
+                                Download Table as PDF
+                            </button>
+                        </div>
+                    }
+                }
+                else 
+                {
+                    @if (_chartData.Length == 0 && _dates.Length == 0)
+                    {
+                        <div style="text-align:center; padding: 20px; color: #273F4F;">
+                             <p>No data available for the selected currency and date range.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="chart-container">
+                            <canvas id="currencyChart"></canvas>
+                            <div id="chartTooltip" class="chart-tooltip"></div>
+                        </div>
+                        <div class="chart-footer">
+                            <small>
+                                Chart shows exchange rates against Ukrainian Hryvnia (UAH).
+                                Data is updated daily on business days.
+                            </small>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+
+    @if (_pinnedCurrencies.Count > 0)
+    {
+        <div class="pinned-container">
+            <h3>Pinned Charts</h3>
+            <div class="pinned-charts-section">
+                @foreach (string c in _pinnedCurrencies)
+                {
+                    if (_pinnedData.TryGetValue(c, out (decimal[] Data, string[] Dates) chartInfo))
+                    {
+                        <MiniChart Currency="@c"
+                                   Data="chartInfo.Data"
+                                   Dates="chartInfo.Dates"
+                                   StartDate="@_startDateString" 
+                                   EndDate="@_endDateString"   
+                                   OnRemove="() => RemovePinnedCurrency(c)"/>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>

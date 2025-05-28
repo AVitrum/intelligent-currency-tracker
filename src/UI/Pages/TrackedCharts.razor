@@ -22,6 +22,8 @@
                     <MiniChart Currency="@c"
                                Data="chartInfo.Data"
                                Dates="chartInfo.Dates"
+                               StartDate="@_startDateString"
+                               EndDate="@_endDateString"
                                OnRemove="() => RemovePinnedCurrency(c)"/>
                 }
             }
@@ -31,7 +33,7 @@
     {
         <div class="no-charts-message">
             <p>No pinned charts available. Would you like to add some?</p>
-            <a class="go-to-charts-btn" href="/currency-chart">Go to Currency Charts</a>
+            <a class="go-to-charts-btn" href="/dashboard">Go to Dashboard</a>
         </div>
     }
 </div>

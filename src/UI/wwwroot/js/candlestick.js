@@ -35,11 +35,11 @@ function drawCandlestickChart(data, dates) {
         ctx.moveTo(padding, padding);
         ctx.lineTo(padding, d.h - padding);
         ctx.lineTo(d.w - padding, d.h - padding);
-        ctx.strokeStyle = '#273F4F';
+        ctx.strokeStyle = '#1D3557';
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.font = '16px Arial';
-        ctx.fillStyle = '#273F4F';
+        ctx.fillStyle = '#1D3557';
         ctx.fillText('Date', d.w / 2 - 20, d.h - 10);
         ctx.save();
         ctx.translate(15, d.h / 2 + 20);
@@ -55,7 +55,7 @@ function drawCandlestickChart(data, dates) {
     function drawCandles() {
         const d = getDims();
         ctx.clearRect(0, 0, d.w, d.h);
-        ctx.fillStyle = '#EFEEEA';
+        ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, d.w, d.h);
 
         drawAxes();
@@ -72,10 +72,9 @@ function drawCandlestickChart(data, dates) {
                 candleWidth,
                 d.h - padding - y
             );
-            ctx.fillStyle = '#FE7743';
+            ctx.fillStyle = '#2B6CB0';
             ctx.fill();
 
-            // Draw comparison line above the column (except for the first column)
             if (i > 0) {
                 ctx.beginPath();
                 ctx.moveTo(x - candleWidth / 2, y);

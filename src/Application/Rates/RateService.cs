@@ -66,6 +66,39 @@ public class RateService : IRateService
         return GetAllCurrenciesResult.SuccessResult(currenciesDto);
     }
 
+    public async Task<BaseResult> GetAllCurrenciesAsync(DateTime start, DateTime end)
+    {
+        IEnumerable<Rate> rates = await GetRatesFromDbAsync(start, end, null, 0, 0);
+        List<Currency> currencies = [];
+
+        foreach (Rate rate in rates)
+        {
+            Currency? currency = await _currencyRepository.GetByIdAsync(rate.CurrencyId);
+            if (currency is null)
+            {
+                throw new EntityNotFoundException<Currency>();
+            }
+
+            if (currencies.All(c => c.Id != currency.Id))
+            {
+                currencies.Add(currency);
+            }
+        }
+        
+        if (currencies is null || currencies.Count == 0)
+        {
+            throw new EntityNotFoundException<Currency>();
+        }
+
+        List<CurrencyDto> currenciesDto = [];
+        currenciesDto.AddRange(currencies.Select(currency => _mapper.Map<CurrencyDto>(currency)));
+        currenciesDto = currenciesDto.OrderBy(c => c.Code).ToList();
+
+        _logger.LogInformation("Successfully retrieved all currencies");
+
+        return GetAllCurrenciesResult.SuccessResult(currenciesDto);
+    }
+
     public async Task<BaseResult> GetLastUpdatedCurrenciesAsync()
     {
         List<Rate> rates = (List<Rate>)await _rateRepository.GetLastUpdatedAsync();
@@ -166,6 +199,10 @@ public class RateService : IRateService
             if (start.Date == end.Date)
             {
                 rates = await _rateRepository.GetRangeAsync(start);
+            }
+            else if (page == 0 || pageSize == 0)
+            {
+                rates = await _rateRepository.GetRangeAsync(start, end);
             }
             else
             {

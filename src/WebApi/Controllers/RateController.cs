@@ -51,6 +51,39 @@ public class RateController : ControllerBase
 
         return Ok(response);
     }
+    
+    [HttpGet("get-all-currencies-in-range")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<BaseResponse>> GetAllCurrenciesInRange([FromQuery] ExchangeRateRequest request)
+    {
+        BaseResponse response;
+        BaseResult result = await _rateService.GetAllCurrenciesAsync(request.Start, request.End);
+
+        if (result is not GetAllCurrenciesResult getAllCurrenciesResult)
+        {
+            response = new GetAllCurrenciesResponse(
+                false,
+                "Failed to retrieve currencies.",
+                StatusCodes.Status400BadRequest,
+                result.Errors,
+                null
+            );
+
+            return BadRequest(response);
+        }
+
+        response = new GetAllCurrenciesResponse(
+            true,
+            "Currencies retrieved successfully.",
+            StatusCodes.Status200OK,
+            new List<string>(),
+            getAllCurrenciesResult.Currencies
+        );
+
+        return Ok(response);
+    }
 
     [HttpGet("get-range")]
     [ProducesResponseType(StatusCodes.Status200OK)]

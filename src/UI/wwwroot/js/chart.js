@@ -41,11 +41,11 @@ function drawChart(data, dates) {
         ctx.moveTo(padding, padding);
         ctx.lineTo(padding, d.h - padding);
         ctx.lineTo(d.w - padding, d.h - padding);
-        ctx.strokeStyle = '#273F4F';
+        ctx.strokeStyle = '#1D3557';
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.font = '16px Arial';
-        ctx.fillStyle = '#273F4F';
+        ctx.fillStyle = '#1D3557';
         ctx.fillText('Date', d.w / 2 - 20, d.h - 10);
         ctx.save();
         ctx.translate(15, d.h / 2 + 20);
@@ -57,7 +57,7 @@ function drawChart(data, dates) {
     function drawPlot() {
         const d = getDims();
         ctx.clearRect(0, 0, d.w, d.h);
-        ctx.fillStyle = '#EFEEEA';
+        ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, d.w, d.h);
 
         drawAxes();
@@ -67,7 +67,7 @@ function drawChart(data, dates) {
         pathPoints.forEach(p => ctx.lineTo(p.x, p.y));
         ctx.lineTo(pathPoints[pathPoints.length - 1].x, d.h - padding);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(254, 119, 67, 0.2)'; // #FE7743 with alpha
+        ctx.fillStyle = 'rgba(43, 108, 176, 0.2)';
         ctx.fill();
 
         ctx.beginPath();
@@ -75,7 +75,7 @@ function drawChart(data, dates) {
             if (i === 0) ctx.moveTo(p.x, p.y);
             else ctx.lineTo(p.x, p.y);
         });
-        ctx.strokeStyle = '#FE7743';
+        ctx.strokeStyle = '#2B6CB0';
         ctx.lineWidth = 2;
         ctx.stroke();
     }
@@ -167,7 +167,7 @@ function drawMiniChart(canvasId, tooltipId, data, dates) {
         ctx.moveTo(padding, padding);
         ctx.lineTo(padding, d.h - padding);
         ctx.lineTo(d.w - padding, d.h - padding);
-        ctx.strokeStyle = '#273F4F';
+        ctx.strokeStyle = '#1D3557';
         ctx.lineWidth = 1.5;
         ctx.stroke();
     }
@@ -175,7 +175,7 @@ function drawMiniChart(canvasId, tooltipId, data, dates) {
     function drawPlot() {
         const d = getDims();
         ctx.clearRect(0, 0, d.w, d.h);
-        ctx.fillStyle = '#EFEEEA';
+        ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, d.w, d.h);
 
         drawAxes();
@@ -185,7 +185,7 @@ function drawMiniChart(canvasId, tooltipId, data, dates) {
         pathPoints.forEach(p => ctx.lineTo(p.x, p.y));
         ctx.lineTo(pathPoints[pathPoints.length - 1].x, d.h - padding);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(254, 119, 67, 0.15)';
+        ctx.fillStyle = 'rgba(43, 108, 176, 0.15)';
         ctx.fill();
 
         ctx.beginPath();
@@ -193,7 +193,7 @@ function drawMiniChart(canvasId, tooltipId, data, dates) {
             if (i === 0) ctx.moveTo(p.x, p.y);
             else ctx.lineTo(p.x, p.y);
         });
-        ctx.strokeStyle = '#FE7743';
+        ctx.strokeStyle = '#2B6CB0';
         ctx.lineWidth = 1.5;
         ctx.stroke();
     }
