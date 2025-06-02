@@ -71,4 +71,31 @@ public class AiModelController : ControllerBase
 
         return BadRequest(response);
     }
+
+    [HttpPost("forecast")]
+    public async Task<ActionResult<BaseResponse>> Forecast(ForecastRequest request)
+    {
+        BaseResponse response;
+        BaseResult result = await _aiModelService.ForecastAsync(request.CurrencyR030, request.Periods);
+
+        if (result is ForecastResult forecastResult)
+        {
+            response = new ForecastResponse(
+                forecastResult.Success,
+                "Forecast successful.",
+                StatusCodes.Status200OK,
+                forecastResult.Errors,
+                forecastResult.Forecast);
+            return Ok(response);
+        }
+
+        response = new ForecastResponse(
+            result.Success,
+            "Forecast failed.",
+            StatusCodes.Status400BadRequest,
+            result.Errors,
+            null);
+
+        return BadRequest(response);
+    }
 }

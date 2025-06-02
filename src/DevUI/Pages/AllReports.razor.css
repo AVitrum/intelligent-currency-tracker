@@ -1,0 +1,223 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.page-title {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 30px;
+    font-weight: 300;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    animation: slideDownFadeIn 0.8s ease-out;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    animation: fadeInScaleUp 0.7s ease-out;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+}
+
+.report-table thead {
+    background-color: #3498db; 
+    color: #fff;
+}
+
+.report-table thead th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.report-table tbody tr {
+    border-bottom: 1px solid #ecf0f1;
+    transition: background-color 0.3s ease, transform 0.2s ease-out;
+}
+
+.report-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.report-table tbody td {
+    padding: 15px;
+    font-size: 0.98rem;
+    vertical-align: middle;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 15px; 
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #fff;
+    text-transform: capitalize;
+    display: inline-block;
+    min-width: 90px;
+    text-align: center;
+}
+
+.status-pending {
+    background-color: rgba(243, 156, 18, 0.8);
+}
+
+.status-inprogress {
+    background-color: rgba(52, 152, 219, 0.8); 
+}
+
+.status-resolved {
+    background-color: rgba(46, 204, 113, 0.8); 
+}
+
+.status-unknown {
+    background-color: rgba(149, 165, 166, 0.8); /* Grey, slightly transparent */
+}
+
+.btn {
+    border: none;
+    border-radius: 5px;
+    padding: 10px 18px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.btn-view-details {
+    background-color: #2980b9; /* Darker blue */
+}
+
+.btn-view-details:hover {
+    background-color: #1f638f;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.btn-view-details:active {
+    transform: translateY(0px);
+    box-shadow: none;
+}
+
+.load-more-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-load-more {
+    background-color: #3498db; /* Primary blue */
+    padding: 12px 25px;
+    font-size: 1rem;
+}
+
+.btn-load-more:hover {
+    background-color: #2874a6;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.2);
+}
+
+.btn-load-more:active {
+    transform: translateY(0px);
+    box-shadow: none;
+}
+
+.btn-load-more:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.loading-indicator {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.spinner {
+    margin: 20px auto;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.no-reports-message {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    padding: 30px;
+}
+
+@keyframes fadeInScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideDownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.report-row-animation {
+    animation: fadeInRow 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInRow {
+    to {
+        opacity: 1;
+    }
+}
+
+.report-table tbody tr:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.report-table tbody tr:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.report-table tbody tr:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

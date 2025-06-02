@@ -1,6 +1,6 @@
 using Domain.Common;
 
-namespace Application.ExchangeRates.Results;
+namespace Application.Rates.Results;
 
 public class ExportExchangeRatesToCsvResult : BaseResult
 {
@@ -19,6 +19,6 @@ public class ExportExchangeRatesToCsvResult : BaseResult
 
     public static ExportExchangeRatesToCsvResult SuccessResult(byte[] fileContent, string fileName)
     {
-        return new ExportExchangeRatesToCsvResult(true, Array.Empty<string>(), fileContent, fileName);
+        return new ExportExchangeRatesToCsvResult(true, [], fileContent, fileName);
     }
 }

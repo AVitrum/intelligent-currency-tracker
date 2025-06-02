@@ -1,12 +1,4 @@
 @page "/create-admin"
-@using DevUI.Interfaces
-@using Domain.Enums
-@using Shared.Dtos
-@inject HttpClient Http
-@inject NavigationManager Navigation
-@inject IDevUISettings DevUISettings
-@inject IToastService ToastService
-@inject IHttpClientService HttpClientService
 
 <div class="container">
     <div class="form-card">
@@ -49,37 +41,3 @@
         </EditForm>
     </div>
 </div>
-
-@code {
-    private readonly CreateUserDto _request = new CreateUserDto();
-
-    private async Task HandleValidSubmit()
-    {
-        _request.Provider = UserServiceProvider.ADMIN.ToString();
-
-        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() =>
-            Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/register", _request));
-
-        if (response.IsSuccessStatusCode)
-        {
-            ToastService.ShowSuccess("User successfully registered!");
-            Navigation.NavigateTo("/");
-        }
-        else
-        {
-            string errorResponse = await response.Content.ReadAsStringAsync();
-            string errorMessage = !string.IsNullOrEmpty(errorResponse)
-                ? errorResponse
-                : "Registration failed. Please try again.";
-
-            ToastService.ShowError(errorMessage);
-
-            await Task.Delay(3000);
-            _request.Email = string.Empty;
-            _request.UserName = string.Empty;
-            _request.Password = string.Empty;
-            _request.PhoneNumber = string.Empty;
-        }
-    }
-
-}

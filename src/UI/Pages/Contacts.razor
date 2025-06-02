@@ -1,86 +1,65 @@
 @page "/contacts"
-@inject IToastService ToastService
 
-<PageTitle>Contacts</PageTitle>
+<PageTitle>Report an Issue</PageTitle>
 
 <div class="page-container">
     <section class="header-section">
-        <h2>Contacts</h2>
+        <h2>Report an Issue</h2>
         <div class="description">
-            Contact us for more information, collaboration, or support. We are always happy to help!
+            Please provide details about the issue you are experiencing. Your feedback is important to us.
         </div>
     </section>
 
     <section class="content-section">
-        <div class="form-container">
+        <div class="form-container"
+             style="flex: 1 1 100%; max-width: 600px; margin: 0 auto;"> @* Adjusted style for single column *@
             <div class="form-card">
-                <h3>Write to Us</h3>
-                <EditForm Model="FormModel">
+                <h3>Submit a Report</h3>
+                <EditForm Model="ReportModel" OnValidSubmit="HandleSendReportAsync">
+                    <DataAnnotationsValidator/>
                     <div class="form-fields">
                         <div class="form-group">
-                            <label for="name">Name</label>
-                            <input id="name" class="form-control" type="text" placeholder="Your name"
-                                   @bind="FormModel.Name"/>
+                            <label for="title">Title</label>
+                            <InputText id="title" class="form-control" @bind-Value="ReportModel.Title"
+                                       placeholder="Brief title of the issue"/>
+                            <ValidationMessage For="@(() => ReportModel.Title)"/>
                         </div>
                         <div class="form-group">
-                            <label for="email">Email</label>
-                            <input id="email" class="form-control" type="email" placeholder="Your email"
-                                   @bind="FormModel.Email"/>
+                            <label for="description">Description</label>
+                            <InputTextArea id="description" class="form-control" rows="4"
+                                           @bind-Value="ReportModel.Description"
+                                           placeholder="Detailed description of the issue"/>
+                            <ValidationMessage For="@(() => ReportModel.Description)"/>
                         </div>
                         <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" class="form-control" rows="4" placeholder="Your message"
-                                      @bind="FormModel.Message"></textarea>
+                            <label for="attachments">Attachments (Optional)</label>
+                            <InputFile id="attachments" class="form-control" OnChange="LoadFiles" multiple/>
+                            @if (SelectedFiles.Any())
+                            {
+                                <ul style="list-style-type: none; padding-left: 0; margin-top: 0.5rem;">
+                                    @foreach (IBrowserFile file in SelectedFiles)
+                                    {
+                                        <li style="font-size: 0.9rem; color: #4A5568;">@file.Name (@FormatBytes(file.Size))</li>
+                                    }
+                                </ul>
+                            }
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="form-control">Send</button>
+                        <button type="submit" class="form-control" disabled="@IsSubmitting">
+                            @if (IsSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <text> Sending...</text>
+                            }
+                            else
+                            {
+                                <text>Send Report</text>
+                            }
+                        </button>
                     </div>
                 </EditForm>
             </div>
         </div>
-        <div class="contacts-section">
-            <div class="contacts-card">
-                <h3>Our Contacts</h3>
-                <div class="contact-item">
-                    <span class="contact-label">Email:</span>
-                    <a href="mailto:info@example.com" @onclick="() => CopyToClipboard(Email)">@Email</a>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-label">Phone:</span>
-                    <a href="tel:+380123456789" @onclick="() => CopyToClipboard(Phone)">@Phone</a>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-label">Address:</span>
-                    <span @onclick="() => CopyToClipboard(Address)" style="cursor:pointer;">@Address</span>
-                </div>
-            </div>
-        </div>
     </section>
 </div>
-
-@code {
-    private const string Email = "info@example.com";
-    private const string Phone = "+38 (012) 345-67-89";
-    private const string Address = "Kyiv, Example St, 1";
-
-    private ContactFormModel FormModel { get; } = new ContactFormModel();
-
-
-    public class ContactFormModel
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty;
-    }
-
-    private async Task CopyToClipboard(string text)
-    {
-        await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
-        ToastService.ShowSuccess($"Copied: {text}");
-    }
-
-    [Inject]
-    private IJSRuntime JS { get; set; } = null!;
-
-}

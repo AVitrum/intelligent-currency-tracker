@@ -175,4 +175,24 @@ public partial class CurrencyDetails : ComponentBase, IPageComponent
     {
         NavigationManager.NavigateTo("/dashboard");
     }
+
+    private async Task DownloadDetailsAsPdfAsync()
+    {
+        if (_currencyDetails == null)
+        {
+            ToastService.ShowError("No data available to download.");
+            return;
+        }
+
+        try
+        {
+            string fileName = $"CurrencyDetails_{CurrencyCode}_{StartDate}_{EndDate}.pdf";
+            await Js.InvokeVoidAsync("downloadPageAsPdf", "details-page-container", fileName);
+            ToastService.ShowInfo("Preparing PDF download...");
+        }
+        catch (Exception ex)
+        {
+            await HandleInvalidResponse($"Could not generate PDF: {ex.Message}");
+        }
+    }
 }

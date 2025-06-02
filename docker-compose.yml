@@ -98,6 +98,8 @@
       - "8000:8000"
     networks:
       - test-network
+    volumes:
+      - ./models:/app/models
   
   #  devui:
   #    image: devui

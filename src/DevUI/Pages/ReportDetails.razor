@@ -1,0 +1,107 @@
+@page "/report-details/{ReportId:guid}"
+
+<div class="report-details-page">
+    @if (_isLoading && _report == null)
+    {
+        <div class="loading-indicator">
+            <p>Loading report details...</p>
+            <div class="spinner"></div>
+        </div>
+    }
+    else if (_report != null)
+    {
+        <h3 class="page-title">Report: @(_report.Title.Length > 50 ? _report.Title[..50] + "..." : _report.Title)</h3>
+        <div class="report-form-container">
+            <div class="form-section">
+                <label>Title</label>
+                <p>@_report.Title</p>
+            </div>
+
+            <div class="form-section">
+                <label>Description</label>
+                <p class="description-text">@_report.Description</p>
+            </div>
+
+            <div class="form-section">
+                <label>Status</label>
+                <p>
+                   <span class="status-badge @GetStatusClass(_report.Status)">
+                       @_report.Status
+                   </span>
+                </p>
+            </div>
+
+            <div class="form-section">
+                <label>Resolved</label>
+                <p>@(_report.IsResolved ? "Yes" : "No")</p>
+            </div>
+
+            @if (_report.Attachments != null && _report.Attachments.Any())
+            {
+                <div class="form-section attachments-display-section">
+                    <label>Attachments</label>
+                    <div class="image-gallery">
+                        @foreach (byte[] attachmentBytes in _report.Attachments)
+                        {
+                            string imageUrl = GetImageDataUrl(attachmentBytes);
+                            if (!string.IsNullOrEmpty(imageUrl))
+                            {
+                                <img src="@imageUrl" alt="Report Attachment" class="attachment-image"
+                                     @onclick="() => ViewImage(imageUrl)"/>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="form-section">
+                    <label>Attachments</label>
+                    <p>No attachments for this report.</p>
+                </div>
+            }
+        </div>
+        <div class="actions-container">
+            <button class="btn btn-primary" @onclick="NavigateToReportList" disabled="@_isLoading">Back to All Reports
+            </button>
+            @if (!_report.IsResolved)
+            {
+                <button class="btn btn-success" @onclick="MarkReportAsResolvedAsync" disabled="@_isLoading">
+                    @if (_isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span> Processing...</span>
+                    }
+                    else
+                    {
+                        <span>Mark as Resolved</span>
+                    }
+                </button>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-content-message">
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <p>@_errorMessage</p>
+            }
+            else
+            {
+                <p>Report details could not be loaded or report not found.</p>
+            }
+            <button class="btn btn-primary" @onclick="NavigateToReportList">Back to All Reports</button>
+        </div>
+    }
+</div>
+
+@if (_isImageViewerOpen && !string.IsNullOrEmpty(_currentImageInViewer))
+{
+    <div class="image-viewer-overlay" @onclick="CloseImageViewer">
+        <div class="image-viewer-content" @onclick:stopPropagation="true">
+            <span class="image-viewer-close" @onclick="CloseImageViewer">&times;</span>
+            <img src="@_currentImageInViewer" alt="Enlarged Attachment"/>
+        </div>
+    </div>
+}

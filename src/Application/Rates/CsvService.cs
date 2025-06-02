@@ -3,14 +3,14 @@ using System.Text;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
-using Application.ExchangeRates.Results;
+using Application.Rates.Results;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Domain.Common;
 using Microsoft.Extensions.Logging;
 using Shared.Dtos;
 
-namespace Application.ExchangeRates;
+namespace Application.Rates;
 
 public class CsvService : ICsvService
 {

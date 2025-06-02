@@ -1,0 +1,55 @@
+@page "/all-reports"
+@using Shared.Dtos
+
+<h3 class="page-title">All Reports</h3>
+<div class="container">
+    @if (!_reports.Any() && _isLoading)
+    {
+        <div class="loading-indicator">
+            <p>Loading reports...</p>
+            <div class="spinner"></div>
+        </div>
+    }
+    else if (!_reports.Any())
+    {
+        <p class="no-reports-message">No reports found.</p>
+    }
+    else
+    {
+        <table class="report-table">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Resolved</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (ReportDto report in _reports)
+            {
+                <tr class="report-row-animation">
+                    <td>@report.Title</td>
+                    <td>
+                        <span class="status-badge @GetStatusClass(report.Status)">
+                            @report.Status
+                        </span>
+                    </td>
+                    <td>@(report.IsResolved ? "Yes" : "No")</td>
+                    <td>
+                        <button class="btn btn-view-details" @onclick="() => NavigateToReportDetails(report.Id)">View
+                            Details
+                        </button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <div class="load-more-container">
+            <button class="btn btn-load-more" @onclick="LoadMoreReports" disabled="@_isLoading">
+                @(_isLoading ? "Loading..." : "Load More")
+            </button>
+        </div>
+    }
+</div>

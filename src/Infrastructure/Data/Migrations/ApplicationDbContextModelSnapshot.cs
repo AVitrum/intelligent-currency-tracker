@@ -92,6 +92,36 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Currencies");
                 });
 
+            modelBuilder.Entity("Domain.Entities.FileLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ReportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("TimeStamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("FileLinks");
+                });
+
             modelBuilder.Entity("Domain.Entities.Rate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -125,6 +155,38 @@ namespace Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Rates");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Report", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("TimeStamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserSettings", b =>
@@ -424,6 +486,15 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.FileLink", b =>
+                {
+                    b.HasOne("Domain.Entities.Report", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.Rate", b =>
                 {
                     b.HasOne("Domain.Entities.Currency", "Currency")
@@ -523,6 +594,11 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entities.Report", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>

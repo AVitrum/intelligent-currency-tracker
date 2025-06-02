@@ -61,6 +61,8 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
         services.AddScoped<ITraceableCurrencyRepository, TraceableCurrencyRepository>();
+        services.AddScoped<IFileLinkRepository, FileLinkRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
 
         //Background Services
         services.AddSingleton<ExchangeRateSyncService>();

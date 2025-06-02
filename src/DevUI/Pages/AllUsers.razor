@@ -1,12 +1,5 @@
 @page "/all-users"
-@inject HttpClient Http
-@inject NavigationManager Navigation
-@inject IDevUISettings DevUISettings
-@inject IToastService ToastService
-@inject IHttpClientService HttpClientService
-@using DevUI.Interfaces
 @using Shared.Dtos
-@implements IDisposable
 
 <h3 class="page-title">All Users</h3>
 <div class="container">
@@ -38,60 +31,3 @@
         <button class="btn btn-primary" @onclick="LoadMoreUsers" disabled="@_isLoading">Load More</button>
     </div>
 </div>
-
-@code {
-    private readonly List<UserDto> _users = [];
-    private int _currentPage = 1;
-    private const int PageSize = 25;
-    private bool _isLoading;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadUsers();
-    }
-
-    private async Task LoadUsers()
-    {
-        _isLoading = true;
-
-        HttpResponseMessage? response = await HttpClientService.SendRequestAsync(() =>
-            Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/get-all-users?page={_currentPage}&pageSize={PageSize}")
-        );
-
-        if (response.IsSuccessStatusCode)
-        {
-            List<UserDto>? users = await response.Content.ReadFromJsonAsync<List<UserDto>>();
-            if (users is not null)
-            {
-                _users.AddRange(users);
-                _currentPage++;
-            }
-        }
-        else
-        {
-            IAsyncEnumerable<string?> errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
-
-            await foreach (string? error in errorResponse)
-            {
-                string errorMessage = !string.IsNullOrEmpty(error)
-                    ? error
-                    : "Request failed. Please try again later!";
-                ToastService.ShowError(errorMessage);
-            }
-        }
-
-        _isLoading = false;
-    }
-
-    private async Task LoadMoreUsers()
-    {
-        await LoadUsers();
-    }
-
-    private void NavigateToUserDetails(string userId)
-    {
-        Navigation.NavigateTo($"/user-details/{userId}");
-    }
-
-    public void Dispose() { }
-}

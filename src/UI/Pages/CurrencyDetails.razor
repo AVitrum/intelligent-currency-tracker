@@ -1,7 +1,7 @@
 @page "/currency/{CurrencyCode}/{StartDate}/{EndDate}"
 @using Shared.Dtos
 
-<div class="details-page-container">
+<div class="details-page-container" id="details-page-container">
     @if (_isLoading)
     {
         <div class="loading-message">
@@ -54,7 +54,6 @@
                 </div>
             </div>
 
-            @* Mini Chart Card *@
             <div class="analytics-card">
                 <h2 class="card-section-title">@CurrencyCode Rate Trend</h2>
                 @if (_chartRateData != null && _chartRateData.Any())
@@ -94,6 +93,8 @@
                 </div>
             }
         </div>
-        <button @onclick="NavigateToDashboard" class="action-button back-button">Back to Dashboard</button>
+        <div class="action-buttons-row">
+            <button @onclick="NavigateToDashboard" class="action-button">Back to Dashboard</button>
+        </div>
     }
 </div>
