@@ -155,6 +155,16 @@ public partial class ReportDetails : ComponentBase, IPageComponent
         StateHasChanged();
     }
 
+    private async Task NavigateToRespondToReport()
+    {
+        if (_report != null)
+        {
+            Navigation.NavigateTo($"/respond-to-report/{_report.Id}");
+        }
+
+        await Task.CompletedTask;
+    }
+
     private async Task MarkReportAsResolvedAsync()
     {
         if (_report == null)

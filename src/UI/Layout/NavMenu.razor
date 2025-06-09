@@ -1,11 +1,15 @@
 ﻿@using Shared.Helpers
+@using UI.Services
 @inject IJSRuntime Js
 @inject NavigationManager Navigation
+@inject LocalizationService Localizer
+@inject UserSettingsService UserSettingsService
+@implements IAsyncDisposable
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/">Currency Tracker</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="() => OnToggleSidebar.InvokeAsync()">
+        <a class="navbar-brand" href="/">@_navbarBrand</a>
+        <button title="@_navbarToggleMenuTitle" class="navbar-toggler" @onclick="() => OnToggleSidebar.InvokeAsync()">
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
@@ -18,14 +22,14 @@
             <div class="nav-item">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                     <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
-                    Home
+                    @_navHome
                 </NavLink>
             </div>
 
             <div class="nav-item">
                 <NavLink class="nav-link" href="auth">
                     <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
-                    Sign Up / Sign In
+                    @_navAuth
                 </NavLink>
             </div>
         }
@@ -34,35 +38,35 @@
             <div class="nav-item">
                 <NavLink class="nav-link" href="dashboard">
                     <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
-                    Dashboard
+                    @_navDashboard
                 </NavLink>
             </div>
 
             <div class="nav-item">
                 <NavLink class="nav-link" href="forecast">
                     <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
-                    Predictive Charts
+                    @_navPredictiveCharts
                 </NavLink>
             </div>
 
             <div class="nav-item">
                 <NavLink class="nav-link" href="tracked-charts">
                     <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
-                    Tracked Charts
+                    @_navTrackedCharts
                 </NavLink>
             </div>
 
             <div class="nav-item">
                 <NavLink class="nav-link" href="compare-currencies">
                     <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
-                    Compare Currencies
+                    @_navCompareCurrencies
                 </NavLink>
             </div>
 
             <div class="nav-item">
                 <button class="nav-link" @onclick="Logout">
                     <span class="bi bi-logout-nav-menu" aria-hidden="true"></span>
-                    Logout
+                    @_navLogout
                 </button>
             </div>
         }
@@ -73,14 +77,48 @@
     [Parameter] public EventCallback OnToggleSidebar { get; set; }
     [Parameter] public bool HideNavItems { get; set; }
 
-    private bool _collapseNavMenu;
+    private bool _collapseNavMenu; // This seems unused in the provided snippet, but kept for consistency
     private bool _isTokenPresent;
 
-    private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
+    private string _navbarBrand = "";
+    private string _navbarToggleMenuTitle = "";
+    private string _navHome = "";
+    private string _navAuth = "";
+    private string _navDashboard = "";
+    private string _navPredictiveCharts = "";
+    private string _navTrackedCharts = "";
+    private string _navCompareCurrencies = "";
+    private string _navLogout = "";
 
     protected override async Task OnInitializedAsync()
     {
+        if (UserSettingsService != null)
+        {
+            UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
+        }
+
         _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+        await LoadLocalizedStringsAsync();
+    }
+
+    private async Task LoadLocalizedStringsAsync()
+    {
+        _navbarBrand = await Localizer.GetStringAsync("navbar.brand");
+        _navbarToggleMenuTitle = await Localizer.GetStringAsync("navbar.toggle_menu_title");
+        _navHome = await Localizer.GetStringAsync("nav.home");
+        _navAuth = await Localizer.GetStringAsync("nav.auth");
+        _navDashboard = await Localizer.GetStringAsync("nav.dashboard");
+        _navPredictiveCharts = await Localizer.GetStringAsync("nav.predictive_charts");
+        _navTrackedCharts = await Localizer.GetStringAsync("nav.tracked_charts");
+        _navCompareCurrencies = await Localizer.GetStringAsync("nav.compare_currencies");
+        _navLogout = await Localizer.GetStringAsync("nav.logout");
+    }
+
+    private async Task HandleSettingsChangedAsync()
+    {
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+        await LoadLocalizedStringsAsync();
+        StateHasChanged();
     }
 
     private void ToggleNavMenu()
@@ -91,6 +129,16 @@
     private async Task Logout()
     {
         await JwtTokenHelper.RemoveJwtTokensFromCookiesAsync(Js, Navigation);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (UserSettingsService != null)
+        {
+            UserSettingsService.OnSettingsChangedAsync -= HandleSettingsChangedAsync;
+        }
+
+        await Task.CompletedTask;
     }
 
 }

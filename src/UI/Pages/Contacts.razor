@@ -1,38 +1,38 @@
 @page "/contacts"
 
-<PageTitle>Report an Issue</PageTitle>
+<PageTitle>@_pageTitle</PageTitle>
 
 <div class="page-container">
     <section class="header-section">
-        <h2>Report an Issue</h2>
+        <h2>@_headerTitle</h2>
         <div class="description">
-            Please provide details about the issue you are experiencing. Your feedback is important to us.
+            @_headerDescription
         </div>
     </section>
 
     <section class="content-section">
         <div class="form-container"
-             style="flex: 1 1 100%; max-width: 600px; margin: 0 auto;"> @* Adjusted style for single column *@
+             style="flex: 1 1 100%; max-width: 600px; margin: 0 auto;">
             <div class="form-card">
-                <h3>Submit a Report</h3>
+                <h3>@_formCardTitle</h3>
                 <EditForm Model="ReportModel" OnValidSubmit="HandleSendReportAsync">
                     <DataAnnotationsValidator/>
                     <div class="form-fields">
                         <div class="form-group">
-                            <label for="title">Title</label>
+                            <label for="title">@_labelTitle</label>
                             <InputText id="title" class="form-control" @bind-Value="ReportModel.Title"
-                                       placeholder="Brief title of the issue"/>
+                                       placeholder="@_placeholderTitle"/>
                             <ValidationMessage For="@(() => ReportModel.Title)"/>
                         </div>
                         <div class="form-group">
-                            <label for="description">Description</label>
+                            <label for="description">@_labelDescription</label>
                             <InputTextArea id="description" class="form-control" rows="4"
                                            @bind-Value="ReportModel.Description"
-                                           placeholder="Detailed description of the issue"/>
+                                           placeholder="@_placeholderDescription"/>
                             <ValidationMessage For="@(() => ReportModel.Description)"/>
                         </div>
                         <div class="form-group">
-                            <label for="attachments">Attachments (Optional)</label>
+                            <label for="attachments">@_labelAttachments</label>
                             <InputFile id="attachments" class="form-control" OnChange="LoadFiles" multiple/>
                             @if (SelectedFiles.Any())
                             {
@@ -50,11 +50,11 @@
                             @if (IsSubmitting)
                             {
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <text> Sending...</text>
+                                <text> @_buttonSending</text>
                             }
                             else
                             {
-                                <text>Send Report</text>
+                                <text>@_buttonSendReport</text>
                             }
                         </button>
                     </div>

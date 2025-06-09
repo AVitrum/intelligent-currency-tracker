@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
 using Application.Reports.Results;
+using AutoMapper;
 using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
@@ -18,14 +19,20 @@ public class ReportService : IReportService
     private readonly ILogger<ReportService> _logger;
     private readonly IReportRepository _reportRepository;
     private readonly IAmazonS3 _s3Client;
+    private readonly IEmailSender _emailSender;
+    private readonly IUserService _userService;
 
     public ReportService(
         ILogger<ReportService> logger,
         IReportRepository reportRepository,
-        IAppSettings appSettings)
+        IAppSettings appSettings,
+        IEmailSender emailSender,
+        IUserService userService)
     {
         _logger = logger;
         _reportRepository = reportRepository;
+        _emailSender = emailSender;
+        _userService = userService;
 
         _s3Client = new AmazonS3Client(
             appSettings.AwsAccessKey,
@@ -42,11 +49,12 @@ public class ReportService : IReportService
         Report report = new Report
         {
             Title = dto.Title,
-            Description = dto.Description
+            Description = dto.Description,
+            SenderId = dto.SenderId
         };
         const string path = "reports/files/";
 
-        if (dto.Attachments is not null && dto.Attachments.Any())
+        if (dto.Attachments is not null && dto.Attachments.Count != 0)
         {
             foreach ((string filePath, string fileExtension) in dto.Attachments)
             {
@@ -84,6 +92,28 @@ public class ReportService : IReportService
         return BaseResult.SuccessResult();
     }
 
+    public async Task<BaseResult> RespondAsync(Guid id, string message)
+    {
+        Report report = await _reportRepository.GetByIdAsync(id);
+        BaseResult findEmailResult = await _userService.GetEmailAsync(report.SenderId);
+
+        if (!findEmailResult.Success)
+        {
+            return BaseResult.FailureResult(findEmailResult.Errors);
+        }
+
+        string email = ((EmailResult)findEmailResult).Email;
+
+        await _emailSender.SendEmailWithDefaultDesignAsync(email, report.Title, message);
+        _logger.LogInformation("Response sent to {Email} for report {ReportId}", email, id);
+
+        report.IsResolved = true;
+        report.Status = ReportStatus.Resolved;
+        await _reportRepository.UpdateAsync(report);
+
+        return BaseResult.SuccessResult();
+    }
+
     public async Task<BaseResult> GetByIdAsync(Guid id)
     {
         Report report = await _reportRepository.GetByIdAsync(id);
@@ -93,7 +123,8 @@ public class ReportService : IReportService
             Title = report.Title,
             Description = report.Description,
             IsResolved = report.IsResolved,
-            Status = report.Status.ToString()
+            Status = report.Status.ToString(),
+            SenderId = report.SenderId
         };
 
         if (report.Attachments.Count != 0)
@@ -133,7 +164,8 @@ public class ReportService : IReportService
             Title = report.Title,
             Description = report.Description,
             IsResolved = report.IsResolved,
-            Status = report.Status.ToString()
+            Status = report.Status.ToString(),
+            SenderId = report.SenderId
         }).ToList();
 
         return GetAllReportsResult.SuccessResult(reportDtos);

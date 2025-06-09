@@ -15,9 +15,10 @@ using UI.Common.Interfaces;
 using UI.Services;
 using IConfiguration = UI.Common.Interfaces.IConfiguration;
 
+
 namespace UI.Pages;
 
-public partial class Dashboard : ComponentBase, IPageComponent
+public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
 {
     private DateTime _startDate = DateTime.Today.AddMonths(-1);
     private DateTime _endDate = DateTime.Today;
@@ -27,6 +28,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
 
     private readonly List<string> _currencies = [];
     private readonly List<string> _pinnedCurrencies = [];
+
     private readonly Dictionary<string, (decimal[] Data, string[] Dates)> _pinnedData =
         new Dictionary<string, (decimal[] Data, string[] Dates)>();
 
@@ -47,35 +49,131 @@ public partial class Dashboard : ComponentBase, IPageComponent
     [Inject] private IHttpClientService HttpClientService { get; set; } = null!;
     [Inject] private HttpClient Http { get; set; } = null!;
     [Inject] private IJSRuntime Js { get; set; } = null!;
+    [Inject] private LocalizationService Localizer { get; set; } = null!;
+    [Inject] private UserSettingsService UserSettingsService { get; set; } = null!;
+
+    private string _pageTitle = "";
+    private string _headerTitle = "";
+    private string _headerDescription = "";
+    private string _labelCurrency = "";
+    private string _labelStartDate = "";
+    private string _labelEndDate = "";
+    private string _labelChartType = "";
+    private string _buttonPinCurrency = "";
+    private string _buttonViewDetails = "";
+    private string _buttonShowChart = "";
+    private string _buttonShowTable = "";
+    private string _loadingChartData = "";
+    private string _tableHeaderDate = "";
+    private string _tableHeaderRate = "";
+    private string _tableNoData = "";
+    private string _buttonDownloadPdf = "";
+    private string _noDataAvailable = "";
+    private string _chartFooterText = "";
+    private string _pinnedChartsTitle = "";
+    private string _buttonRemovePinned = "";
+    private string _chartTypeLine = "";
+    private string _chartTypeCandlestick = "";
+
+    private string _errorGeneric = "";
+    private string _errorTryAgain = "";
+    private string _toastNoCurrencyForRange = "";
+    private string _toastSelectCurrencyToPin = "";
+    private string _toastCurrencyAlreadyPinned = "";
+    private string _toastCurrencyPinnedSuccessfully = "";
+    private string _toastSelectCurrencyFirst = "";
+    private string _errorLoadingTrackedCurrencies = "";
+    private string _errorRequestingPinnedData = "";
+    private string _errorLoadingCurrencyList = "";
+    private string _errorWebsocketLoadingRates = "";
+    private string _errorPinningCurrency = "";
+    private string _errorRemovingPinnedCurrency = "";
+    private string _errorMessagePrefix = "";
+    private string _errorStatusCodePrefix = "";
+    private string _errorErrorsPrefix = "";
+    private string _errorExceptionPrefix = "";
 
 
-    public Task<string> HandleResponse(BaseResponse? response)
+    private async Task LoadLocalizedStringsAsync()
+    {
+        _pageTitle = await Localizer.GetStringAsync("dashboard.page_title");
+        _headerTitle = await Localizer.GetStringAsync("dashboard.header_title");
+        _headerDescription = await Localizer.GetStringAsync("dashboard.header_description");
+        _labelCurrency = await Localizer.GetStringAsync("dashboard.label.currency");
+        _labelStartDate = await Localizer.GetStringAsync("dashboard.label.start_date");
+        _labelEndDate = await Localizer.GetStringAsync("dashboard.label.end_date");
+        _labelChartType = await Localizer.GetStringAsync("dashboard.label.chart_type");
+        _buttonPinCurrency = await Localizer.GetStringAsync("dashboard.button.pin_currency");
+        _buttonViewDetails = await Localizer.GetStringAsync("dashboard.button.view_details");
+        _buttonShowChart = await Localizer.GetStringAsync("dashboard.button.show_chart");
+        _buttonShowTable = await Localizer.GetStringAsync("dashboard.button.show_table");
+        _loadingChartData = await Localizer.GetStringAsync("dashboard.loading_chart_data");
+        _tableHeaderDate = await Localizer.GetStringAsync("dashboard.table.header_date");
+        _tableHeaderRate = await Localizer.GetStringAsync("dashboard.table.header_rate");
+        _tableNoData = await Localizer.GetStringAsync("dashboard.no_data_available");
+        _buttonDownloadPdf = await Localizer.GetStringAsync("dashboard.button.download_pdf");
+        _noDataAvailable = await Localizer.GetStringAsync("dashboard.no_data_available");
+        _chartFooterText = await Localizer.GetStringAsync("dashboard.chart_footer_text");
+        _pinnedChartsTitle = await Localizer.GetStringAsync("dashboard.pinned_charts_title");
+        _buttonRemovePinned = await Localizer.GetStringAsync("dashboard.button.remove_pinned");
+        _chartTypeLine = await Localizer.GetStringAsync("dashboard.chart_type.line");
+        _chartTypeCandlestick = await Localizer.GetStringAsync("dashboard.chart_type.candlestick");
+
+        _errorGeneric = await Localizer.GetStringAsync("settings.error.generic_processing");
+        _errorTryAgain = await Localizer.GetStringAsync("settings.toast.default_error_try_again");
+        _toastNoCurrencyForRange = await Localizer.GetStringAsync("dashboard.toast.no_currency_selected_for_range");
+        _toastSelectCurrencyToPin = await Localizer.GetStringAsync("dashboard.toast.select_currency_to_pin");
+        _toastCurrencyAlreadyPinned = await Localizer.GetStringAsync("dashboard.toast.currency_already_pinned");
+        _toastCurrencyPinnedSuccessfully =
+            await Localizer.GetStringAsync("dashboard.toast.currency_pinned_successfully");
+        _toastSelectCurrencyFirst = await Localizer.GetStringAsync("dashboard.toast.select_currency_first");
+        _errorLoadingTrackedCurrencies = await Localizer.GetStringAsync("dashboard.error.loading_tracked_currencies");
+        _errorRequestingPinnedData = await Localizer.GetStringAsync("dashboard.error.requesting_pinned_data");
+        _errorLoadingCurrencyList = await Localizer.GetStringAsync("dashboard.error.loading_currency_list");
+        _errorWebsocketLoadingRates = await Localizer.GetStringAsync("dashboard.error.websocket_loading_rates");
+        _errorPinningCurrency = await Localizer.GetStringAsync("dashboard.error.pinning_currency");
+        _errorRemovingPinnedCurrency = await Localizer.GetStringAsync("dashboard.error.removing_pinned_currency");
+        _errorMessagePrefix = await Localizer.GetStringAsync("settings.error.message_prefix");
+        _errorStatusCodePrefix = await Localizer.GetStringAsync("settings.error.status_code_prefix");
+        _errorErrorsPrefix = await Localizer.GetStringAsync("settings.error.errors_prefix");
+        _errorExceptionPrefix = await Localizer.GetStringAsync("settings.error.exception_prefix");
+    }
+
+    private async Task HandleSettingsChangedAsync()
+    {
+        await LoadLocalizedStringsAsync();
+        StateHasChanged();
+    }
+
+    public async Task<string> HandleResponse(BaseResponse? response)
     {
         if (response is null)
         {
-            return Task.FromResult("An error occurred while processing your request.");
+            return _errorGeneric;
         }
 
         StringBuilder errorMessage = new StringBuilder();
-        errorMessage.AppendLine($"Message: {response.Message}");
-        errorMessage.AppendLine($"Status Code: {response.StatusCode}");
+        errorMessage.AppendLine($"{_errorMessagePrefix} {response.Message}");
+        errorMessage.AppendLine($"{_errorStatusCodePrefix} {response.StatusCode}");
         if (response.Errors.Any())
         {
-            errorMessage.AppendLine($"Errors: {string.Join(", ", response.Errors)}");
+            errorMessage.AppendLine($"{_errorErrorsPrefix} {string.Join(", ", response.Errors)}");
         }
 
-        return Task.FromResult(errorMessage.ToString());
+        return await Task.FromResult(errorMessage.ToString());
     }
 
-    public Task HandleInvalidResponse(
-        string message = "An error occurred while processing your request. Try again later.")
+    public async Task HandleInvalidResponse(string? message = null)
     {
-        ToastService.ShowError(message);
-        return Task.CompletedTask;
+        ToastService.ShowError(message ?? _errorTryAgain);
+        await Task.CompletedTask;
     }
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadLocalizedStringsAsync();
+        UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
+
         _isLoadingChartData = true;
         SetStringDates();
         await WebSocketService.ConnectAsync();
@@ -143,7 +241,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
         }
         catch (Exception ex)
         {
-            await HandleInvalidResponse($"Error loading tracked currencies: {ex.Message}");
+            await HandleInvalidResponse(string.Format(_errorLoadingTrackedCurrencies, ex.Message));
         }
     }
 
@@ -173,13 +271,13 @@ public partial class Dashboard : ComponentBase, IPageComponent
                 }
                 else
                 {
-                     _pinnedData.Remove(currency);
+                    _pinnedData.Remove(currency);
                 }
             }
             catch (Exception ex)
             {
                 _pinnedData.Remove(currency);
-                await HandleInvalidResponse($"Error requesting pinned data for {currency}: {ex.Message}");
+                await HandleInvalidResponse(string.Format(_errorRequestingPinnedData, currency, ex.Message));
             }
         }
     }
@@ -201,7 +299,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
 
             if (resp.IsSuccessStatusCode && apiResponse?.Currencies != null)
             {
-                var normalizedNewCurrencies = apiResponse.Currencies
+                List<string> normalizedNewCurrencies = apiResponse.Currencies
                     .Where(c => !string.IsNullOrWhiteSpace(c.Code))
                     .Select(c => c.Code.Trim().ToUpperInvariant())
                     .Distinct()
@@ -210,7 +308,8 @@ public partial class Dashboard : ComponentBase, IPageComponent
 
                 _currencies.AddRange(normalizedNewCurrencies);
 
-                if (!string.IsNullOrEmpty(previouslySelectedCurrencyNormalized) && _currencies.Contains(previouslySelectedCurrencyNormalized))
+                if (!string.IsNullOrEmpty(previouslySelectedCurrencyNormalized) &&
+                    _currencies.Contains(previouslySelectedCurrencyNormalized))
                 {
                     _selectedCurrency = _currencies.First(c => c == previouslySelectedCurrencyNormalized);
                 }
@@ -233,7 +332,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
         catch (Exception ex)
         {
             _selectedCurrency = string.Empty;
-            await HandleInvalidResponse($"Error loading currency list: {ex.Message}");
+            await HandleInvalidResponse(string.Format(_errorLoadingCurrencyList, ex.Message));
         }
     }
 
@@ -243,7 +342,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
         {
             _chartData = [];
             _dates = [];
-            ToastService.ShowInfo("No currency selected or available for the current date range.");
+            ToastService.ShowInfo(_toastNoCurrencyForRange);
             return;
         }
 
@@ -274,7 +373,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
         }
         catch (Exception ex)
         {
-            await HandleInvalidResponse($"WebSocket error loading rates: {ex.Message}");
+            await HandleInvalidResponse(string.Format(_errorWebsocketLoadingRates, ex.Message));
             _chartData = [];
             _dates = [];
         }
@@ -326,14 +425,14 @@ public partial class Dashboard : ComponentBase, IPageComponent
     {
         if (string.IsNullOrEmpty(_selectedCurrency))
         {
-            ToastService.ShowInfo("Please select a currency to pin.");
+            ToastService.ShowInfo(_toastSelectCurrencyToPin);
             return;
         }
-        
+
         string normalizedSelectedCurrency = _selectedCurrency.Trim().ToUpperInvariant();
         if (_pinnedCurrencies.Contains(normalizedSelectedCurrency))
         {
-            ToastService.ShowInfo($"Currency '{_selectedCurrency}' is already pinned.");
+            ToastService.ShowInfo(string.Format(_toastCurrencyAlreadyPinned, _selectedCurrency));
             return;
         }
 
@@ -348,8 +447,8 @@ public partial class Dashboard : ComponentBase, IPageComponent
             TrackCurrencyResponse? response = await resp.Content.ReadFromJsonAsync<TrackCurrencyResponse>();
             if (resp.IsSuccessStatusCode && response is { Success: true })
             {
-                ToastService.ShowSuccess($"Currency '{_selectedCurrency}' pinned successfully.");
-                if (!_pinnedCurrencies.Contains(normalizedSelectedCurrency)) 
+                ToastService.ShowSuccess(string.Format(_toastCurrencyPinnedSuccessfully, _selectedCurrency));
+                if (!_pinnedCurrencies.Contains(normalizedSelectedCurrency))
                 {
                     _pinnedCurrencies.Add(normalizedSelectedCurrency);
                 }
@@ -363,7 +462,8 @@ public partial class Dashboard : ComponentBase, IPageComponent
                     List<RateDto> rates = (List<RateDto>)rateDataResponse.Rates;
                     if (rates.Count != 0)
                     {
-                        _pinnedData[normalizedSelectedCurrency] = (rates.Select(r => r.Value).ToArray(), rates.Select(r => r.Date).ToArray());
+                        _pinnedData[normalizedSelectedCurrency] = (rates.Select(r => r.Value).ToArray(),
+                            rates.Select(r => r.Date).ToArray());
                     }
                     else
                     {
@@ -371,7 +471,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
                     }
                 }
 
-                _lastPinnedCurrency = _selectedCurrency; 
+                _lastPinnedCurrency = _selectedCurrency;
                 _shouldDrawNewPin = true;
             }
             else
@@ -382,7 +482,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
         }
         catch (Exception ex)
         {
-            await HandleInvalidResponse($"Error pinning currency: {ex.Message}");
+            await HandleInvalidResponse(string.Format(_errorPinningCurrency, ex.Message));
         }
         finally
         {
@@ -409,7 +509,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
                 await resp.Content.ReadFromJsonAsync<RemoveTrackedCurrencyResponse>();
             if (resp.IsSuccessStatusCode && response is { Success: true })
             {
-                ToastService.ShowSuccess(response.Message);
+                ToastService.ShowSuccess(response.Message); // Assuming response.Message is localized or a key
                 _pinnedCurrencies.Remove(normalizedCode);
                 _pinnedData.Remove(normalizedCode);
             }
@@ -421,7 +521,7 @@ public partial class Dashboard : ComponentBase, IPageComponent
         }
         catch (Exception ex)
         {
-            await HandleInvalidResponse($"Error removing pinned currency: {ex.Message}");
+            await HandleInvalidResponse(string.Format(_errorRemovingPinnedCurrency, ex.Message));
         }
         finally
         {
@@ -445,12 +545,19 @@ public partial class Dashboard : ComponentBase, IPageComponent
     {
         if (string.IsNullOrEmpty(_selectedCurrency))
         {
-            ToastService.ShowError("Please select a currency first.");
+            ToastService.ShowError(_toastSelectCurrencyFirst);
             return;
         }
 
         string navStartDateString = _startDate.ToString(DateConstants.DateFormat);
         string navEndDateString = _endDate.ToString(DateConstants.DateFormat);
         NavigationManager.NavigateTo($"/currency/{_selectedCurrency}/{navStartDateString}/{navEndDateString}");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        UserSettingsService.OnSettingsChangedAsync -= HandleSettingsChangedAsync;
+        await Task.CompletedTask;
+        GC.SuppressFinalize(this);
     }
 }

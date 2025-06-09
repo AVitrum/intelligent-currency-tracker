@@ -2,8 +2,10 @@ using Application.Common.Interfaces.Services;
 using Application.Reports.Results;
 using Domain.Common;
 using Domain.Enums;
+using Infrastructure.Utils.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Dtos;
+using Shared.Payload.Requests;
 using Shared.Payload.Responses;
 using Shared.Payload.Responses.Report;
 
@@ -14,10 +16,12 @@ namespace WebApi.Controllers;
 public class ReportController : ControllerBase
 {
     private readonly IReportService _reportService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ReportController(IReportService reportService)
+    public ReportController(IReportService reportService, IHttpContextAccessor httpContextAccessor)
     {
         _reportService = reportService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [HttpPost("send")]
@@ -52,10 +56,17 @@ public class ReportController : ControllerBase
             return BadRequest(response);
         }
 
+        string userId = _httpContextAccessor.HttpContext?.User.GetUserId()!;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
         CreateReportDto dto = new CreateReportDto
         {
             Title = title,
-            Description = description
+            Description = description,
+            SenderId = userId
         };
 
         if (attachments is not null && attachments.Any())
@@ -91,6 +102,45 @@ public class ReportController : ControllerBase
         response = new DefaultResponse(
             false,
             "Failed to send report.",
+            StatusCodes.Status500InternalServerError,
+            result.Errors);
+        return StatusCode(StatusCodes.Status500InternalServerError, response);
+    }
+
+    [HttpPost("respond/{id:guid}")]
+    [Authorize(Roles = nameof(UserRole.ADMIN))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(BaseResponse))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(BaseResponse))]
+    public async Task<ActionResult<BaseResponse>> RespondToReport(Guid id, [FromBody] RespondRequest request)
+    {
+        BaseResponse response;
+
+        if (id == Guid.Empty)
+        {
+            response = new DefaultResponse(
+                false,
+                "Invalid report ID.",
+                StatusCodes.Status400BadRequest,
+                new List<string> { "Invalid report ID." });
+            return BadRequest(response);
+        }
+
+        BaseResult result = await _reportService.RespondAsync(id, request.Message);
+
+        if (result.Success)
+        {
+            response = new DefaultResponse(
+                true,
+                "Response sent successfully.",
+                StatusCodes.Status200OK,
+                []);
+            return Ok(response);
+        }
+
+        response = new DefaultResponse(
+            false,
+            "Failed to respond to report.",
             StatusCodes.Status500InternalServerError,
             result.Errors);
         return StatusCode(StatusCodes.Status500InternalServerError, response);

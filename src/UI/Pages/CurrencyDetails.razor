@@ -1,61 +1,59 @@
 @page "/currency/{CurrencyCode}/{StartDate}/{EndDate}"
-@using Shared.Dtos
+
+<PageTitle>@_pageTitle</PageTitle>
 
 <div class="details-page-container" id="details-page-container">
     @if (_isLoading)
     {
         <div class="loading-message">
-            <p>Loading currency details for @CurrencyCode...</p>
+            <p>@_loadingMessage</p>
         </div>
     }
     else if (_currencyDetails == null || string.IsNullOrEmpty(_currencyDetails.CurrencyPair))
     {
         <div class="no-data-message-container">
-            <p>No analytical data found for currency code '@CurrencyCode' for the selected period.</p>
-            <button @onclick="NavigateToDashboard" class="action-button">Return to Dashboard</button>
+            <h3>@_noDataTitle</h3>
+            <p>@_noDataDescription</p>
+            <button class="btn-primary" @onclick="NavigateToDashboard">@_noDataButtonBackToDashboard</button>
         </div>
     }
     else
     {
-        <h1 class="details-page-title">@_currencyDetails.CurrencyPair Currency Analytics</h1>
+        <h1 class="details-page-title">@_headerTitle</h1>
 
         <div class="analytics-cards-container">
             <div class="analytics-card">
-                <h2 class="card-section-title">Statistical Overview</h2>
+                <h2 class="card-section-title">@_sectionStatisticalOverview</h2>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-label">Mean Value:</span>
+                        <span class="stat-label">@_statMeanValue</span>
                         <span class="stat-value">@_currencyDetails.MeanValue.ToString("N4")</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Median Value:</span>
+                        <span class="stat-label">@_statMedianValue</span>
                         <span class="stat-value">@_currencyDetails.MedianValue.ToString("N4")</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Maximum Value:</span>
+                        <span class="stat-label">@_statMaxValue</span>
                         <span class="stat-value">@_currencyDetails.MaxValue.ToString("N4")</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Minimum Value:</span>
+                        <span class="stat-label">@_statMinValue</span>
                         <span class="stat-value">@_currencyDetails.MinValue.ToString("N4")</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Value Range:</span>
-                        <span class="stat-value">@_currencyDetails.Range.ToString("N4")</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Standard Deviation:</span>
+                        <span class="stat-label">@_statStdDeviation</span>
                         <span class="stat-value">@_currencyDetails.StandardDeviation.ToString("N4")</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Variance:</span>
+                        <span class="stat-label">@_statVariance</span>
                         <span class="stat-value">@_currencyDetails.Variance.ToString("N4")</span>
                     </div>
                 </div>
             </div>
 
             <div class="analytics-card">
-                <h2 class="card-section-title">@CurrencyCode Rate Trend</h2>
+                <h2 class="card-section-title">@_sectionRateTrend @CurrencyCode</h2>
                 @if (_chartRateData != null && _chartRateData.Any())
                 {
                     <div class="mini-chart-wrapper">
@@ -66,35 +64,13 @@
                 }
                 else
                 {
-                    <p class="no-chart-data">Rate data for the chart is not available for this period.</p>
+                    <p class="no-chart-data">@_chartNoData</p>
                 }
             </div>
-
-            @if (_currencyDetails.MovingAverages.Any())
-            {
-                <div class="analytics-card">
-                    <h2 class="card-section-title">Moving Averages</h2>
-                    <div class="moving-averages-grid">
-                        @foreach (MovingAverageDto ma in _currencyDetails.MovingAverages)
-                        {
-                            <div class="ma-item">
-                                <span class="ma-label">@ma.Period-Day MA:</span>
-                                <span class="ma-value">@ma.Value.ToString("N4")</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="analytics-card">
-                    <h2 class="card-section-title">Moving Averages</h2>
-                    <p class="no-ma-data">No moving average data available for this period.</p>
-                </div>
-            }
         </div>
+
         <div class="action-buttons-row">
-            <button @onclick="NavigateToDashboard" class="action-button">Back to Dashboard</button>
+            <button @onclick="NavigateToDashboard" class="action-button">@_buttonBackToDashboard</button>
         </div>
     }
 </div>

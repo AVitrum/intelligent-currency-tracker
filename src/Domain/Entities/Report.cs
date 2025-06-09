@@ -9,6 +9,8 @@ public class Report : BaseEntity
     public required string Title { get; set; }
     public required string Description { get; set; }
 
+    public required string SenderId { get; set; }
+
     public bool IsResolved { get; set; } = false;
 
     [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -66,6 +66,9 @@
             </button>
             @if (!_report.IsResolved)
             {
+                <button class="btn btn-info" @onclick="NavigateToRespondToReport" disabled="@_isLoading">
+                    Respond to Report
+                </button>
                 <button class="btn btn-success" @onclick="MarkReportAsResolvedAsync" disabled="@_isLoading">
                     @if (_isLoading)
                     {

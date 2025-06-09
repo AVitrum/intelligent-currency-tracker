@@ -1,7 +1,7 @@
 <div class="mini-chart-card">
     <div class="mini-chart-header">
         <div class="currency-label">@Currency</div>
-        <button type="button" class="mini-chart-close" @onclick="Remove">
+        <button type="button" class="mini-chart-close" @onclick="Remove" aria-label="@_removeButtonAriaLabel">
             <svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor">
                 <path
                     d="M135.2 17.69C142.5 7.93 153.4 0 166.4 0h115.1c13 0 23.9 7.93 31.2 17.69L370.1 48H432c8.837 0 16 7.162 16 16s-7.163 16-16 16H16C7.163 80 0 72.84 0 64S7.163 48 16 48h61.9l57.3-30.31zM32 128h384l-21.33 338.6c-1.414 22.4-20.69 41.4-43.07 41.4H96.4c-22.38 0-41.66-19.03-43.07-41.4L32 128z"/>
@@ -13,6 +13,6 @@
         <div id="miniTooltip-@Currency" class="chart-tooltip"></div>
     </div>
     <div class="mini-chart-actions">
-        <button class="mini-chart-details-btn" @onclick="NavigateToDetails">View Details</button>
+        <button class="mini-chart-details-btn" @onclick="NavigateToDetails">@_viewDetailsButtonText</button>
     </div>
 </div>
