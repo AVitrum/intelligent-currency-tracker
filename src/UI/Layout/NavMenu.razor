@@ -1,4 +1,5 @@
-﻿@using Shared.Helpers
+﻿@using Shared.Dtos
+@using Shared.Helpers
 @using UI.Services
 @inject IJSRuntime Js
 @inject NavigationManager Navigation
@@ -97,7 +98,7 @@
             UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
         }
 
-        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js) != null;
         await LoadLocalizedStringsAsync();
     }
 
@@ -116,7 +117,7 @@
 
     private async Task HandleSettingsChangedAsync()
     {
-        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js) != null;
         await LoadLocalizedStringsAsync();
         StateHasChanged();
     }
@@ -128,6 +129,9 @@
 
     private async Task Logout()
     {
+        SettingsDto settings = await UserSettingsService.GetSettingsAsync(Js);
+        settings.Language = "en";
+        await UserSettingsService.SaveSettingsAsync(settings, Js);
         await JwtTokenHelper.RemoveJwtTokensFromCookiesAsync(Js, Navigation);
     }
 

@@ -71,7 +71,6 @@ public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
     private string _noDataAvailable = "";
     private string _chartFooterText = "";
     private string _pinnedChartsTitle = "";
-    private string _buttonRemovePinned = "";
     private string _chartTypeLine = "";
     private string _chartTypeCandlestick = "";
 
@@ -91,7 +90,6 @@ public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
     private string _errorMessagePrefix = "";
     private string _errorStatusCodePrefix = "";
     private string _errorErrorsPrefix = "";
-    private string _errorExceptionPrefix = "";
 
 
     private async Task LoadLocalizedStringsAsync()
@@ -115,7 +113,7 @@ public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
         _noDataAvailable = await Localizer.GetStringAsync("dashboard.no_data_available");
         _chartFooterText = await Localizer.GetStringAsync("dashboard.chart_footer_text");
         _pinnedChartsTitle = await Localizer.GetStringAsync("dashboard.pinned_charts_title");
-        _buttonRemovePinned = await Localizer.GetStringAsync("dashboard.button.remove_pinned");
+        await Localizer.GetStringAsync("dashboard.button.remove_pinned");
         _chartTypeLine = await Localizer.GetStringAsync("dashboard.chart_type.line");
         _chartTypeCandlestick = await Localizer.GetStringAsync("dashboard.chart_type.candlestick");
 
@@ -136,7 +134,7 @@ public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
         _errorMessagePrefix = await Localizer.GetStringAsync("settings.error.message_prefix");
         _errorStatusCodePrefix = await Localizer.GetStringAsync("settings.error.status_code_prefix");
         _errorErrorsPrefix = await Localizer.GetStringAsync("settings.error.errors_prefix");
-        _errorExceptionPrefix = await Localizer.GetStringAsync("settings.error.exception_prefix");
+        await Localizer.GetStringAsync("settings.error.exception_prefix");
     }
 
     private async Task HandleSettingsChangedAsync()
@@ -220,6 +218,11 @@ public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
         _endDateString = _endDate.ToString(DateConstants.DateFormat);
     }
 
+    private bool CheckDates()
+    {
+        return _startDate != _endDate;
+    }
+
     private async Task LoadTrackedCurrenciesAsync()
     {
         string url = $"{Configuration.ApiUrl}/userRate/tracked-currencies";
@@ -247,6 +250,12 @@ public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
 
     private async Task RequestDataForPinnedCurrenciesAsync()
     {
+        if (!CheckDates())
+        {
+            ToggleTable();
+        }
+
+        
         foreach (string currency in _pinnedCurrencies)
         {
             string url =
@@ -509,7 +518,7 @@ public partial class Dashboard : ComponentBase, IPageComponent, IAsyncDisposable
                 await resp.Content.ReadFromJsonAsync<RemoveTrackedCurrencyResponse>();
             if (resp.IsSuccessStatusCode && response is { Success: true })
             {
-                ToastService.ShowSuccess(response.Message); // Assuming response.Message is localized or a key
+                ToastService.ShowSuccess(response.Message); 
                 _pinnedCurrencies.Remove(normalizedCode);
                 _pinnedData.Remove(normalizedCode);
             }

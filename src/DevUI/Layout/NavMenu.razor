@@ -76,7 +76,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js) != null;
     }
 
     private void ToggleNavMenu()

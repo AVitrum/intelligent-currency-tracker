@@ -143,16 +143,54 @@ select.form-control {
 .forecast-warning {
     margin-top: 1.5rem;
     padding: 1rem;
-    background-color: #FFFBEB; /* Light yellow background */
-    border: 1px solid #FEEBC8; /* Yellow border */
-    color: #744210; /* Dark yellow/brown text */
+    background-color: #FFFBEB; 
+    border: 1px solid #FEEBC8; 
+    color: #744210; 
     border-radius: 8px;
     font-size: 0.9rem;
     line-height: 1.5;
 }
 
 .forecast-warning strong {
-    color: #9C4221; /* Slightly darker for emphasis */
+    color: #9C4221; 
+}
+
+.forecast-table-container {
+    margin-top: 2rem;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+}
+
+.forecast-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    color: #2C3E50;
+}
+
+.forecast-table th,
+.forecast-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.forecast-table th {
+    background-color: #F8F9FA;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.forecast-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.forecast-table tbody tr:hover {
+    background-color: #F1F5F9;
 }
 
 

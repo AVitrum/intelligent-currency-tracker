@@ -64,7 +64,7 @@
             UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
         }
 
-        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js) != null;
         await LoadLocalizedStringsAsync();
     }
 

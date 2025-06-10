@@ -21,15 +21,6 @@
                 </select>
             </div>
             <div class="settings-group">
-                <label for="theme">@_themeLabel</label>
-                <select id="theme" class="settings-control" @bind="Dto.Theme">
-                    @foreach (Theme theme in Enum.GetValues<Theme>())
-                    {
-                        <option value="@theme.ToString()">@theme</option>
-                    }
-                </select>
-            </div>
-            <div class="settings-group">
                 <label for="summary">@_summaryTypeLabel</label>
                 <select id="summary" class="settings-control" @bind="Dto.SummaryType">
                     @foreach (SummaryType summary in Enum.GetValues<SummaryType>())

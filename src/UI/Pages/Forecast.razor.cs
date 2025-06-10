@@ -9,11 +9,12 @@ using Shared.Payload.Requests;
 using Shared.Payload.Responses.AiModel;
 using Shared.Payload.Responses.Rate;
 using UI.Common.Interfaces;
+using UI.Services;
 using IConfiguration = UI.Common.Interfaces.IConfiguration;
 
 namespace UI.Pages;
 
-public partial class Forecast : ComponentBase, IPageComponent
+public partial class Forecast : ComponentBase, IPageComponent, IAsyncDisposable
 {
     private readonly List<CurrencyDto> _currencyDtos = [];
     private readonly List<string> _currencyCodes = [];
@@ -30,7 +31,37 @@ public partial class Forecast : ComponentBase, IPageComponent
     [Inject] private IHttpClientService HttpClientService { get; set; } = null!;
     [Inject] private HttpClient Http { get; set; } = null!;
     [Inject] private IJSRuntime Js { get; set; } = null!;
+    [Inject] private LocalizationService Localizer { get; set; } = null!;
+    [Inject] private UserSettingsService UserSettingsService { get; set; } = null!;
 
+    private string _pageTitleString = "";
+    private string _headerTitleString = "";
+    private string _headerDescriptionString = "";
+    private string _labelSelectCurrencyString = "";
+    private string _loadingCurrenciesString = "";
+    private string _noCurrenciesAvailableString = "";
+    private string _labelForecastPeriodString = "";
+    private string _generatingForecastString = "";
+    private string _disclaimerStrongString = "";
+    private string _disclaimerTextString = "";
+    private string _loadingForecastDataString = "";
+    private string _noForecastDataString = "";
+    private string _chartFooterTextString = "";
+    private string _tableHeaderDateString = "";
+    private string _tableHeaderValueString = "";
+
+    private string _toastSelectCurrencyString = "";
+    private string _toastInvalidPeriodString = "";
+    private string _toastCurrencyDetailsNotFoundString = "";
+    private string _toastForecastSuccessString = "";
+    private string _errorLoadingCurrencyListFormatString = "";
+    private string _errorFetchingForecastFormatString = "";
+    
+    private string _errorGenericString = "";
+    private string _errorMessagePrefixString = "";
+    private string _errorStatusCodePrefixString = "";
+    private string _errorErrorsPrefixString = "";
+    
     private string SelectedCurrencyCode
     {
         get => _selectedCurrencyCodeField;
@@ -57,40 +88,78 @@ public partial class Forecast : ComponentBase, IPageComponent
         }
     }
 
-    public Task<string> HandleResponse(BaseResponse? response)
-    {
-        if (response is null)
-        {
-            return Task.FromResult("An error occurred while processing your request.");
-        }
-
-        StringBuilder errorMessage = new StringBuilder();
-        errorMessage.AppendLine($"Message: {response.Message}");
-        errorMessage.AppendLine($"Status Code: {response.StatusCode}");
-        if (response.Errors.Any())
-        {
-            errorMessage.AppendLine($"Errors: {string.Join(", ", response.Errors)}");
-        }
-
-        return Task.FromResult(errorMessage.ToString());
-    }
-
-    public Task HandleInvalidResponse(string message = "An error occurred. Please try again.")
-    {
-        ToastService.ShowError(message);
-        return Task.CompletedTask;
-    }
-
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
+        await LoadLocalizedStringsAsync();
+        UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
         await LoadCurrencyListAsync();
         if (!string.IsNullOrEmpty(SelectedCurrencyCode) && ForecastPeriods > 0)
         {
             await HandleForecastAsync();
         }
-
         _isLoading = false;
+    }
+
+    private async Task LoadLocalizedStringsAsync()
+    {
+        _pageTitleString = await Localizer.GetStringAsync("forecast.page_title");
+        _headerTitleString = await Localizer.GetStringAsync("forecast.header.title");
+        _headerDescriptionString = await Localizer.GetStringAsync("forecast.header.description");
+        _labelSelectCurrencyString = await Localizer.GetStringAsync("forecast.form.label_currency");
+        _loadingCurrenciesString = await Localizer.GetStringAsync("forecast.form.loading_currencies");
+        _noCurrenciesAvailableString = await Localizer.GetStringAsync("forecast.form.no_currencies");
+        _labelForecastPeriodString = await Localizer.GetStringAsync("forecast.form.label_period");
+        _generatingForecastString = await Localizer.GetStringAsync("forecast.form.generating_forecast");
+        _disclaimerStrongString = await Localizer.GetStringAsync("forecast.disclaimer.strong");
+        _disclaimerTextString = await Localizer.GetStringAsync("forecast.disclaimer.text");
+        _loadingForecastDataString = await Localizer.GetStringAsync("forecast.chart.loading_data");
+        _noForecastDataString = await Localizer.GetStringAsync("forecast.chart.no_data");
+        _chartFooterTextString = await Localizer.GetStringAsync("forecast.chart.footer");
+        _tableHeaderDateString = await Localizer.GetStringAsync("forecast.table.header_date");
+        _tableHeaderValueString = await Localizer.GetStringAsync("forecast.table.header_value");
+
+        _toastSelectCurrencyString = await Localizer.GetStringAsync("forecast.toast.select_currency");
+        _toastInvalidPeriodString = await Localizer.GetStringAsync("forecast.toast.invalid_period");
+        _toastCurrencyDetailsNotFoundString = await Localizer.GetStringAsync("forecast.toast.currency_details_not_found");
+        _toastForecastSuccessString = await Localizer.GetStringAsync("forecast.toast.forecast_success");
+        _errorLoadingCurrencyListFormatString = await Localizer.GetStringAsync("forecast.error.loading_currency_list_format");
+        _errorFetchingForecastFormatString = await Localizer.GetStringAsync("forecast.error.fetching_forecast_format");
+
+        _errorGenericString = await Localizer.GetStringAsync("settings.toast.default_error_try_again");
+        _errorMessagePrefixString = await Localizer.GetStringAsync("settings.error.message_prefix");
+        _errorStatusCodePrefixString = await Localizer.GetStringAsync("settings.error.status_code_prefix");
+        _errorErrorsPrefixString = await Localizer.GetStringAsync("settings.error.errors_prefix");
+    }
+
+    private async Task HandleSettingsChangedAsync()
+    {
+        await LoadLocalizedStringsAsync();
+        StateHasChanged();
+    }
+    
+    public Task<string> HandleResponse(BaseResponse? response)
+    {
+        if (response is null)
+        {
+            return Task.FromResult(_errorGenericString);
+        }
+
+        StringBuilder errorMessage = new StringBuilder();
+        errorMessage.AppendLine($"{_errorMessagePrefixString} {response.Message}");
+        errorMessage.AppendLine($"{_errorStatusCodePrefixString} {response.StatusCode}");
+        if (response.Errors.Any())
+        {
+            errorMessage.AppendLine($"{_errorErrorsPrefixString} {string.Join(", ", response.Errors)}");
+        }
+
+        return Task.FromResult(errorMessage.ToString());
+    }
+
+    public Task HandleInvalidResponse(string? message = null)
+    {
+        ToastService.ShowError(message ?? _errorGenericString);
+        return Task.CompletedTask;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -150,7 +219,7 @@ public partial class Forecast : ComponentBase, IPageComponent
         catch (Exception ex)
         {
             _selectedCurrencyCodeField = string.Empty;
-            await HandleInvalidResponse($"Error loading currency list: {ex.Message}");
+            await HandleInvalidResponse(string.Format(_errorLoadingCurrencyListFormatString, ex.Message));
         }
     }
 
@@ -168,9 +237,8 @@ public partial class Forecast : ComponentBase, IPageComponent
         {
             if (_currencyCodes.Count != 0)
             {
-                ToastService.ShowError("Please select a currency.");
+                ToastService.ShowError(_toastSelectCurrencyString);
             }
-
             _forecastData = [];
             _forecastDates = [];
             _isLoading = false;
@@ -180,7 +248,7 @@ public partial class Forecast : ComponentBase, IPageComponent
 
         if (_forecastPeriodsField <= 0)
         {
-            ToastService.ShowError("Forecast periods must be greater than zero.");
+            ToastService.ShowError(_toastInvalidPeriodString);
             _forecastData = [];
             _forecastDates = [];
             _isLoading = false;
@@ -192,7 +260,7 @@ public partial class Forecast : ComponentBase, IPageComponent
             c.Code.Trim().ToUpperInvariant() == _selectedCurrencyCodeField.Trim().ToUpperInvariant());
         if (selectedDto == null)
         {
-            ToastService.ShowError("Selected currency details not found.");
+            ToastService.ShowError(_toastCurrencyDetailsNotFoundString);
             _forecastData = [];
             _forecastDates = [];
             _isLoading = false;
@@ -217,7 +285,7 @@ public partial class Forecast : ComponentBase, IPageComponent
                 _forecastData = response.Forecast.Select(p => p.Yhat).ToArray();
                 _forecastDates = response.Forecast.Select(p => p.Ds).ToArray();
                 _forecastFetched = true;
-                ToastService.ShowSuccess("Forecast generated successfully.");
+                ToastService.ShowSuccess(_toastForecastSuccessString);
             }
             else
             {
@@ -231,12 +299,19 @@ public partial class Forecast : ComponentBase, IPageComponent
         {
             _forecastData = [];
             _forecastDates = [];
-            await HandleInvalidResponse($"Error fetching forecast: {ex.Message}");
+            await HandleInvalidResponse(string.Format(_errorFetchingForecastFormatString, ex.Message));
         }
         finally
         {
             _isLoading = false;
             StateHasChanged();
         }
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        UserSettingsService.OnSettingsChangedAsync -= HandleSettingsChangedAsync;
+        await Task.CompletedTask;
+        GC.SuppressFinalize(this);
     }
 }

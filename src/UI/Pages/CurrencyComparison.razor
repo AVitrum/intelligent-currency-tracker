@@ -1,19 +1,19 @@
 @page "/compare-currencies"
 @using Domain.Constants
 
-<PageTitle>Currency Comparison</PageTitle>
+<PageTitle>@_pageTitle</PageTitle>
 
 <div class="comparison-page-container">
-    <h1 class="comparison-page-title">Currency Comparison</h1>
+    <h1 class="comparison-page-title">@_headerTitle</h1>
 
     <div class="form-section-container card-style">
         <div class="form-grid">
             <div class="form-group">
-                <label for="currencySelect1">Base Currency:</label>
+                <label for="currencySelect1">@_labelBaseCurrency</label>
                 <select id="currencySelect1" @bind="_selectedCurrency1" class="form-control">
-                    @if (_currencies.Count == 0)
+                    @if (_currencies.Count == 0 && _isLoading)
                     {
-                        <option value="">Loading currencies...</option>
+                        <option value="">@_optionLoadingCurrencies</option>
                     }
                     else
                     {
@@ -25,11 +25,11 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="currencySelect2">Compare With:</label>
+                <label for="currencySelect2">@_labelCompareWith</label>
                 <select id="currencySelect2" @bind="_selectedCurrency2" class="form-control">
-                    @if (_currencies.Count == 0)
+                    @if (_currencies.Count == 0 && _isLoading)
                     {
-                        <option value="">Loading currencies...</option>
+                        <option value="">@_optionLoadingCurrencies</option>
                     }
                     else
                     {
@@ -41,11 +41,11 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="startDate">Start Date:</label>
+                <label for="startDate">@_labelStartDate</label>
                 <input id="startDate" type="date" @bind="_startDate" class="form-control"/>
             </div>
             <div class="form-group">
-                <label for="endDate">End Date:</label>
+                <label for="endDate">@_labelEndDate</label>
                 <input id="endDate" type="date" @bind="_endDate" class="form-control"/>
             </div>
         </div>
@@ -53,10 +53,11 @@
             @if (_isLoading && _comparisonDetails == null)
             {
                 <span class="spinner"></span>
+                <span>@_buttonComparing</span>
             }
             else
             {
-                <span>Compare Currencies</span>
+                <span>@_buttonCompare</span>
             }
         </button>
     </div>
@@ -64,32 +65,28 @@
     @if (_isLoading && _comparisonDetails == null)
     {
         <div class="loading-message card-style">
-            <p>Loading comparison data...</p>
+            <p>@_loadingMessage</p>
         </div>
     }
     else if (_comparisonDetails != null)
     {
         <div class="analytics-results-container">
             <div class="analytics-summary card-style">
-                <h2 class="card-section-title">Comparison Summary</h2>
-                <p><strong>Analysis
-                        Period:</strong> @_comparisonDetails.AnalysisStartDate.ToString(DateConstants.DateFormat) - @_comparisonDetails.AnalysisEndDate.ToString(DateConstants.DateFormat)
-                </p>
-                <p><strong>Correlation Coefficient:</strong> @_comparisonDetails.CorrelationCoefficient.ToString("N4")
-                </p>
-                <p><strong>Average Spread:</strong> @_comparisonDetails.AverageSpread.ToString("N4")</p>
-                <p><strong>Spread Standard
-                        Deviation:</strong> @_comparisonDetails.SpreadStandardDeviation.ToString("N4")</p>
+                <h2 class="card-section-title">@_summaryTitle</h2>
+                <p><strong>@_summaryAnalysisPeriod</strong> @_comparisonDetails.AnalysisStartDate.ToString(DateConstants.DateFormat) - @_comparisonDetails.AnalysisEndDate.ToString(DateConstants.DateFormat)</p>
+                <p><strong>@_summaryCorrelationCoefficient</strong> @_comparisonDetails.CorrelationCoefficient.ToString("N4")</p>
+                <p><strong>@_summaryAverageSpread</strong> @_comparisonDetails.AverageSpread.ToString("N4")</p>
+                <p><strong>@_summarySpreadStdDev</strong> @_comparisonDetails.SpreadStandardDeviation.ToString("N4")</p>
             </div>
 
             <div class="currency-details-grid">
                 <div class="analytics-card">
-                    <h2 class="card-section-title">@_comparisonDetails.BaseCurrency.CurrencyPair Details</h2>
+                    <h2 class="card-section-title">@string.Format(_detailsHeaderFormat, _comparisonDetails.BaseCurrency.CurrencyPair)</h2>
                     @RenderSingleCurrencyAnalytics(_comparisonDetails.BaseCurrency)
                 </div>
 
                 <div class="analytics-card">
-                    <h2 class="card-section-title">@_comparisonDetails.ComparedCurrency.CurrencyPair Details</h2>
+                    <h2 class="card-section-title">@string.Format(_detailsHeaderFormat, _comparisonDetails.ComparedCurrency.CurrencyPair)</h2>
                     @RenderSingleCurrencyAnalytics(_comparisonDetails.ComparedCurrency)
                 </div>
             </div>
@@ -98,10 +95,9 @@
     else if (!_isLoading)
     {
         <div class="no-data-message-container card-style">
-            <p>Select two different currencies and a date range, then click "Compare Currencies" to see the
-                analysis.</p>
+            <p>@_noDataInstruction</p>
         </div>
     }
 
-    <button @onclick="NavigateToDashboard" class="action-button back-button">Dashboard</button>
+    <button @onclick="NavigateToDashboard" class="action-button back-button">@_buttonDashboard</button>
 </div>
