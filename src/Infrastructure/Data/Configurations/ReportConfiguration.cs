@@ -14,8 +14,7 @@ public class ReportConfiguration : IEntityTypeConfiguration<Report>
             .HasConversion<string>()
             .IsRequired();
 
-        builder.HasMany(e => e.Attachments)
-            .WithOne()
-            .IsRequired();
+        builder.HasMany(r => r.Attachments)
+            .WithOne();
     }
 }

@@ -16,7 +16,7 @@
                 @if (_emailSuggestions.Any())
                 {
                     <ul class="suggestions-list">
-                        @foreach (string? suggestion in _emailSuggestions)
+                        @foreach (string suggestion in _emailSuggestions)
                         {
                             <li @onclick="() => SelectSuggestedEmail(suggestion)">@suggestion</li>
                         }

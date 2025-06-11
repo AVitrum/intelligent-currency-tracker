@@ -4,6 +4,7 @@ using Amazon.S3.Model;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
+using Application.Posts.Results;
 using Application.Reports.Results;
 using Domain.Common;
 using Domain.Enums;
@@ -145,6 +146,27 @@ public class UserService : IUserService
         return user is null
             ? BaseResult.FailureResult(new List<string> { "User not found" })
             : EmailResult.SuccessResult(user.Email!);
+    }
+
+    public async Task<BaseResult> ConvertUserToDtoAsync(string userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(new List<string> { "User not found" });
+        }
+
+        UserDto dto = new UserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName!,
+            Email = user.Email!,
+            PhoneNumber = user.PhoneNumber,
+            CreationMethod = user.CreationMethod.ToString(),
+            Roles = await _userManager.GetRolesAsync(user)
+        };
+        
+        return ConvertUserToDtoResult.SuccessResult(dto);
     }
 
     public async Task<BaseResult> SaveSettingsAsync(SettingsDto dto, string userId)

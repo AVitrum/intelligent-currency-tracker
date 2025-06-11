@@ -96,11 +96,11 @@ public class SummarySenderService : BackgroundService
             using IServiceScope scope = _scopeFactory.CreateScope();
             IEmailSender emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
             ISummaryService summaryService = scope.ServiceProvider.GetRequiredService<ISummaryService>();
-            UserManager<ApplicationUser> userManager =
-                scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             ITraceableCurrencyRepository traceableCurrencyRepository =
                 scope.ServiceProvider.GetRequiredService<ITraceableCurrencyRepository>();
             ICurrencyRepository currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
+            UserManager<ApplicationUser> userManager =
+                scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             ApplicationUser? user = await userManager.FindByIdAsync(settings.UserId);
             if (user == null)

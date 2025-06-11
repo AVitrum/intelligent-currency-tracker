@@ -12,6 +12,7 @@ public interface IUserService
     Task<BaseResult> UploadPhotoAsync(string filePath, string fileExtension, string userId);
     Task<BaseResult> GetProfileAsync(string userId);
     Task<BaseResult> GetEmailAsync(string userId);
+    Task<BaseResult> ConvertUserToDtoAsync(string userId);
     Task<BaseResult> SaveSettingsAsync(SettingsDto dto, string userId);
     Task<BaseResult> GetSettingsAsync(string userId);
     Task<BaseResult> ChangePasswordAsync(string oldPassword, string confirmPassword, string newPassword, string userId);
