@@ -14,10 +14,12 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services.AddBlazoredToast();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<IConfiguration, Configuration>();
 builder.Services.AddScoped<IHttpClientService, HttpClientService>();
-builder.Services.AddScoped<IUserSettingsService, UserSettingsServiceService>();
+builder.Services.AddScoped<UserSettingsService>();
+builder.Services.AddScoped<LocalizationService>();
 builder.Services.AddSingleton<WebSocketService>();
 
 await builder.Build().RunAsync();

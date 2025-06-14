@@ -1,0 +1,67 @@
+@page "/respond-to-report/{ReportId:guid}"
+
+<div class="respond-report-page">
+    @if (_isLoading && _report == null)
+    {
+        <div class="loading-indicator">
+            <p>Loading report details...</p>
+            <div class="spinner"></div>
+        </div>
+    }
+    else if (_report != null)
+    {
+        <h3 class="page-title">Respond to
+            Report: @(_report.Title.Length > 40 ? _report.Title[..40] + "..." : _report.Title)</h3>
+        <div class="report-form-container">
+            <div class="form-section">
+                <label>Report Title</label>
+                <p>@_report.Title</p>
+            </div>
+
+            <div class="form-section">
+                <label>Report Description</label>
+                <p class="description-text">@_report.Description</p>
+            </div>
+
+            <div class="form-section">
+                <label for="responseMessage">Your Response</label>
+                <textarea id="responseMessage" class="form-control" @bind="_responseMessage" @bind:event="oninput"
+                          rows="5" placeholder="Enter your response message here..."></textarea>
+                @if (!string.IsNullOrWhiteSpace(_validationError))
+                {
+                    <p class="text-danger">@_validationError</p>
+                }
+            </div>
+        </div>
+        <div class="actions-container">
+            <button class="btn btn-secondary" @onclick="NavigateBack" disabled="@_isSubmitting">
+                Cancel
+            </button>
+            <button class="btn btn-primary" @onclick="HandleRespondToReportAsync" disabled="@_isSubmitting">
+                @if (_isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span> Submitting...</span>
+                }
+                else
+                {
+                    <span>Submit Response</span>
+                }
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="no-content-message">
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <p>@_errorMessage</p>
+            }
+            else
+            {
+                <p>Report details could not be loaded or report not found.</p>
+            }
+            <button class="btn btn-primary" @onclick="NavigateToReportList">Back to All Reports</button>
+        </div>
+    }
+</div>

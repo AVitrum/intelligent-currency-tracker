@@ -32,6 +32,18 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         return rate;
     }
 
+    public async Task<Rate> GetPreviousByCurrencyIdAsync(Guid currencyId, DateTime lastRateDate)
+    {
+        Rate rate = await _context.Rates
+            .AsNoTracking()
+            .Where(x => x.CurrencyId == currencyId && x.Date < lastRateDate)
+            .OrderByDescending(x => x.Date)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync() ?? throw new EntityNotFoundException<Rate>();
+
+        return rate;
+    }
+
     public async Task<IEnumerable<Rate>> GetRangeAsync(DateTime date)
     {
         return await _context.Rates

@@ -1,26 +1,11 @@
 ﻿@using Shared.Helpers
+@using UI.Services
 @inherits LayoutComponentBase
 @inject IJSRuntime Js
 @inject NavigationManager Navigation
-
-@code {
-    private bool _isSidebarVisible;
-    private bool _hideNavItems;
-    private bool _isTokenPresent;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
-    }
-
-    private void ToggleSidebar()
-    {
-        _hideNavItems = _isSidebarVisible;
-        _isSidebarVisible = !_isSidebarVisible;
-    }
-
-}
-
+@inject LocalizationService Localizer
+@inject UserSettingsService UserSettingsService
+@implements IAsyncDisposable
 
 <div class="page">
     <div class="sidebar @(_isSidebarVisible ? "" : "collapsing")">
@@ -38,19 +23,21 @@
         <div class="top-row px-4">
             @if (_isTokenPresent)
             {
-                <a href="/profile">Profile</a>
+                <a href="/profile">@_topBarProfile</a>
             }
-            <a href="">API</a>
-            <a href="/contacts">Contacts</a>
-            <a href="">About</a>
-            <a href="/settings" class="settings-link" title="Settings">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#273F4F" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path
-                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 11 3.09V3a2 2 0 1 1 4 0v.09c0 .66.39 1.26 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c0 .66.39 1.26 1 1.51H21a2 2 0 1 1 0 4h-.09c-.66 0-1.26.39-1.51 1z"/>
-                </svg>
-            </a>
+            <a href="/contacts">@_topBarReport</a>
+            <a href="">@_topBarAbout</a>
+            @if (_isTokenPresent)
+            {
+                <a href="/settings" class="settings-link" title="@_topBarSettingsTitle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#273F4F" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 11 3.09V3a2 2 0 1 1 4 0v.09c0 .66.39 1.26 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c0 .66.39 1.26 1 1.51H21a2 2 0 1 1 0 4h-.09c-.66 0-1.26.39-1.51 1z"/>
+                    </svg>
+                </a>
+            }
         </div>
 
         <article class="content px-4">
@@ -59,3 +46,56 @@
     </main>
     <BlazoredToasts/>
 </div>
+
+@code {
+    private bool _isSidebarVisible;
+    private bool _hideNavItems;
+    private bool _isTokenPresent;
+
+    private string _topBarProfile = "";
+    private string _topBarReport = "";
+    private string _topBarAbout = "";
+    private string _topBarSettingsTitle = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserSettingsService != null)
+        {
+            UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
+        }
+
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js) != null;
+        await LoadLocalizedStringsAsync();
+    }
+
+    private async Task LoadLocalizedStringsAsync()
+    {
+        _topBarProfile = await Localizer.GetStringAsync("topbar.profile");
+        _topBarReport = await Localizer.GetStringAsync("topbar.report");
+        _topBarAbout = await Localizer.GetStringAsync("topbar.about");
+        _topBarSettingsTitle = await Localizer.GetStringAsync("topbar.settings_title");
+    }
+
+    private async Task HandleSettingsChangedAsync()
+    {
+        await LoadLocalizedStringsAsync();
+        StateHasChanged();
+    }
+
+    private void ToggleSidebar()
+    {
+        _hideNavItems = _isSidebarVisible;
+        _isSidebarVisible = !_isSidebarVisible;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (UserSettingsService != null)
+        {
+            UserSettingsService.OnSettingsChangedAsync -= HandleSettingsChangedAsync;
+        }
+
+        await Task.CompletedTask;
+    }
+
+}

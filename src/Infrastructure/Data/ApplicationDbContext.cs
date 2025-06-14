@@ -13,6 +13,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<UserSettings> UserSettings => Set<UserSettings>();
     public DbSet<TraceableCurrency> TraceableCurrencies => Set<TraceableCurrency>();
+    public DbSet<Report> Reports => Set<Report>();
+    public DbSet<Post> Posts => Set<Post>();
+    public DbSet<FileLink> FileLinks => Set<FileLink>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

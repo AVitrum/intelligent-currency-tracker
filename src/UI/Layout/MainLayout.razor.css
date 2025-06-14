@@ -2,20 +2,20 @@
     display: flex;
     flex-direction: row;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    background-color: #EFEEEA;
+    background-color: #F0F2F5;
 }
 
 main {
     flex: 1;
-    background-color: #EFEEEA;
-    color: #000000;
+    background-color: #F0F2F5;
+    color: #2C3E50;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #EFEEEA;
-    color: #000000;
+    background-color: #F0F2F5;
+    color: #2C3E50;
     margin: 0;
     padding: 0;
 }
@@ -26,25 +26,26 @@ body {
     margin-left: 0.7rem;
     padding: 0.2rem;
     border-radius: 50%;
-    transition: background 0.2s;
+    transition: background-color 0.2s;
 }
 
 .settings-link:hover {
-    background: #FFEBE0;
+    background-color: #F0F2F5; 
 }
 
 .settings-link svg {
     display: block;
+   
 }
 
 .top-row {
-    background-color: #EFEEEA;
-    border-bottom: 1px solid #273F4F;
+    background-color: #FFFFFF; 
+    border-bottom: 1px solid #E2E8F0;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
-    color: #EFEEEA;
+    color: #2C3E50;
     transition: background-color 0.4s ease;
 }
 
@@ -53,14 +54,14 @@ body {
     white-space: nowrap;
     margin-left: 1.5rem;
     text-decoration: none;
-    color: #FE7743;
+    color: #2B6CB0;
     transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
 .top-row ::deep a:hover,
 .top-row ::deep .btn-link:hover {
     text-decoration: underline;
-    color: #000000;
+    color: #1D3557; 
 }
 
 .sidebar-header {
@@ -71,7 +72,7 @@ body {
 
 .sidebar-toggle-btn {
     background: none;
-    color: #EFEEEA;
+    color: #FFFFFF; 
     border: none;
     font-size: 24px;
     cursor: pointer;
@@ -88,7 +89,7 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    background-color: #273F4F;
+    background-color: #1D3557;
     padding-top: 1rem;
     position: sticky;
     top: 0;
@@ -97,13 +98,13 @@ body {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, #273F4F 0%, #FE7743 40%, #EFEEEA 100%);
+    background-color: #1D3557;
     width: 250px;
     height: 100vh;
     position: sticky;
     top: 0;
     overflow: hidden;
-    color: #EFEEEA;
+    color: #FFFFFF;
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.5s ease,
     transform 0.5s ease;
@@ -153,7 +154,7 @@ body {
     }
 
     .top-row,
-    article {
+    main > article {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
     }

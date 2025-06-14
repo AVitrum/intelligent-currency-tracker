@@ -29,13 +29,13 @@ public static class UserSeeder
             throw new Exception("Failed to create admin user");
         }
 
-        IdentityResult roleResult = await userManager.AddToRoleAsync(adminUser, UserRole.USER.ToString());
+        IdentityResult roleResult = await userManager.AddToRoleAsync(adminUser, nameof(UserRole.USER));
         if (!roleResult.Succeeded)
         {
             throw new Exception("Failed to add user to role");
         }
 
-        roleResult = await userManager.AddToRoleAsync(adminUser, UserRole.ADMIN.ToString());
+        roleResult = await userManager.AddToRoleAsync(adminUser, nameof(UserRole.ADMIN));
         if (!roleResult.Succeeded)
         {
             throw new Exception("Failed to add user to role");
@@ -63,7 +63,7 @@ public static class UserSeeder
             throw new Exception("Failed to create user");
         }
 
-        roleResult = await userManager.AddToRoleAsync(user, UserRole.USER.ToString());
+        roleResult = await userManager.AddToRoleAsync(user, nameof(UserRole.USER));
         if (!roleResult.Succeeded)
         {
             throw new Exception("Failed to add user to role");
@@ -82,9 +82,9 @@ public static class UserSeeder
         RoleManager<IdentityRole> roleManager =
             serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        string[] roleNames = ["ADMIN", "USER"];
+        string[] roleNames = ["ADMIN", "USER", "PUBLISHER"];
 
-        foreach (string? roleName in roleNames)
+        foreach (string roleName in roleNames)
         {
             bool roleExist = await roleManager.RoleExistsAsync(roleName);
             if (!roleExist)

@@ -1,41 +1,37 @@
 @page "/profile"
-@using UI.Common.Interfaces
-@inject IConfiguration Configuration
-@inject IHttpClientService HttpClientService
-@inject IToastService ToastService
-@inject NavigationManager Navigation
-@inject HttpClient Http
 
-<PageTitle>User Profile</PageTitle>
+<PageTitle>@_pageTitle</PageTitle>
 
 <div class="page-container">
     <div class="header-section">
-        <h2>Profile</h2>
+        <h2>@_headerTitle</h2>
     </div>
     <div class="profile-content">
         <div class="profile-image-section">
             @if (!string.IsNullOrEmpty(_profileImageSrc))
             {
-                <img src="@_profileImageSrc" alt="Profile Photo"/>
+                <img src="@_profileImageSrc" alt="@_profilePhotoAlt"/>
             }
             else
             {
-                <p>No photo available.</p>
+                <p>@_noPhotoAvailable</p>
             }
         </div>
         <div class="profile-info-section">
             @if (_profile is not null)
             {
-                <p><strong>User ID:</strong> @_profile.UserId</p>
-                <p><strong>Name:</strong> @_profile.UserName</p>
-                <p><strong>Email:</strong> @_profile.Email</p>
-                <p><strong>Phone:</strong> @_profile.PhoneNumber</p>
+                <p><strong>@_labelName:</strong> @_profile.UserName</p>
+                <p><strong>@_labelEmail:</strong> @_profile.Email</p>
+                @if (!string.IsNullOrEmpty(_profile.PhoneNumber))
+                {
+                    <p><strong>@_labelPhone:</strong> @_profile.PhoneNumber</p>
+                }
             }
         </div>
 
         <div class="profile-actions">
-            <button class="btn-primary">Modify Information</button>
-            <button class="btn-secondary" @onclick="OnPasswordChange">Change Password</button>
+            <button class="btn-primary">@_buttonModifyInformation</button>
+            <button class="btn-secondary" @onclick="OnPasswordChange">@_buttonChangePassword</button>
         </div>
     </div>
 </div>

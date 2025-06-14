@@ -22,7 +22,7 @@ public partial class Auth : ComponentBase, IPageComponent
 
     private string? _errorMessage;
     private bool IsLogin { get; set; } = true;
-
+    
     [Inject] private IJSRuntime Js { get; set; } = null!;
 
     public Task<string> HandleResponse(BaseResponse? response)
@@ -54,6 +54,15 @@ public partial class Auth : ComponentBase, IPageComponent
         _loginRequest.Identifier = string.Empty;
         _loginRequest.Password = string.Empty;
         return Task.CompletedTask;
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await IsTokenPresentAsync())
+        {
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
+        }
+        await base.OnInitializedAsync();
     }
 
     private async Task HandleLoginValidSubmit()
@@ -128,6 +137,12 @@ public partial class Auth : ComponentBase, IPageComponent
         }
     }
 
+    private async Task<bool> IsTokenPresentAsync()
+    {
+        string? token = await JwtTokenHelper.GetJwtTokenFromCookies(Js);
+        return string.IsNullOrEmpty(token);
+    }
+    
     private void ToggleLoginMode()
     {
         IsLogin = !IsLogin;

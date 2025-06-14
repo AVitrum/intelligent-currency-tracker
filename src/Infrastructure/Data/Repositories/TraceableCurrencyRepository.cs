@@ -19,6 +19,14 @@ public class TraceableCurrencyRepository : BaseRepository<TraceableCurrency>, IT
             .AnyAsync(tc => tc.UserId == userId && tc.CurrencyId == currencyId);
     }
 
+    public async Task<TraceableCurrency> GetByUserIdAndCurrencyIdAsync(string userId, Guid currencyId)
+    {
+        return await _context.TraceableCurrencies
+                   .Include(tc => tc.Currency)
+                   .FirstOrDefaultAsync(tc => tc.UserId == userId && tc.CurrencyId == currencyId)
+               ?? throw new EntityNotFoundException<TraceableCurrency>();
+    }
+
     public async Task<IEnumerable<TraceableCurrency>> GetByUserIdAsync(string userId)
     {
         return await _context.TraceableCurrencies

@@ -45,4 +45,14 @@ public class UserSettingsRepository : BaseRepository<UserSettings>, IUserSetting
             .OrderBy(us => us.TimeStamp)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<UserSettings>> GetUserSettingsRangeByPercentageToNotifyAsync(decimal percentage)
+    {
+        List<UserSettings> userSettings = await _context.UserSettings
+            .Where(us => us.PercentageToNotify <= percentage && us.NotificationsEnabled)
+            .OrderBy(us => us.TimeStamp)
+            .ToListAsync();
+
+        return userSettings;
+    }
 }

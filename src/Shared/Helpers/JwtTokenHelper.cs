@@ -67,7 +67,7 @@ public static class JwtTokenHelper
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
     }
 
-    public static async Task<string?> GetJwtTokenFromCookies(IJSRuntime js, NavigationManager navigation)
+    public static async Task<string?> GetJwtTokenFromCookies(IJSRuntime js)
     {
         await EnsureJsFunctionsExistAsync(js);
         string? token = await js.InvokeAsync<string?>("getCookie", "jwtToken");

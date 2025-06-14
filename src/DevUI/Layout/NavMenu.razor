@@ -31,29 +31,33 @@
         else
         {
             <div class="nav-item">
+                <NavLink class="nav-link" href="all-users">
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
+                    User List
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="all-reports">
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
+                    Report Queue
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
                 <NavLink class="nav-link" href="create-admin">
                     <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span>
                     Create Admin
                 </NavLink>
             </div>
+
             <div class="nav-item">
                 <NavLink class="nav-link" href="role-manager">
                     <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span>
                     Role Manager
                 </NavLink>
             </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="all-users">
-                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
-                    User List
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="currency-details">
-                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span>
-                    Exchange Rates
-                </NavLink>
-            </div>
+
             <div class="nav-item">
                 <button class="nav-link" @onclick="Logout">
                     <span class="bi bi-logout-nav-menu" aria-hidden="true"></span>
@@ -72,7 +76,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js, Navigation) != null;
+        _isTokenPresent = await JwtTokenHelper.GetJwtTokenFromCookies(Js) != null;
     }
 
     private void ToggleNavMenu()

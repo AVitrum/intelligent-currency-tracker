@@ -4,13 +4,13 @@
     height: 90vh;
     margin: 0;
     padding: 0;
-    background-color: #EFEEEA;
+    background-color: #F0F2F5;
 }
 
 .image-container {
     flex: 1;
     height: 100%;
-    background-color: #EFEEEA;
+    background-color: #F0F2F5;
     padding: 0;
     margin: 0;
 }
@@ -32,29 +32,49 @@
 }
 
 .form-card {
-    background-color: #273F4F;
+    background-color: #FFFFFF;
     padding: 2rem;
-    border-radius: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.07) 0px 8px 16px -4px;
     text-align: center;
     animation: fadeIn 0.5s ease-out;
     max-width: 90%;
     max-height: 90%;
     min-width: 50%;
-    color: #EFEEEA;
+    color: #1D3557;
+    border: 1px solid #E2E8F0;
 }
 
 .form-group {
     margin-bottom: 1.2rem;
 }
 
+.btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: #2B6CB0;
+    color: #FFFFFF;
+}
+
 .btn-primary:hover {
-    background-color: #1f2e39;
-    transform: scale(1.02);
+    background-color: #2C5282;
+    color: #FFFFFF;
+    transform: translateY(-2px);
 }
 
 .btn-primary:active {
-    transform: scale(0.98);
+    transform: translateY(0);
 }
 
 .alert.error-alert {
@@ -129,17 +149,30 @@
     animation-delay: 0.4s;
 }
 
-::deep .btn-primary,
-::deep .btn-secondary {
-    transition: transform 0.2s ease, background-color 0.3s ease;
+::deep .btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+    font-size: 1rem;
 }
 
-::deep .btn-primary:hover,
-::deep .btn-secondary:hover {
+::deep .btn-primary {
+    background-color: #2B6CB0;
+    color: #FFFFFF;
+}
+
+::deep .btn-primary:hover {
+    background-color: #2C5282;
+    color: #FFFFFF;
     transform: translateY(-2px);
 }
 
-::deep .btn-primary:active,
-::deep .btn-secondary:active {
+::deep .btn-primary:active {
     transform: translateY(0);
 }

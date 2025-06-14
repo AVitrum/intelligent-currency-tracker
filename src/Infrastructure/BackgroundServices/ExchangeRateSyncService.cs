@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Utils;
+using Domain.Constants;
 using Domain.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,7 @@ public class ExchangeRateSyncService : BackgroundService
     }
 
     public event ExchangeRatesFetchedEventHandler? ExchangeRatesFetched;
+    public event AlertSenderEventHandler? AlertSender;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -46,7 +48,7 @@ public class ExchangeRateSyncService : BackgroundService
 
             if (_r030.Count != 0 && ExchangeRatesFetched != null)
             {
-                await ExchangeRatesFetched.Invoke(this, new ExchangeRatesFetchedEventArgs(_r030));
+                await ExchangeRatesFetched.Invoke(this, new AiModelUpdateEventArgs(_r030));
             }
         } while (await timer.WaitForNextTickAsync(stoppingToken));
     }
@@ -172,7 +174,7 @@ public class ExchangeRateSyncService : BackgroundService
         return $"{baseUrl}/NBUStatService/v1/statdirectory/exchange?date={formattedDate}&json";
     }
 
-    private static async Task<ICollection<Rate>> CompareToPreviousAsync(
+    private async Task<ICollection<Rate>> CompareToPreviousAsync(
         ICollection<Rate> rates,
         IRateRepository rateRepository)
     {
@@ -180,6 +182,15 @@ public class ExchangeRateSyncService : BackgroundService
         {
             Rate lastRate = await rateRepository.GetLastByCurrencyIdAsync(rate.CurrencyId);
             rate.ValueCompareToPrevious = rate.Value - lastRate.Value;
+
+            decimal percentDifference = lastRate.Value != 0
+                ? (rate.Value - lastRate.Value) / lastRate.Value * 100m
+                : 0m;
+
+            if (percentDifference <= -Percentages.OnePercent * 100)
+            {
+                AlertSender?.Invoke(this, new AlertSenderEventArgs(rate.CurrencyId, percentDifference));
+            }
         }
 
         return rates;

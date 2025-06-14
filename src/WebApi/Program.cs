@@ -1,6 +1,7 @@
 using Application;
 using Application.Common.Interfaces.Utils;
 using Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using WebApi.Configurations;
 
@@ -20,8 +21,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddCustomCorsPolicy();
 
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, CustomAuthorizationResultHandler>();
 builder.Services.AddScoped<IRateWebSocketHandler, RateWebSocketHandler>();
-
 
 builder.Services
     .AddInfrastructure()

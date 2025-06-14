@@ -15,18 +15,23 @@ namespace UI.Pages;
 
 public partial class TrackedCharts : ComponentBase, IPageComponent
 {
+    private readonly DateTime _startDate = DateTime.Today.AddMonths(-1);
+    
     private readonly DateTime _endDate = DateTime.Today;
 
     private readonly List<string> _pinnedCurrencies = [];
-
+    
     private readonly Dictionary<string, (decimal[] Data, string[] Dates)> _pinnedData =
         new Dictionary<string, (decimal[] Data, string[] Dates)>();
 
-    private readonly DateTime _startDate = DateTime.Today.AddMonths(-1);
+    private string _startDateString = string.Empty;
+    
+    private string _endDateString = string.Empty;
+
     private string? _lastPinnedCurrency;
 
     private bool _shouldDrawNewPin;
-
+    
     public Task<string> HandleResponse(BaseResponse? response)
     {
         if (response is null)
@@ -56,6 +61,7 @@ public partial class TrackedCharts : ComponentBase, IPageComponent
 
     protected override async Task OnInitializedAsync()
     {
+        SetDateStrings();
         await LoadPinnedCurrenciesAsync();
         await RequestDataForPinnedCurrenciesAsync();
         await DrawPinnedChartsAsync();
@@ -77,6 +83,12 @@ public partial class TrackedCharts : ComponentBase, IPageComponent
 
             _shouldDrawNewPin = false;
         }
+    }
+
+    private void SetDateStrings()
+    {
+        _startDateString = _startDate.ToString(DateHelper.GetDateFormat());
+        _endDateString = _endDate.ToString(DateHelper.GetDateFormat());
     }
 
     private async Task LoadPinnedCurrenciesAsync()
@@ -115,11 +127,8 @@ public partial class TrackedCharts : ComponentBase, IPageComponent
     {
         foreach (string currency in _pinnedCurrencies)
         {
-            string start = _startDate.ToString(DateHelper.GetDateFormat());
-            string end = _endDate.ToString(DateHelper.GetDateFormat());
-
             string url =
-                $"{Configuration.ApiUrl}/Rate/get-range?StartDateString={start}&EndDateString={end}&Currency={currency}";
+                $"{Configuration.ApiUrl}/Rate/get-range?StartDateString={_startDateString}&EndDateString={_endDateString}&Currency={currency}";
 
             try
             {

@@ -1,8 +1,11 @@
+using System.Globalization;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
+using Application.Posts.Results;
+using Application.Reports.Results;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Identity.Results;
@@ -137,6 +140,35 @@ public class UserService : IUserService
         return ProfileResult.SuccessResult(userId, user.UserName!, user.Email!, user.PhoneNumber, photoBytes);
     }
 
+    public async Task<BaseResult> GetEmailAsync(string userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+        return user is null
+            ? BaseResult.FailureResult(new List<string> { "User not found" })
+            : EmailResult.SuccessResult(user.Email!);
+    }
+
+    public async Task<BaseResult> ConvertUserToDtoAsync(string userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(new List<string> { "User not found" });
+        }
+
+        UserDto dto = new UserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName!,
+            Email = user.Email!,
+            PhoneNumber = user.PhoneNumber,
+            CreationMethod = user.CreationMethod.ToString(),
+            Roles = await _userManager.GetRolesAsync(user)
+        };
+        
+        return ConvertUserToDtoResult.SuccessResult(dto);
+    }
+
     public async Task<BaseResult> SaveSettingsAsync(SettingsDto dto, string userId)
     {
         ApplicationUser? user = await _userManager.FindByIdAsync(userId);
@@ -152,6 +184,7 @@ public class UserService : IUserService
             SummaryType = !string.IsNullOrEmpty(dto.SummaryType)
                 ? Enum.Parse<SummaryType>(dto.SummaryType, true)
                 : null,
+            PercentageToNotify = decimal.Parse(dto.PercentageToNotify),
             NotificationsEnabled = dto.NotificationsEnabled,
             UserId = userId
         };
@@ -179,6 +212,7 @@ public class UserService : IUserService
             Language = settings.Language.ToString(),
             Theme = settings.Theme.ToString(),
             SummaryType = settings.SummaryType?.ToString(),
+            PercentageToNotify = settings.PercentageToNotify.ToString(CultureInfo.CurrentCulture),
             NotificationsEnabled = settings.NotificationsEnabled
         };
 

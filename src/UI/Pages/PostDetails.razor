@@ -1,0 +1,86 @@
+@page "/posts/{Id:guid}"
+
+<PageTitle>@(string.Format(_pageTitleFormat, _post?.Title ?? Id.ToString()))</PageTitle>
+
+<div class="post-details-container">
+    <div class="back-button-container">
+        <button @onclick="NavigateToPosts" class="btn btn-secondary mb-3">@_buttonBackToPosts</button>
+    </div>
+
+    @if (_isLoadingPost)
+    {
+        <div class="loading-indicator">
+            <p>@_loadingPost</p>
+        </div>
+    }
+    else if (_post != null)
+    {
+        <article class="post-article">
+            <header class="post-header">
+                <h1>@_post.Title</h1>
+                <div class="post-meta">
+                <span>
+                    @_labelCategory
+                    <span class="category-badge" style="background-color: @GetCategoryColor(_post.Category);">
+                        @_post.Category
+                    </span>
+                </span>
+                    <span>@_labelAuthor @_post.Author.UserName</span>
+                    <span>@_labelPublishedOn @_post.CreatedAt.ToString("dd MMM yyyy, HH:mm")</span>
+                </div>
+            </header>
+
+            <section class="post-content-section">
+                <h2>@_labelContent</h2>
+                <div class="post-content-display">
+                    @((MarkupString)_post.Content)
+                </div>
+            </section>
+
+            @if (_isLoadingAttachments)
+            {
+                <div class="loading-indicator">
+                    <p>Loading attachments...</p> @* Consider localizing this string *@
+                </div>
+            }
+            else if (_attachmentsData != null && _attachmentsData.Any())
+            {
+                <section class="post-attachments-section">
+                    <h2>@_labelAttachments</h2>
+                    <div class="attachments-grid">
+                        @foreach (string attachmentUrl in _attachmentsData)
+                        {
+                            @* Pass URL to ShowAttachmentPreview *@
+                            <div class="attachment-item" @onclick="() => ShowAttachmentPreview(attachmentUrl)">
+                                @* Use URL directly in src attribute *@
+                                <img src="@attachmentUrl" alt="Attachment Thumbnail"
+                                     class="attachment-image"/>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+        </article>
+    }
+    else
+    {
+        <div class="error-message">
+            <p>@(_errorMessage ?? _postNotFound)</p>
+        </div>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(_selectedAttachmentPreview))
+{
+    <div class="attachment-preview-modal-overlay" @onclick="CloseAttachmentPreview">
+        <div class="attachment-preview-modal-content" @onclick:stopPropagation="true">
+            <button class="close-preview-button" @onclick="CloseAttachmentPreview"
+                    title="@_closePreviewButtonArialLabel" aria-label="@_closePreviewButtonArialLabel">
+                <span class="close-icon">&times;</span>
+            </button>
+            @* Use URL directly in src attribute for preview *@
+            <img src="@_selectedAttachmentPreview" alt="Attachment Preview"
+                 class="attachment-preview-image"/>
+        </div>
+    </div>
+}

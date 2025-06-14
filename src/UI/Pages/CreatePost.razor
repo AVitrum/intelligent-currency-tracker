@@ -1,0 +1,84 @@
+@page "/create-post"
+@using Domain.Enums
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "PUBLISHER")]
+
+<PageTitle>@_pageTitle</PageTitle>
+
+<div class="page-container">
+    <section class="header-section">
+        <h2>@_headerTitle</h2>
+        <div class="description">
+            @_headerDescription
+        </div>
+    </section>
+
+    <section class="content-section">
+        <div class="form-container" style="flex: 1 1 100%; max-width: 700px; margin: 0 auto;">
+            <div class="form-card">
+                <h3>@_formCardTitle</h3>
+                <EditForm Model="PostModel" OnValidSubmit="HandleCreatePostAsync">
+                    <DataAnnotationsValidator/>
+                    <div class="form-fields">
+                        <div class="form-group">
+                            <label for="title">@_labelTitle</label>
+                            <InputText id="title" class="form-control" @bind-Value="PostModel.Title"
+                                       placeholder="@_placeholderTitle"/>
+                            <ValidationMessage For="@(() => PostModel.Title)"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="content">@_labelContent</label>
+                            <InputTextArea id="content" class="form-control" rows="6"
+                                           @bind-Value="PostModel.Content"
+                                           placeholder="@_placeholderContent"/>
+                            <ValidationMessage For="@(() => PostModel.Content)"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">@_labelCategory</label>
+                            <InputSelect id="category" class="form-control" @bind-Value="PostModel.Category">
+                                @if (string.IsNullOrEmpty(PostModel.Category))
+                                {
+                                    <option value="">@_optionSelectCategory</option>
+                                }
+                                @foreach (PostCategory category in _postCategories)
+                                {
+                                    <option value="@category.ToString()">@category.ToString()</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => PostModel.Category)"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="attachments">@_labelAttachments</label>
+                            <InputFile id="attachments" class="form-control" OnChange="LoadFiles" multiple/>
+                            @if (SelectedFiles.Any())
+                            {
+                                <ul style="list-style-type: none; padding-left: 0; margin-top: 0.5rem;">
+                                    @foreach (IBrowserFile file in SelectedFiles)
+                                    {
+                                        <li style="font-size: 0.9rem; color: #4A5568;">@file.Name (@FormatBytes(file.Size))</li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="form-control" disabled="@IsSubmitting">
+                            @if (IsSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <text> @_buttonCreating</text>
+                            }
+                            else
+                            {
+                                <text>@_buttonCreatePost</text>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </section>
+</div>

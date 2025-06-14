@@ -1,44 +1,51 @@
 .mini-chart-card {
-    border: 1px solid #EFEEEA;
-    padding: 10px;
+    border: 1px solid #E2E8F0;
+    padding: 1rem;
     margin: 10px;
     position: relative;
-    background: #FE7743;
+    background: #FFFFFF;
     width: 100%;
     max-width: 600px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    color: #2C3E50;
+    display: flex;
+    flex-direction: column;
 }
 
 .mini-chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #FE7743;
 }
 
 .currency-label {
     font-weight: bold;
-    color: #EFEEEA;
+    color: #1D3557;
 }
 
 .mini-chart-close {
     background: transparent;
     border: none;
-    color: #EFEEEA;
+    color: #4A5568;
     font-size: 1.2rem;
     cursor: pointer;
 }
 
 .mini-chart-close:hover {
-    color: #ff0000;
+    color: #D32F2F;
 }
 
 .mini-chart-container {
     position: relative;
     margin-top: 10px;
     width: 100%;
-    padding-bottom: 56.25%;
-    background-color: #273F4F;
+    padding-bottom: 56.25%; 
+    background-color: #FFFFFF;
     overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+    flex-grow: 1; 
 }
 
 .mini-chart-container > canvas {
@@ -51,16 +58,17 @@
 
 .chart-tooltip {
     position: fixed;
-    background-color: #273F4F;
-    color: #FFF;
+    background-color: #1D3557;
+    color: #FFFFFF;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 12px;
     pointer-events: none;
     white-space: nowrap;
     transform: translate(-50%, -100%);
     display: none;
     z-index: 10;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 .mini-chart-container:hover .chart-tooltip {
@@ -68,13 +76,35 @@
     opacity: 1;
 }
 
+.mini-chart-actions {
+    margin-top: 0.75rem;
+    text-align: right; 
+}
+
+.mini-chart-details-btn {
+    background-color: #4A5568;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.mini-chart-details-btn:hover {
+    background-color: #2D3748;
+}
+
+
 @media (max-width: 768px) {
     .mini-chart-card {
         margin-bottom: 2rem;
     }
 
     .mini-chart-container {
-        padding-bottom: 75%;
+        padding-bottom: 75%; 
     }
 }
 

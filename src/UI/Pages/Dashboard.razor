@@ -1,0 +1,168 @@
+@page "/dashboard"
+@using UI.Components.Chart
+
+<PageTitle>@_pageTitle</PageTitle>
+
+<div class="page-container">
+    <div class="header-section">
+        <h2>@_headerTitle</h2>
+        <p class="description">
+            @_headerDescription
+        </p>
+    </div>
+
+    <div class="content-section">
+        <div class="form-container">
+            <div class="form-card">
+                <div class="form-group">
+                    <label for="currencySelect">@_labelCurrency</label>
+                    <select id="currencySelect"
+                            @bind="_selectedCurrency"
+                            @bind:after="OnCurrencyChangedAsync"
+                            class="form-control" disabled="@_isLoadingChartData">
+                        @foreach (string c in _currencies)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">@_labelStartDate</label>
+                    <input id="startDate"
+                           type="date"
+                           @bind="_startDate"
+                           @bind:after="OnDateChangedAsync"
+                           class="form-control" disabled="@_isLoadingChartData"/>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">@_labelEndDate</label>
+                    <input id="endDate"
+                           type="date"
+                           @bind="_endDate"
+                           @bind:after="OnDateChangedAsync"
+                           class="form-control" disabled="@_isLoadingChartData"/>
+                </div>
+                <div class="form-group">
+                    <label for="chartType">@_labelChartType</label>
+                    <select id="chartType"
+                            class="form-control"
+                            @bind="_selectedChartType"
+                            @bind:after="OnChartTypeChangedAsync"
+                            disabled="@_isLoadingChartData">
+                        <option value="line">@_chartTypeLine</option>
+                        <option value="candlestick">@_chartTypeCandlestick</option>
+                    </select>
+                </div>
+                <button class="form-control" @onclick="PinCurrentCurrency" disabled="@_isLoadingChartData">
+                    @_buttonPinCurrency
+                </button>
+                <button class="form-control details-button" @onclick="NavigateToDetails"
+                        disabled="@_isLoadingChartData">
+                    @_buttonViewDetails
+                </button>
+            </div>
+        </div>
+        <div class="chart-section">
+            <div style="text-align:right; margin-bottom: 1rem;">
+                <button class="inverted-btn" style="width:auto; display:inline-block; padding:0.3rem 1.2rem;"
+                        @onclick="ToggleTable" disabled="@_isLoadingChartData">
+                    @(_showTable ? _buttonShowChart : _buttonShowTable)
+                </button>
+            </div>
+
+            @if (_isLoadingChartData)
+            {
+                <div style="text-align:center; padding: 20px; color: #273F4F;">
+                    <p>@_loadingChartData</p>
+                </div>
+            }
+            else
+            {
+                @if (_showTable)
+                {
+                    <div class="table-responsive">
+                        <table id="ratesTable" class="table table-striped"
+                               style="width:100%; background:#fff; color:#273F4F;">
+                            <thead>
+                            <tr>
+                                <th>@_tableHeaderDate</th>
+                                <th>@_tableHeaderRate</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @if (_chartData.Length == 0)
+                            {
+                                <tr>
+                                    <td colspan="2" style="text-align:center;">@_tableNoData</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @for (int i = 0; i < _dates.Length; i++)
+                                {
+                                    <tr>
+                                        <td>@_dates[i]</td>
+                                        <td>@_chartData[i]</td>
+                                    </tr>
+                                }
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (_chartData.Length > 0)
+                    {
+                        <div style="text-align:right; margin-top:0.5rem;">
+                            <button class="inverted-btn"
+                                    style="width:auto; display:inline-block; padding:0.3rem 1.2rem;"
+                                    @onclick="DownloadTablePdf">
+                                @_buttonDownloadPdf
+                            </button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    @if (_chartData.Length == 0 && _dates.Length == 0)
+                    {
+                        <div style="text-align:center; padding: 20px; color: #273F4F;">
+                            <p>@_noDataAvailable</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="chart-container">
+                            <canvas id="currencyChart"></canvas>
+                            <div id="chartTooltip" class="chart-tooltip"></div>
+                        </div>
+                        <div class="chart-footer">
+                            <small>
+                                @_chartFooterText
+                            </small>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+
+    @if (_pinnedCurrencies.Count > 0)
+    {
+        <div class="pinned-container">
+            <h3>@_pinnedChartsTitle</h3>
+            <div class="pinned-charts-section">
+                @foreach (string c in _pinnedCurrencies)
+                {
+                    if (_pinnedData.TryGetValue(c, out (decimal[] Data, string[] Dates) chartInfo))
+                    {
+                        <MiniChart Currency="@c"
+                                   Data="chartInfo.Data"
+                                   Dates="chartInfo.Dates"
+                                   StartDate="@_startDateString"
+                                   EndDate="@_endDateString"
+                                   OnRemove="() => RemovePinnedCurrency(c)"/>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>

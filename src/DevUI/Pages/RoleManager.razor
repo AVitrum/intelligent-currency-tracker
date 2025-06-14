@@ -1,12 +1,5 @@
 @page "/role-manager"
-@using DevUI.Interfaces
 @using Domain.Enums
-@using Shared.Payload.Requests
-@inject HttpClient Http
-@inject NavigationManager Navigation
-@inject IDevUISettings DevUISettings
-@inject IHttpClientService HttpClientService
-@inject IToastService ToastService
 
 <div class="container">
     <div class="form-card">
@@ -23,7 +16,7 @@
                 @if (_emailSuggestions.Any())
                 {
                     <ul class="suggestions-list">
-                        @foreach (string? suggestion in _emailSuggestions)
+                        @foreach (string suggestion in _emailSuggestions)
                         {
                             <li @onclick="() => SelectSuggestedEmail(suggestion)">@suggestion</li>
                         }
@@ -46,63 +39,3 @@
         </EditForm>
     </div>
 </div>
-
-@code {
-    private readonly ChangeRoleRequest _roleChangeRequest = new ChangeRoleRequest { RoleString = UserRole.USER.ToString() };
-    private List<string> _emailSuggestions = [];
-
-    private async Task HandleRoleChange()
-    {
-        HttpResponseMessage? response = await HttpClientService.SendRequestAsync(() =>
-            Http.PostAsJsonAsync($"{DevUISettings.ApiUrl}/Identity/change-role", _roleChangeRequest)
-        );
-
-        if (response.IsSuccessStatusCode)
-        {
-            ToastService.ShowSuccess("Role assigned successfully");
-            Navigation.NavigateTo("/role-manager", true);
-        }
-        else
-        {
-            IAsyncEnumerable<string> errorResponse = response.Content.ReadFromJsonAsAsyncEnumerable<string>();
-            await foreach (string? error in errorResponse)
-            {
-                string errorMessage = !string.IsNullOrEmpty(error) ? error : "Request failed. Please try again later!";
-                ToastService.ShowError(errorMessage);
-            }
-
-            await Task.Delay(3000);
-            ResetRequestFields();
-        }
-    }
-
-    private async Task SearchEmailSuggestions(ChangeEventArgs e)
-    {
-        string? searchTerm = e.Value?.ToString();
-        if (string.IsNullOrEmpty(searchTerm))
-        {
-            _emailSuggestions.Clear();
-            return;
-        }
-
-        HttpResponseMessage response = await HttpClientService.SendRequestAsync(() =>
-            Http.GetAsync($"{DevUISettings.ApiUrl}/Identity/search-emails?query={searchTerm}"));
-
-        if (response.IsSuccessStatusCode)
-        {
-            _emailSuggestions = await response.Content.ReadFromJsonAsync<List<string>>() ?? [];
-        }
-    }
-
-    private void SelectSuggestedEmail(string email)
-    {
-        _roleChangeRequest.Email = email;
-        _emailSuggestions.Clear();
-    }
-
-    private void ResetRequestFields()
-    {
-        _roleChangeRequest.Email = string.Empty;
-    }
-
-}

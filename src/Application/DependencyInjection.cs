@@ -2,9 +2,9 @@ using Application.AiModel;
 using Application.Common.Helpers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
-using Application.ExchangeRates;
 using Application.Kafka;
 using Application.Rates;
+using Application.Reports;
 using Microsoft.Extensions.DependencyInjection;
 using Shared;
 
@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ICsvService, CsvService>();
         services.AddScoped<IRateService, RateService>();
         services.AddScoped<IAiModelService, AiModelService>();
+        services.AddScoped<IReportService, ReportService>();
 
         services.AddScoped<IKafkaProducer, KafkaProducer>();
     }

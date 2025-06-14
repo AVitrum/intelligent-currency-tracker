@@ -1,49 +1,34 @@
 .page-container {
-    padding: 2.5rem;
+    padding: 2rem;
     max-width: 950px;
     margin: 2rem auto;
-    background: linear-gradient(135deg, #EFEEEA 80%, #FFEBE0 100%);
-    border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(39, 63, 79, 0.12), 0 1.5px 6px rgba(254, 119, 67, 0.08);
-    animation: fadeIn 1s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    background-color: #F0F2F5;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.07) 0px 8px 16px -4px;
 }
 
 .header-section {
     text-align: center;
     margin-bottom: 2.5rem;
-    animation: fadeIn 1.2s 0.1s backwards;
 }
 
 .header-section h2 {
     margin-bottom: 1rem;
-    color: #273F4F;
-    font-size: 2.3rem;
-    letter-spacing: 1px;
-    font-weight: 700;
-    text-shadow: 0 2px 8px rgba(39, 63, 79, 0.08);
+    color: #1D3557;
+    font-size: 2.2rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #4299E1;
+    display: inline-block;
 }
 
 .description {
-    color: #222;
+    color: #4A5568;
     max-width: 700px;
-    margin: 0 auto;
+    margin: 0 auto 2rem auto;
     line-height: 1.7;
-    font-size: 1.15rem;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 16px;
-    padding: 0.7rem 1.2rem;
-    box-shadow: 0 1px 4px rgba(39, 63, 79, 0.04);
+    font-size: 1.1rem;
+    text-align: center;
 }
 
 .content-section {
@@ -56,36 +41,30 @@
 .form-container {
     flex: 0 0 350px;
     min-width: 280px;
-    animation: fadeIn 1.2s 0.2s backwards;
 }
 
-.form-card {
-    background: #EFEEEA;
-    color: #273F4F;
-    padding: 2rem 1.5rem;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(39, 63, 79, 0.13), 0 1.5px 6px rgba(254, 119, 67, 0.08);
-    backdrop-filter: blur(14px);
-    border: 1.5px solid #FFB88C;
-    transition: box-shadow 0.3s, transform 0.3s;
-    will-change: transform;
+.form-card,
+.contacts-card {
+    background: #FFFFFF;
+    color: #2C3E50;
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    border: 1px solid #E2E8F0;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 1rem;
 }
 
-.form-card:hover {
-    box-shadow: 0 16px 40px rgba(254, 119, 67, 0.18), 0 2px 8px rgba(39, 63, 79, 0.10);
-    transform: translateY(-4px) scale(1.02);
-}
-
-.form-card h3 {
-    color: #FE7743;
-    margin-bottom: 1.2rem;
-    text-align: center;
-    font-size: 1.35rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+.form-card h3,
+.contacts-card h3 {
+    color: #1D3557;
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    font-weight: 500;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #4299E1;
+    text-align: left;
 }
 
 .form-fields {
@@ -98,119 +77,90 @@
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #273F4F;
+    color: #4A5568;
     font-weight: 500;
-    letter-spacing: 0.2px;
 }
 
 .form-control {
     width: 100%;
-    padding: 0.6rem 0.9rem;
-    border: 1.5px solid #FE7743;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85);
-    transition: all 0.2s cubic-bezier(.4, 2, .6, 1);
-    color: #273F4F;
-    font-size: 1.05rem;
-    box-shadow: 0 1px 4px rgba(39, 63, 79, 0.04);
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #CBD5E0;
+    border-radius: 6px;
+    background-color: #F7FAFC;
+    color: #2D3748;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: #273F4F;
-    box-shadow: 0 0 0 3px rgba(39, 63, 79, 0.13);
-    background: #fff;
+    border-color: #4299E1;
+    box-shadow: 0 0 0 0.2rem rgba(66, 153, 225, 0.25);
+    background-color: #FFFFFF;
 }
 
 .form-actions {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     display: flex;
     justify-content: flex-end;
 }
 
 button.form-control {
-    background: linear-gradient(90deg, #273F4F 60%, #FE7743 100%);
-    color: #fff;
+    background-color: #2B6CB0;
+    color: #FFFFFF;
     border: none;
-    border-radius: 14px;
-    padding: 0.7rem 0;
-    font-weight: 600;
-    font-size: 1.08rem;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 8px rgba(254, 119, 67, 0.13);
+    border-radius: 6px;
+    padding: 0.8rem 1.8rem;
+    font-weight: bold;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
-    margin-top: 0;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
     width: 100%;
+    text-align: center;
 }
 
-button.form-control:hover, button.form-control:focus {
-    background: linear-gradient(90deg, #FE7743 60%, #273F4F 100%);
-    color: #fff;
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 4px 16px rgba(39, 63, 79, 0.13);
+button.form-control:hover,
+button.form-control:focus {
+    background-color: #2C5282;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: none;
 }
 
 .contacts-section {
     flex: 1;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    animation: fadeIn 1.2s 0.3s backwards;
 }
 
 .contacts-card {
-    background: #FE7743;
-    padding: 2rem 1.5rem;
-    border-radius: 22px;
-    color: #EFEEEA;
-    box-shadow: 0 8px 32px rgba(39, 63, 79, 0.13), 0 1.5px 6px rgba(254, 119, 67, 0.08);
     min-width: 260px;
     max-width: 350px;
-    border: 1.5px solid #FE7743;
-    transition: box-shadow 0.3s, transform 0.3s;
-    will-change: transform;
-    backdrop-filter: blur(10px);
-}
-
-.contacts-card:hover {
-    box-shadow: 0 16px 40px rgba(39, 63, 79, 0.18), 0 2px 8px rgba(254, 119, 67, 0.10);
-    transform: translateY(-4px) scale(1.02);
-}
-
-.contacts-card h3 {
-    margin-bottom: 1.2rem;
-    color: #EFEEEA;
-    font-size: 1.22rem;
-    text-align: center;
-    font-weight: 600;
-    letter-spacing: 0.5px;
 }
 
 .contact-item {
-    margin-bottom: 1.1rem;
+    margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    animation: fadeIn 1.2s 0.4s backwards;
+    gap: 0.3rem;
 }
 
 .contact-label {
-    font-weight: 600;
-    color: #EFEEEA;
-    letter-spacing: 0.2px;
+    font-weight: 500;
+    color: #4A5568;
 }
 
 .contacts-card a {
-    color: #EFEEEA;
+    color: #2B6CB0;
     text-decoration: none;
-    transition: color 0.2s, text-shadow 0.2s;
+    transition: color 0.2s ease;
     font-weight: 500;
 }
 
 .contacts-card a:hover {
-    color: #EFEEEA;
-    text-shadow: 0 2px 8px #FE7743;
+    color: #1D3557;
+    text-decoration: underline;
 }
 
 @media (max-width: 900px) {
@@ -219,7 +169,7 @@ button.form-control:hover, button.form-control:focus {
     }
 
     .content-section {
-        gap: 1.2rem;
+        gap: 1.5rem;
     }
 }
 
@@ -233,15 +183,19 @@ button.form-control:hover, button.form-control:focus {
     .form-container, .contacts-section {
         width: 100%;
         min-width: unset;
+    }
+
+    .form-container {
         margin-bottom: 2rem;
     }
+
 
     .contacts-card {
         max-width: 100%;
     }
 
     .header-section h2 {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
     }
 
     .description {
@@ -251,27 +205,30 @@ button.form-control:hover, button.form-control:focus {
 
 @media (max-width: 480px) {
     .page-container {
-        padding: 0.7rem;
-        border-radius: 12px;
+        padding: 1rem;
+        margin: 1rem auto;
+        border-radius: 10px;
     }
 
     .header-section h2 {
-        font-size: 1.2rem;
+        font-size: 1.6rem;
     }
 
     .description {
         font-size: 0.9rem;
         padding: 0.5rem 0.7rem;
-        border-radius: 10px;
     }
 
     .form-card, .contacts-card {
-        padding: 1rem;
-        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
     }
 
-    .form-control {
-        font-size: 0.95rem;
-        border-radius: 8px;
+    .form-control, button.form-control {
+        font-size: 0.9rem;
+    }
+
+    button.form-control {
+        padding: 0.7rem 1.5rem;
     }
 }

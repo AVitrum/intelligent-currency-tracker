@@ -64,7 +64,7 @@ public class RateWebSocketHandler : IRateWebSocketHandler
         }
     }
 
-    private async Task OnExchangeRatesFetched(object? sender, ExchangeRatesFetchedEventArgs e)
+    private async Task OnExchangeRatesFetched(object? sender, AiModelUpdateEventArgs e)
     {
         if (_socket is not { State: WebSocketState.Open })
         {

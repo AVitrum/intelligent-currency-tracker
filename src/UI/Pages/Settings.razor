@@ -3,16 +3,16 @@
 
 <div class="settings-page">
     <section class="settings-header">
-        <h2>Settings</h2>
+        <h2>@_pageTitle</h2>
         <div class="settings-description">
-            Manage your preferences for language, theme, and notifications.
+            @_pageDescription
         </div>
     </section>
 
     <EditForm Model="@Dto" OnValidSubmit="SaveSettings">
         <div class="settings-card">
             <div class="settings-group">
-                <label for="language">Language</label>
+                <label for="language">@_languageLabel</label>
                 <select id="language" class="settings-control" @bind="Dto.Language">
                     @foreach (Language lang in Enum.GetValues<Language>())
                     {
@@ -21,16 +21,7 @@
                 </select>
             </div>
             <div class="settings-group">
-                <label for="theme">Theme</label>
-                <select id="theme" class="settings-control" @bind="Dto.Theme">
-                    @foreach (Theme theme in Enum.GetValues<Theme>())
-                    {
-                        <option value="@theme.ToString()">@theme</option>
-                    }
-                </select>
-            </div>
-            <div class="settings-group">
-                <label for="summary"></label>
+                <label for="summary">@_summaryTypeLabel</label>
                 <select id="summary" class="settings-control" @bind="Dto.SummaryType">
                     @foreach (SummaryType summary in Enum.GetValues<SummaryType>())
                     {
@@ -41,11 +32,11 @@
             <div class="settings-group">
                 <label>
                     <input type="checkbox" class="settings-checkbox" @bind="Dto.NotificationsEnabled"/>
-                    Enable notifications
+                    @_notificationsLabel
                 </label>
             </div>
             <div class="settings-actions">
-                <button type="submit" class="settings-save-btn">Save</button>
+                <button type="submit" class="settings-save-btn">@_saveButtonText</button>
             </div>
         </div>
     </EditForm>

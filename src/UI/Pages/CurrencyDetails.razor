@@ -1,0 +1,76 @@
+@page "/currency/{CurrencyCode}/{StartDate}/{EndDate}"
+
+<PageTitle>@_pageTitle</PageTitle>
+
+<div class="details-page-container" id="details-page-container">
+    @if (_isLoading)
+    {
+        <div class="loading-message">
+            <p>@_loadingMessage</p>
+        </div>
+    }
+    else if (_currencyDetails == null || string.IsNullOrEmpty(_currencyDetails.CurrencyPair))
+    {
+        <div class="no-data-message-container">
+            <h3>@_noDataTitle</h3>
+            <p>@_noDataDescription</p>
+            <button class="btn-primary" @onclick="NavigateToDashboard">@_noDataButtonBackToDashboard</button>
+        </div>
+    }
+    else
+    {
+        <h1 class="details-page-title">@_headerTitle</h1>
+
+        <div class="analytics-cards-container">
+            <div class="analytics-card">
+                <h2 class="card-section-title">@_sectionStatisticalOverview</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">@_statMeanValue</span>
+                        <span class="stat-value">@_currencyDetails.MeanValue.ToString("N4")</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">@_statMedianValue</span>
+                        <span class="stat-value">@_currencyDetails.MedianValue.ToString("N4")</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">@_statMaxValue</span>
+                        <span class="stat-value">@_currencyDetails.MaxValue.ToString("N4")</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">@_statMinValue</span>
+                        <span class="stat-value">@_currencyDetails.MinValue.ToString("N4")</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">@_statStdDeviation</span>
+                        <span class="stat-value">@_currencyDetails.StandardDeviation.ToString("N4")</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">@_statVariance</span>
+                        <span class="stat-value">@_currencyDetails.Variance.ToString("N4")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analytics-card">
+                <h2 class="card-section-title">@_sectionRateTrend @CurrencyCode</h2>
+                @if (_chartRateData != null && _chartRateData.Any())
+                {
+                    <div class="mini-chart-wrapper">
+                        <canvas id="currencyDetailChart-@CurrencyCode"
+                                class="currency-detail-mini-chart-canvas"></canvas>
+                        <div id="currencyDetailTooltip-@CurrencyCode" class="chart-tooltip"></div>
+                    </div>
+                }
+                else
+                {
+                    <p class="no-chart-data">@_chartNoData</p>
+                }
+            </div>
+        </div>
+
+        <div class="action-buttons-row">
+            <button @onclick="NavigateToDashboard" class="action-button">@_buttonBackToDashboard</button>
+        </div>
+    }
+</div>

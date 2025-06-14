@@ -1,5 +1,97 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Home - Currency Monitor</PageTitle>
 
-<h1>This page is under construction.</h1>
+<div class="page-container home-page">
+    <header class="header-section">
+        <h2>Welcome to Currency Monitor & Forecaster</h2>
+        <p class="description">
+            Your ultimate solution for tracking real-time currency exchange rates, analyzing historical data,
+            and receiving insightful forecasts to make informed financial decisions.
+        </p>
+        <div class="hero-image-placeholder">
+            @* <p>Image Placeholder 1 (e.g., Hero Banner)</p> *@
+            <img src="images/hero.png" alt="Hero Banner"/>
+        </div>
+    </header>
+
+    <section class="features-section">
+        <h3 class="section-title">Key Features</h3>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon-placeholder">
+                    <p>Icon 1</p>
+                </div>
+                <h4>Real-Time Tracking</h4>
+                <p>Stay updated with the latest exchange rates from around the globe.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-placeholder">
+                    <p>Icon 2</p>
+                </div>
+                <h4>Historical Data Analysis</h4>
+                <p>Explore past trends and patterns to understand currency behavior.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-placeholder">
+                    <p>Icon 3</p>
+                </div>
+                <h4>AI-Powered Forecasts</h4>
+                <p>Leverage advanced algorithms for predictive currency insights.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-placeholder">
+                    <p>Icon 4</p>
+                </div>
+                <h4>Customizable Dashboard</h4>
+                <p>Personalize your view to monitor the currencies that matter most to you.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works-section">
+        <h3 class="section-title">How It Works</h3>
+        <div class="steps-container">
+            <div class="step-card">
+                <div class="step-image-placeholder">
+                    @* <p>Image Placeholder 2 (e.g., Step 1 illustration)</p> *@
+                    <img src="images/step1.png" alt="Step 1 illustration"/>
+                </div>
+                <h4>1. Sign Up</h4>
+                <p>Create your free account in minutes.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-image-placeholder">
+                    @* <p>Image Placeholder 3 (e.g., Step 2 illustration)</p> *@
+                    <img src="images/step2.png" alt="Step 2 illustration"/>
+                </div>
+                <h4>2. Select Currencies</h4>
+                <p>Choose the currencies you want to track and analyze.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-image-placeholder">
+                    @* <p>Image Placeholder 4 (e.g., Step 3 illustration)</p> *@
+                    <img src="images/step3.png" alt="Step 3 illustration"/>
+                </div>
+                <h4>3. Get Insights</h4>
+                <p>Access real-time data, historical charts, and forecasts.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h3 class="section-title">Ready to Get Started?</h3>
+        <p>Join thousands of users benefiting from precise currency monitoring and forecasting.</p>
+        <button class="cta-button" @onclick="NavigateToDashboard">Go to Dashboard</button>
+        <button class="cta-button secondary" @onclick="NavigateToRegister">Sign Up Now</button>
+    </section>
+
+    <footer class="home-footer">
+        <p>&copy; @DateTime.Now.Year Currency Monitor & Forecaster. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+            <a href="/contacts">Contact Us</a>
+        </div>
+    </footer>
+</div>

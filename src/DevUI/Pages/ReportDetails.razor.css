@@ -1,0 +1,383 @@
+.report-details-page {
+    padding: 20px;
+    max-width: 900px;
+    margin: 40px auto;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeInScaleUp 0.7s ease-out;
+}
+
+.page-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 300;
+    font-size: 2.2rem;
+    color: #2c3e50;
+    animation: slideDownFadeIn 0.8s ease-out;
+}
+
+.report-form-container {
+    background-color: #fdfdfd;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    margin-top: 20px;
+    animation: fadeInContent 0.6s ease-out forwards;
+}
+
+.form-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #eee;
+    opacity: 0;
+    animation: slideInUp 0.5s ease-out forwards;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.form-section label {
+    display: block;
+    font-weight: 600;
+    color: #3498db;
+    margin-bottom: 8px;
+    font-size: 1.05rem;
+}
+
+.form-section p {
+    margin: 0;
+    color: #444;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    word-wrap: break-word;
+}
+
+.description-text {
+    white-space: pre-wrap;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #efefef;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #fff;
+    text-transform: capitalize;
+    display: inline-block;
+    min-width: 90px;
+    text-align: center;
+}
+
+.status-pending {
+    background-color: rgba(243, 156, 18, 0.85);
+}
+
+.status-inprogress {
+    background-color: rgba(52, 152, 219, 0.85);
+}
+
+.status-resolved {
+    background-color: rgba(46, 204, 113, 0.85);
+}
+
+.status-unknown {
+    background-color: rgba(149, 165, 166, 0.85);
+}
+
+.attachments-display-section .image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.attachment-image {
+    max-width: 180px;
+    max-height: 180px;
+    height: auto;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    object-fit: cover;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.attachment-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn {
+    border: none;
+    border-radius: 5px;
+    padding: 10px 18px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.actions-container {
+    text-align: center;
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.loading-indicator {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.spinner {
+    margin: 20px auto;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.no-content-message {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    animation: fadeInScaleUp 0.6s ease-out;
+}
+
+.no-content-message p {
+    margin-bottom: 20px;
+}
+
+.image-viewer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    animation: fadeInModal 0.3s ease-out;
+}
+
+.image-viewer-content {
+    position: relative;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    animation: scaleUpModal 0.3s ease-out;
+}
+
+.image-viewer-content img {
+    max-width: 100%;
+    max-height: calc(90vh - 40px);
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.image-viewer-close {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    color: #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.image-viewer-close:hover {
+    background-color: #e0e0e0;
+    color: #000;
+}
+
+@keyframes fadeInScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideDownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInContent {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleUpModal {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.report-form-container .form-section:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.report-form-container .form-section:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.report-form-container .form-section:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.report-form-container .form-section:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.report-form-container .form-section:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.btn-success {
+    background-color: #28a745;
+    margin-left: 10px;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-success:disabled {
+    background-color: #28a745;
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+.btn-info:disabled {
+    background-color: #17a2b8;
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: .2em;
+    vertical-align: -0.125em;
+}
+
+.spinner-border {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    vertical-align: text-bottom;
+    border: .25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spinner-border .75s linear infinite;
+    animation: spinner-border .75s linear infinite;
+}
+
+@-webkit-keyframes spinner-border {
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
+}

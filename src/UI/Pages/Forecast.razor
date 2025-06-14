@@ -1,0 +1,102 @@
+@page "/forecast"
+@using System.Globalization
+
+<PageTitle>@_pageTitleString</PageTitle>
+
+<div class="page-container">
+    <div class="header-section">
+        <h2>@_headerTitleString</h2>
+        <p class="description">@_headerDescriptionString</p>
+    </div>
+
+    <div class="content-section">
+        <div class="form-container">
+            <div class="form-card">
+                <div class="form-group">
+                    <label for="currencySelect">@_labelSelectCurrencyString</label>
+                    @if (_currencyCodes.Any())
+                    {
+                        <select id="currencySelect" class="form-control" @bind="SelectedCurrencyCode">
+                            @foreach (string currencyCode in _currencyCodes)
+                            {
+                                <option value="@currencyCode">@currencyCode</option>
+                            }
+                        </select>
+                    }
+                    else if (_isLoading)
+                    {
+                        <p>@_loadingCurrenciesString</p>
+                    }
+                    else
+                    {
+                        <p>@_noCurrenciesAvailableString</p>
+                    }
+                </div>
+                <div class="form-group">
+                    <label for="forecastPeriodsSelect">@_labelForecastPeriodString</label>
+                    <select id="forecastPeriodsSelect" class="form-control" @bind="ForecastPeriods">
+                        <option value="7">7 Days</option>
+                        <option value="14">14 Days</option>
+                        <option value="30">30 Days</option>
+                    </select>
+                </div>
+                @if (_isLoading && _currencyCodes.Any())
+                {
+                    <div class="form-group" style="text-align: center;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span> @_generatingForecastString</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="chart-section">
+            @if (_forecastData.Any())
+            {
+                <div class="forecast-warning">
+                    <strong>@_disclaimerStrongString</strong> @_disclaimerTextString
+                </div>
+            }
+
+            @if (_isLoading && !_forecastData.Any() && _currencyCodes.Any() && !string.IsNullOrEmpty(SelectedCurrencyCode))
+            {
+                <p>@_loadingForecastDataString</p>
+            }
+            else if (!_forecastData.Any() && !_isLoading)
+            {
+                <p>@_noForecastDataString</p>
+            }
+
+            <div class="chart-container">
+                <canvas id="currencyChart"></canvas>
+                <div id="chartTooltip" class="chart-tooltip"></div>
+            </div>
+            <div class="chart-footer">
+                @_chartFooterTextString
+            </div>
+
+            @if (_forecastData.Any() && _forecastDates.Any())
+            {
+                <div class="forecast-table-container">
+                    <table class="forecast-table">
+                        <thead>
+                            <tr>
+                                <th>@_tableHeaderDateString</th>
+                                <th>@_tableHeaderValueString</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < _forecastDates.Length; i++)
+                            {
+                                <tr>
+                                    <td>@_forecastDates[i]</td>
+                                    <td>@_forecastData[i].ToString("N4", CultureInfo.InvariantCulture)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
