@@ -8,5 +8,5 @@ public class ReportDto
     public required string Status { get; set; }
     public required string SenderId { get; set; }
     public bool IsResolved { get; set; }
-    public ICollection<byte[]>? Attachments { get; set; }
+    public ICollection<string>? Attachments { get; set; }
 }

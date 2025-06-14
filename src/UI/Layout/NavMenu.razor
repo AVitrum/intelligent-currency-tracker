@@ -18,6 +18,12 @@
 
 <div class="nav-scrollable @(HideNavItems ? "nav-hidden" : "")" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
+        <div class="nav-item">
+            <NavLink class="nav-link" href="posts" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
+                @_navNews
+            </NavLink>
+        </div>
         @if (!_isTokenPresent)
         {
             <div class="nav-item">
@@ -78,11 +84,12 @@
     [Parameter] public EventCallback OnToggleSidebar { get; set; }
     [Parameter] public bool HideNavItems { get; set; }
 
-    private bool _collapseNavMenu; // This seems unused in the provided snippet, but kept for consistency
+    private bool _collapseNavMenu;
     private bool _isTokenPresent;
 
     private string _navbarBrand = "";
     private string _navbarToggleMenuTitle = "";
+    private string _navNews = "";
     private string _navHome = "";
     private string _navAuth = "";
     private string _navDashboard = "";
@@ -106,6 +113,7 @@
     {
         _navbarBrand = await Localizer.GetStringAsync("navbar.brand");
         _navbarToggleMenuTitle = await Localizer.GetStringAsync("navbar.toggle_menu_title");
+        _navNews = await Localizer.GetStringAsync("nav.news");
         _navHome = await Localizer.GetStringAsync("nav.home");
         _navAuth = await Localizer.GetStringAsync("nav.auth");
         _navDashboard = await Localizer.GetStringAsync("nav.dashboard");

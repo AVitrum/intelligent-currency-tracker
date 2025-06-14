@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Utils;
 using Application.Reports.Results;
-using AutoMapper;
 using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
@@ -127,29 +126,27 @@ public class ReportService : IReportService
             SenderId = report.SenderId
         };
 
-        if (report.Attachments.Count != 0)
+        if (report.Attachments.Count > 0)
         {
-            List<byte[]> fileBytesList = [];
+            List<string> publicUrls = [];
+            string serviceUrl = _s3Client.Config.ServiceURL;
+
+            string baseUriString = serviceUrl.EndsWith("/") ? serviceUrl : serviceUrl + "/";
+            Uri baseUri = new Uri(baseUriString);
 
             foreach (FileLink attachment in report.Attachments)
             {
                 string key = attachment.Key;
+                string fullUrl = new Uri(baseUri, $"{_bucketName.Trim('/')}/{key.TrimStart('/')}").ToString();
 
-                GetObjectRequest getRequest = new GetObjectRequest
-                {
-                    BucketName = _bucketName,
-                    Key = key
-                };
-
-                using GetObjectResponse? response = await _s3Client.GetObjectAsync(getRequest);
-                await using Stream? stream = response.ResponseStream;
-                using MemoryStream ms = new MemoryStream();
-                await stream.CopyToAsync(ms);
-                byte[] fileBytes = ms.ToArray();
-                fileBytesList.Add(fileBytes);
+                publicUrls.Add(fullUrl);
             }
 
-            reportDto.Attachments = fileBytesList;
+            reportDto.Attachments = publicUrls;
+        }
+        else
+        {
+            reportDto.Attachments = new List<string>();
         }
 
         return GetReportByIdResult.SuccessResult(reportDto);

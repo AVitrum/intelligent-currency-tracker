@@ -1,0 +1,48 @@
+@page "/posts"
+@using Shared.Dtos
+
+<PageTitle>@_pageTitle</PageTitle>
+
+<div class="posts-page-container">
+    <section class="header-section">
+        <h2>@_headerTitle</h2>
+    </section>
+
+    @if (_isLoading)
+    {
+        <div class="loading-indicator">
+            <p>@_loadingPosts</p>
+        </div>
+    }
+    else if (!_posts.Any())
+    {
+        <div class="no-posts-found">
+            <p>@_noPostsFound</p>
+        </div>
+    }
+    else
+    {
+        <div class="posts-grid">
+            @foreach (PostDto post in _posts)
+            {
+                <a href="@($"posts/{post.Id}")" class="post-card-link">
+                    <div class="post-card">
+                        <div class="post-card-header">
+                            <h3>@post.Title</h3>
+                            <span class="category-badge" style="background-color: @GetCategoryColor(post.Category);">
+                                @post.Category
+                            </span>
+                        </div>
+                        <div class="post-card-body">
+                            <p class="post-content">@post.Content</p>
+                        </div>
+                        <div class="post-card-footer">
+                            <p class="post-author">@_authorPrefix @post.Author.UserName</p>
+                            <p class="post-date">@post.CreatedAt.ToString("dd MMM yyyy, HH:mm")</p>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

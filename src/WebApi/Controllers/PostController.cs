@@ -124,7 +124,7 @@ public class PostController : ControllerBase
             [],
             getAllPostsResult.Posts));
     }
-    
+
     [HttpGet("get-by-id/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResult))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(BaseResult))]
@@ -133,7 +133,7 @@ public class PostController : ControllerBase
     {
         if (id == Guid.Empty)
         {
-            return BadRequest(new DefaultResponse(
+            return NotFound(new DefaultResponse(
                 false,
                 "Invalid post ID.",
                 StatusCodes.Status400BadRequest,
@@ -158,7 +158,49 @@ public class PostController : ControllerBase
             [],
             getPostByIdResult.Post));
     }
-    
+
+    [HttpGet("get-attachments-by-id/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResult))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(BaseResult))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(BaseResult))]
+    public async Task<ActionResult<BaseResult>> GetAttachmentsById(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            return NotFound(new DefaultResponse(
+                false,
+                "Invalid post ID.",
+                StatusCodes.Status400BadRequest,
+                new List<string> { "Post ID cannot be empty." }));
+        }
+
+        BaseResult result = await _postService.GetAttachmentsById(id);
+        if (result is not GetAttachmentsByIdResult getAttachmentsByIdResult)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new DefaultResponse(
+                false,
+                "Failed to process request.",
+                StatusCodes.Status500InternalServerError,
+                result.Errors));
+        }
+
+        if (getAttachmentsByIdResult.Attachments.ToList().Count == 0)
+        {
+            return NotFound(new DefaultResponse(
+                false,
+                "No attachments found for the specified post.",
+                StatusCodes.Status404NotFound,
+                new List<string> { "No attachments found." }));
+        }
+
+        return Ok(new GetAttachmentsByIdResponse(
+            true,
+            "Attachments retrieved successfully.",
+            StatusCodes.Status200OK,
+            [],
+            getAttachmentsByIdResult.Attachments));
+    }
+
     private static bool ValidateString(string s, out DefaultResponse? response)
     {
         if (string.IsNullOrWhiteSpace(s))

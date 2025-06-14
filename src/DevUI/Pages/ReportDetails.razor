@@ -41,13 +41,12 @@
                 <div class="form-section attachments-display-section">
                     <label>Attachments</label>
                     <div class="image-gallery">
-                        @foreach (byte[] attachmentBytes in _report.Attachments)
+                        @foreach (string attachmentUrl in _report.Attachments)
                         {
-                            string imageUrl = GetImageDataUrl(attachmentBytes);
-                            if (!string.IsNullOrEmpty(imageUrl))
+                            if (!string.IsNullOrEmpty(attachmentUrl))
                             {
-                                <img src="@imageUrl" alt="Report Attachment" class="attachment-image"
-                                     @onclick="() => ViewImage(imageUrl)"/>
+                                <img src="@attachmentUrl" alt="Report Attachment" class="attachment-image"
+                                     @onclick="() => ViewImage(attachmentUrl)"/>
                             }
                         }
                     </div>

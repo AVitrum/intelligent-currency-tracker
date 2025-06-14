@@ -110,35 +110,37 @@ public class PostService : IPostService
             Content = post.Content,
             Category = post.Category.ToString(),
             AuthorId = post.UserId,
-            Author = authorDto
+            Author = authorDto,
+            CreatedAt = post.TimeStamp
         };
 
-        List<FileLink> attachments = (await _postRepository.GetAttachmentsByPostIdAsync(post.Id)).ToList();
-        if (attachments.Count != 0)
-        {
-            List<byte[]> fileBytesList = [];
+        return GetPostByIdResult.SuccessResult(postDto);
+    }
 
-            foreach (FileLink attachment in post.Attachments)
+    public async Task<BaseResult> GetAttachmentsById(Guid id)
+    {
+        List<FileLink> attachments = (await _postRepository.GetAttachmentsByPostIdAsync(id)).ToList();
+        if (attachments.Count > 0)
+        {
+            List<string> publicUrls = [];
+            string serviceUrl = _s3Client.Config.ServiceURL;
+
+            string baseUriString = serviceUrl.EndsWith("/") ? serviceUrl : serviceUrl + "/";
+            Uri baseUri = new Uri(baseUriString);
+
+            foreach (FileLink attachment in attachments)
             {
                 string key = attachment.Key;
 
-                GetObjectRequest getRequest = new GetObjectRequest
-                {
-                    BucketName = _bucketName,
-                    Key = key
-                };
-                using GetObjectResponse? response = await _s3Client.GetObjectAsync(getRequest);
-                await using Stream? stream = response.ResponseStream;
-                using MemoryStream ms = new MemoryStream();
-                await stream.CopyToAsync(ms);
-                byte[] fileBytes = ms.ToArray();
-                fileBytesList.Add(fileBytes);
+                string fullUrl = new Uri(baseUri, $"{_bucketName.Trim('/')}/{key.TrimStart('/')}").ToString();
+                publicUrls.Add(fullUrl);
             }
 
-            postDto.Attachments = fileBytesList;
+            return GetAttachmentsByIdResult.SuccessResult(publicUrls);
         }
 
-        return GetPostByIdResult.SuccessResult(postDto);
+        _logger.LogInformation("No attachments found for post with ID {PostId}", id);
+        return GetAttachmentsByIdResult.SuccessResult([]);
     }
 
     public async Task<BaseResult> GetAllAsync(int page, int pageSize)
@@ -169,7 +171,8 @@ public class PostService : IPostService
                 Content = post.Content,
                 Category = post.Category.ToString(),
                 AuthorId = post.UserId,
-                Author = authorDto
+                Author = authorDto,
+                CreatedAt = post.TimeStamp
             };
 
             postDtos.Add(postDto);

@@ -26,7 +26,7 @@ public partial class ReportDetails : ComponentBase, IPageComponent
     private string _errorMessage = string.Empty;
 
     private bool _isImageViewerOpen;
-    private string? _currentImageInViewer;
+    private string? _currentImageInViewer; 
 
     public Task<string> HandleResponse(BaseResponse? response)
     {
@@ -38,7 +38,7 @@ public partial class ReportDetails : ComponentBase, IPageComponent
         StringBuilder errorMessageBuilder = new StringBuilder();
         errorMessageBuilder.AppendLine($"Message: {response.Message}");
         errorMessageBuilder.AppendLine($"Status Code: {response.StatusCode}");
-        if (response.Errors.Any())
+        if (response.Errors.Any()) 
         {
             errorMessageBuilder.AppendLine($"Errors: {string.Join(", ", response.Errors)}");
         }
@@ -121,18 +121,6 @@ public partial class ReportDetails : ComponentBase, IPageComponent
             "resolved" => "status-resolved",
             _ => "status-unknown"
         };
-    }
-
-    private string GetImageDataUrl(byte[]? imageData)
-    {
-        if (imageData == null || imageData.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        const string mimeType = "image/png";
-        string base64String = Convert.ToBase64String(imageData);
-        return $"data:{mimeType};base64,{base64String}";
     }
 
     private async Task NavigateToReportList()
