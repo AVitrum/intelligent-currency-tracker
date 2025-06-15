@@ -1,6 +1,7 @@
 using Application.AiModel.Results;
 using Application.Common.Interfaces.Services;
 using Domain.Common;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Payload.Requests;
 using Shared.Payload.Responses.AiModel;
@@ -9,7 +10,6 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "ADMIN")]
 public class AiModelController : ControllerBase
 {
     private readonly IAiModelService _aiModelService;
@@ -20,6 +20,7 @@ public class AiModelController : ControllerBase
     }
 
     [HttpPost("train")]
+    [Authorize(Roles = nameof(UserRole.ADMIN))]
     public async Task<ActionResult<BaseResponse>> Train(TrainModelRequest request)
     {
         BaseResponse response;

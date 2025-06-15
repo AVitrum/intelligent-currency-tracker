@@ -47,8 +47,10 @@ public class PostService : IPostService
         {
             Title = request.Title,
             Content = request.Content,
-            Category = Enum.Parse<PostCategory>(request.Category, true),
-            UserId = request.AuthorId
+            Category = Enum.Parse<PostCategory>(request.Category,
+                true),
+            UserId = request.AuthorId,
+            Language = Enum.Parse<Language>(request.Language, true)
         };
 
         const string path = "posts/files/";
@@ -143,13 +145,14 @@ public class PostService : IPostService
         return GetAttachmentsByIdResult.SuccessResult([]);
     }
 
-    public async Task<BaseResult> GetAllAsync(int page, int pageSize)
+    public async Task<BaseResult> GetAllAsync(string language, int page, int pageSize)
     {
-        List<Post> posts = (await _postRepository.GetAllAsync(page, pageSize)).ToList();
+        List<Post> posts = (await _postRepository.GetAllAsync(
+            Enum.Parse<Language>(language, true), page, pageSize)).ToList();
         if (posts.Count == 0)
         {
             _logger.LogInformation("No posts found");
-            return BaseResult.FailureResult(["No posts found"]);
+            return GetAllPostsResult.SuccessResult([]);
         }
 
         List<PostDto> postDtos = [];

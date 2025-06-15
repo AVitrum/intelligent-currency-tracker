@@ -73,6 +73,38 @@ public class IdentityController : ControllerBase
             extendedResult.RefreshToken));
     }
 
+    [HttpGet("get-user-role")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<BaseResponse>> GetUserRole()
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return UnauthorizedResponse("User not found");
+        }
+
+        BaseResult result = await _userService.GetUserRoleAsync(userId);
+
+        if (result is GetUserRoleResult roleResult)
+        {
+            return Ok(new UserRoleResponse(
+                true,
+                "User role retrieved successfully",
+                StatusCodes.Status200OK,
+                new List<string>(),
+                roleResult.Role));
+        }
+
+        return BadRequest(new UserRoleResponse(
+            false,
+            "Failed to retrieve user role",
+            StatusCodes.Status400BadRequest,
+            result.Errors,
+            string.Empty));
+    }
+
     [HttpPost("refresh-token")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -173,7 +205,7 @@ public class IdentityController : ControllerBase
             StatusCodes.Status200OK,
             new List<string>()));
     }
-
+    
     [HttpPost("save-settings")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]

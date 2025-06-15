@@ -81,6 +81,23 @@ public class UserService : IUserService
         return await manager.LoginAsync(request);
     }
 
+    public async Task<BaseResult> GetUserRoleAsync(string userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return BaseResult.FailureResult(new List<string> { "User not found" });
+        }
+
+        IList<string> roles = await _userManager.GetRolesAsync(user);
+        if (roles.Count == 0)
+        {
+            return BaseResult.FailureResult(new List<string> { "User has no roles assigned" });
+        }
+
+        return GetUserRoleResult.SuccessResult(roles[0]);
+    }
+
     public async Task<BaseResult> LoginWithRefreshTokenAsync(RefreshTokenRequest request)
     {
         ILoginManager manager = _loginManagerFactory.Create(request.LoginProvider);

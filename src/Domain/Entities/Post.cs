@@ -12,6 +12,9 @@ public class Post : BaseEntity
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public required PostCategory Category { get; set; } = PostCategory.General;
+    
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public required Language Language { get; set; } = Language.En;
 
     public required string UserId { get; set; }
 

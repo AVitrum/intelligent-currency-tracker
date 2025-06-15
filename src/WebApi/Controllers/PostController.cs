@@ -33,6 +33,7 @@ public class PostController : ControllerBase
         [FromForm] string title,
         [FromForm] string content,
         [FromForm] string category,
+        [FromForm] Language? language,
         [FromForm] IFormFileCollection? attachments)
     {
         if (ValidateString(title, out DefaultResponse? defResponse) ||
@@ -53,9 +54,9 @@ public class PostController : ControllerBase
             Title = title,
             Content = content,
             Category = category,
+            Language = language?.ToString() ?? nameof(Language.En),
             AuthorId = userId
         };
-
         if (attachments is not null && attachments.Any())
         {
             foreach (IFormFile file in attachments)
@@ -95,7 +96,10 @@ public class PostController : ControllerBase
     [HttpGet("get-all")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetAllPostsResponse))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(BaseResult))]
-    public async Task<ActionResult<BaseResult>> GetAllPosts([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<BaseResult>> GetAllPosts(
+        [FromQuery] string language = nameof(Language.En),
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 10)
     {
         if (page < 1 || pageSize < 1)
         {
@@ -106,7 +110,7 @@ public class PostController : ControllerBase
                 new List<string> { "Invalid pagination parameters." }));
         }
 
-        BaseResult result = await _postService.GetAllAsync(page, pageSize);
+        BaseResult result = await _postService.GetAllAsync(language, page, pageSize);
 
         if (result is not GetAllPostsResult getAllPostsResult)
         {
@@ -115,6 +119,16 @@ public class PostController : ControllerBase
                 "Failed to retrieve posts.",
                 StatusCodes.Status500InternalServerError,
                 result.Errors));
+        }
+
+        if (getAllPostsResult.Posts.ToList().Count == 0)
+        {
+            return NotFound(new DefaultResponse(
+                false,
+                "No posts found.",
+                StatusCodes.Status404NotFound,
+                ["Posts not found."]
+            ));
         }
 
         return Ok(new GetAllPostsResponse(

@@ -18,6 +18,8 @@ public class AiModelService : IAiModelService
     private readonly ICsvService _csvService;
     private readonly HttpClient _httpClient;
     private readonly IRateRepository _rateRepository;
+    
+    private const int TrainTimeoutMinutes = 10;
 
     public AiModelService(
         IAppSettings appSettings,
@@ -29,7 +31,7 @@ public class AiModelService : IAiModelService
         _csvService = csvService;
         _rateRepository = rateRepository;
         _httpClient = httpClientFactory.CreateClient();
-        _httpClient.Timeout = TimeSpan.FromMinutes(5);
+        _httpClient.Timeout = TimeSpan.FromMinutes(TrainTimeoutMinutes);
     }
 
     public async Task<BaseResult> TrainModelAsync(int currencyR030)
@@ -42,7 +44,7 @@ public class AiModelService : IAiModelService
         }
         catch (OperationCanceledException)
         {
-            return BaseResult.FailureResult(new List<string> { "Model training request timed out after 5 minutes." });
+            return BaseResult.FailureResult(new List<string> { $"Model training request timed out after {TrainTimeoutMinutes} minutes." });
         }
         catch (Exception ex)
         {

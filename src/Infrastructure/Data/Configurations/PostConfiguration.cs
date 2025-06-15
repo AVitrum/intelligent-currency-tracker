@@ -12,6 +12,10 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.Property(p => p.Category)
             .HasConversion<string>()
             .IsRequired();
+        
+        builder.Property(p => p.Language)
+            .HasConversion<string>()
+            .IsRequired();
 
         builder.HasMany(r => r.Attachments)
             .WithOne();

@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repositories;
+using Domain.Enums;
 using Domain.Exceptions;
 
 namespace Infrastructure.Data.Repositories;
@@ -22,9 +23,10 @@ public class PostRepository : BaseRepository<Post>, IPostRepository
         return post.Attachments;
     }
 
-    public async Task<IEnumerable<Post>> GetAllAsync(int page, int pageSize)
+    public async Task<IEnumerable<Post>> GetAllAsync(Language language, int page, int pageSize)
     {
         return await _posts
+            .Where(p => p.Language == language)
             .OrderByDescending(p => p.TimeStamp)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

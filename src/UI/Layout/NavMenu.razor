@@ -1,10 +1,16 @@
-﻿@using Shared.Dtos
+﻿@using Domain.Enums
+@using Shared.Dtos
 @using Shared.Helpers
+@using Shared.Payload.Responses.Identity
+@using UI.Common.Interfaces
 @using UI.Services
 @inject IJSRuntime Js
 @inject NavigationManager Navigation
 @inject LocalizationService Localizer
 @inject UserSettingsService UserSettingsService
+@inject IHttpClientService HttpClientService
+@inject HttpClient Http
+@inject IConfiguration Configuration
 @implements IAsyncDisposable
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -42,6 +48,26 @@
         }
         else
         {
+            if (_userRole == nameof(UserRole.PUBLISHER))
+            {
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="create-post">
+                        <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
+                        @_navCreatePost
+                    </NavLink>
+                </div>
+                
+                @*For Edit *@
+                
+                @* <div class="nav-item"> *@
+                @*     <NavLink class="nav-link" href="dashboard"> *@
+                @*         <span class="bi bi-chart-nav-menu" aria-hidden="true"></span> *@
+                @*         @_navDashboard *@
+                @*     </NavLink> *@
+                @* </div> *@
+            }
+            
+            
             <div class="nav-item">
                 <NavLink class="nav-link" href="dashboard">
                     <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
@@ -86,12 +112,15 @@
 
     private bool _collapseNavMenu;
     private bool _isTokenPresent;
+    
+    private string _userRole = string.Empty;
 
     private string _navbarBrand = "";
     private string _navbarToggleMenuTitle = "";
     private string _navNews = "";
     private string _navHome = "";
     private string _navAuth = "";
+    private string _navCreatePost = "";
     private string _navDashboard = "";
     private string _navPredictiveCharts = "";
     private string _navTrackedCharts = "";
@@ -100,6 +129,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!string.IsNullOrEmpty(await JwtTokenHelper.GetJwtTokenFromCookies(Js)))
+        {
+            _userRole = await GetUserRoleAsync() ?? string.Empty;
+        }
+        
         if (UserSettingsService != null)
         {
             UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
@@ -116,6 +150,7 @@
         _navNews = await Localizer.GetStringAsync("nav.news");
         _navHome = await Localizer.GetStringAsync("nav.home");
         _navAuth = await Localizer.GetStringAsync("nav.auth");
+        _navCreatePost = await Localizer.GetStringAsync("nav.create_post");
         _navDashboard = await Localizer.GetStringAsync("nav.dashboard");
         _navPredictiveCharts = await Localizer.GetStringAsync("nav.predictive_charts");
         _navTrackedCharts = await Localizer.GetStringAsync("nav.tracked_charts");
@@ -135,6 +170,28 @@
         _collapseNavMenu = !_collapseNavMenu;
     }
 
+    private async Task<string?> GetUserRoleAsync()
+    {
+        try
+        {
+            string url = $"{Configuration.ApiUrl}/Identity/get-user-role";
+            HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+            UserRoleResponse? response = await resp.Content.ReadFromJsonAsync<UserRoleResponse>();
+
+
+            if (resp.IsSuccessStatusCode && response?.Role != null)
+            {
+                return response.Role;
+            }
+            
+            return null;
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+    
     private async Task Logout()
     {
         SettingsDto settings = await UserSettingsService.GetSettingsAsync(Js);
@@ -152,5 +209,4 @@
 
         await Task.CompletedTask;
     }
-
 }

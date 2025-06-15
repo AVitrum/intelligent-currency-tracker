@@ -1,8 +1,10 @@
+using System.Net;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 using System.Text;
 using Blazored.Toast.Services;
 using Domain.Common;
+using Microsoft.JSInterop;
 using Shared.Dtos;
 using Shared.Payload.Responses;
 using Shared.Payload.Responses.Post;
@@ -17,6 +19,7 @@ public partial class Posts : ComponentBase, IPageComponent, IAsyncDisposable
     [Inject] private IToastService ToastService { get; set; } = null!;
     [Inject] private IConfiguration Configuration { get; set; } = null!;
     [Inject] private IHttpClientService HttpClientService { get; set; } = null!;
+    [Inject] private IJSRuntime Js { get; set; } = null!;
     [Inject] private HttpClient Http { get; set; } = null!;
     [Inject] private LocalizationService Localizer { get; set; } = null!;
     [Inject] private UserSettingsService UserSettingsService { get; set; } = null!;
@@ -80,12 +83,13 @@ public partial class Posts : ComponentBase, IPageComponent, IAsyncDisposable
 
     private async Task LoadPostsAsync(int page = 1, int pageSize = 10)
     {
+        string language = (await UserSettingsService.GetSettingsAsync(Js)).Language;
         _isLoading = true;
         StateHasChanged();
 
         try
         {
-            string apiUrl = $"{Configuration.ApiUrl}/Post/get-all?page={page}&pageSize={pageSize}";
+            string apiUrl = $"{Configuration.ApiUrl}/Post/get-all?language={language}&page={page}&pageSize={pageSize}";
             HttpResponseMessage response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(apiUrl));
 
             if (response.IsSuccessStatusCode)
@@ -99,8 +103,12 @@ public partial class Posts : ComponentBase, IPageComponent, IAsyncDisposable
                 {
                     string errorMessage = await HandleResponse(postsResponse);
                     await HandleInvalidResponse(errorMessage);
-                    _posts = new List<PostDto>();
+                    _posts = [];
                 }
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                _posts = [];
             }
             else
             {

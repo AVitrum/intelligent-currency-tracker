@@ -8,6 +8,7 @@ using Blazored.Toast.Services;
 using Domain.Common;
 using Domain.Enums;
 using Shared.Payload.Responses;
+using Shared.Payload.Responses.Identity;
 using UI.Common.Interfaces;
 using UI.Services;
 using IConfiguration = UI.Common.Interfaces.IConfiguration;
@@ -20,6 +21,7 @@ public partial class CreatePost : ComponentBase, IPageComponent, IAsyncDisposabl
     [Inject] private IConfiguration Configuration { get; set; } = null!;
     [Inject] private IHttpClientService HttpClientService { get; set; } = null!;
     [Inject] private HttpClient Http { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private LocalizationService Localizer { get; set; } = null!;
     [Inject] private UserSettingsService UserSettingsService { get; set; } = null!;
 
@@ -27,6 +29,7 @@ public partial class CreatePost : ComponentBase, IPageComponent, IAsyncDisposabl
     private List<IBrowserFile> SelectedFiles { get; } = [];
     private bool IsSubmitting { get; set; }
     private readonly List<PostCategory> _postCategories = Enum.GetValues<PostCategory>().ToList();
+    private readonly List<Language> _languages = Enum.GetValues<Language>().ToList();
 
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
@@ -43,6 +46,8 @@ public partial class CreatePost : ComponentBase, IPageComponent, IAsyncDisposabl
     private string _placeholderContent = "";
     private string _labelCategory = "";
     private string _optionSelectCategory = "";
+    private string _labelLanguage = "";
+    private string _optionSelectLanguage = "";
     private string _labelAttachments = "";
     private string _buttonCreatePost = "";
     private string _buttonCreating = "";
@@ -67,10 +72,19 @@ public partial class CreatePost : ComponentBase, IPageComponent, IAsyncDisposabl
 
         [Required(ErrorMessage = "Category is required.")]
         public string Category { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Language is required.")]
+        public string Language { get; set; } = string.Empty;
     }
 
     protected override async Task OnInitializedAsync()
     {
+        if (await GetUserRoleAsync() != nameof(UserRole.PUBLISHER))
+        {
+            ToastService.ShowError("You do not have permission to create a post.");
+            NavigationManager.NavigateTo("/");
+        }
+        
         await LoadLocalizedStringsAsync();
         UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
         if (string.IsNullOrEmpty(PostModel.Category) && _postCategories.Any())
@@ -91,6 +105,8 @@ public partial class CreatePost : ComponentBase, IPageComponent, IAsyncDisposabl
         _placeholderContent = await Localizer.GetStringAsync("createpost.form.placeholder.content");
         _labelCategory = await Localizer.GetStringAsync("createpost.form.label.category");
         _optionSelectCategory = await Localizer.GetStringAsync("createpost.form.option.select_category");
+        _labelLanguage = await Localizer.GetStringAsync("createpost.form.label.language");
+        _optionSelectLanguage = await Localizer.GetStringAsync("createpost.form.option.select_language");
         _labelAttachments = await Localizer.GetStringAsync("createpost.form.label.attachments");
         _buttonCreatePost = await Localizer.GetStringAsync("createpost.form.button.create_post");
         _buttonCreating = await Localizer.GetStringAsync("createpost.form.button.creating");
@@ -172,6 +188,31 @@ public partial class CreatePost : ComponentBase, IPageComponent, IAsyncDisposabl
         return $"{Math.Round(bytes / Math.Pow(k, i), decimals)} {sizes[i]}";
     }
 
+    private async Task<string> GetUserRoleAsync()
+    {
+        try
+        {
+            string url = $"{Configuration.ApiUrl}/Identity/get-user-role";
+            HttpResponseMessage resp = await HttpClientService.SendRequestAsync(() => Http.GetAsync(url));
+            UserRoleResponse? response = await resp.Content.ReadFromJsonAsync<UserRoleResponse>();
+
+
+            if (resp.IsSuccessStatusCode && response?.Role != null)
+            {
+                return response.Role;
+            }
+
+            string errorMessage = await HandleResponse(response);
+            await HandleInvalidResponse(errorMessage);
+            return string.Empty;
+        }
+        catch (Exception e)
+        {
+            await HandleInvalidResponse($"{_errorGeneric} {e.Message}");
+            return string.Empty;
+        }
+    }
+
     private async Task HandleCreatePostAsync()
     {
         IsSubmitting = true;
@@ -200,7 +241,7 @@ public partial class CreatePost : ComponentBase, IPageComponent, IAsyncDisposabl
                 ToastService.ShowSuccess(_toastPostCreatedSuccessfully);
                 PostModel.Title = string.Empty;
                 PostModel.Content = string.Empty;
-                if (_postCategories.Any())
+                if (_postCategories.Count != 0)
                 {
                     PostModel.Category = _postCategories.First().ToString();
                 }

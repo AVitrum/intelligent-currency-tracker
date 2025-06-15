@@ -1,7 +1,6 @@
 @page "/create-post"
 @using Domain.Enums
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "PUBLISHER")]
 
 <PageTitle>@_pageTitle</PageTitle>
 
@@ -48,6 +47,21 @@
                                 }
                             </InputSelect>
                             <ValidationMessage For="@(() => PostModel.Category)"/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="language">@_labelLanguage</label>
+                            <InputSelect id="language" class="form-control" @bind-Value="PostModel.Language">
+                                @if (string.IsNullOrEmpty(PostModel.Language))
+                                {
+                                    <option value="">@_optionSelectLanguage</option>
+                                }
+                                @foreach (Language language in _languages)
+                                {
+                                    <option value="@language.ToString()">@language.ToString()</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => PostModel.Language)"/>
                         </div>
 
                         <div class="form-group">

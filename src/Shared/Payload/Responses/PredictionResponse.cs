@@ -7,6 +7,12 @@ public class Prediction
 
     [JsonPropertyName("yhat")]
     public double Yhat { get; set; }
+    
+    [JsonPropertyName("yhat_min")]
+    public double YhatMin { get; set; }
+    
+    [JsonPropertyName("yhat_max")]
+    public double YhatMax { get; set; }
 
     public DateTime Date => DateTime.Parse(Ds);
 }
