@@ -200,7 +200,7 @@ function drawMiniChart(canvasId, tooltipId, data, dates) {
 
     function showTooltip(pt) {
         const r = canvas.getBoundingClientRect();
-        tooltipEl.innerHTML = `Date: ${pt.date}<br>Value: ${pt.v.toFixed(2)}`;
+        tooltipEl.innerHTML = `Date: ${pt.date}<br>Value: ${pt.v.toFixed(4)}`;
         tooltipEl.style.left = `${r.left + pt.x}px`;
         tooltipEl.style.top = `${r.top + pt.y}px`;
         tooltipEl.style.display = 'block';

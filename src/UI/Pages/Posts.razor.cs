@@ -18,7 +18,6 @@ public partial class Posts : ComponentBase, IPageComponent, IAsyncDisposable
 {
     [Inject] private IToastService ToastService { get; set; } = null!;
     [Inject] private IConfiguration Configuration { get; set; } = null!;
-    [Inject] private IHttpClientService HttpClientService { get; set; } = null!;
     [Inject] private IJSRuntime Js { get; set; } = null!;
     [Inject] private HttpClient Http { get; set; } = null!;
     [Inject] private LocalizationService Localizer { get; set; } = null!;
@@ -90,7 +89,7 @@ public partial class Posts : ComponentBase, IPageComponent, IAsyncDisposable
         try
         {
             string apiUrl = $"{Configuration.ApiUrl}/Post/get-all?language={language}&page={page}&pageSize={pageSize}";
-            HttpResponseMessage response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(apiUrl));
+            HttpResponseMessage response = await Http.GetAsync(apiUrl);
 
             if (response.IsSuccessStatusCode)
             {

@@ -27,7 +27,6 @@ public partial class Settings : ComponentBase, IPageComponent, IAsyncDisposable
     private string _pageTitle = "";
     private string _pageDescription = "";
     private string _languageLabel = "";
-    private string _themeLabel = "";
     private string _summaryTypeLabel = "";
     private string _notificationsLabel = "";
     private string _saveButtonText = "";
@@ -92,7 +91,6 @@ public partial class Settings : ComponentBase, IPageComponent, IAsyncDisposable
         _pageTitle = await Localizer.GetStringAsync("settings.title");
         _pageDescription = await Localizer.GetStringAsync("settings.description");
         _languageLabel = await Localizer.GetStringAsync("settings.language_label");
-        _themeLabel = await Localizer.GetStringAsync("settings.theme_label");
         _summaryTypeLabel = await Localizer.GetStringAsync("settings.summary_type_label");
         _notificationsLabel = await Localizer.GetStringAsync("settings.notifications_label");
         _saveButtonText = await Localizer.GetStringAsync("settings.save_button");
@@ -129,8 +127,6 @@ public partial class Settings : ComponentBase, IPageComponent, IAsyncDisposable
             if (resp.IsSuccessStatusCode)
             {
                 ToastService.ShowSuccess(_toastSettingsSavedSuccessfully);
-                await Task.Delay(2000);
-                await Js.InvokeVoidAsync("eval", "location.reload()");
             }
             else
             {

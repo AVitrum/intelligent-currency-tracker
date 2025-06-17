@@ -19,7 +19,6 @@ public partial class PostDetails : ComponentBase, IPageComponent, IAsyncDisposab
 
     [Inject] private IToastService ToastService { get; set; } = null!;
     [Inject] private IConfiguration Configuration { get; set; } = null!;
-    [Inject] private IHttpClientService HttpClientService { get; set; } = null!;
     [Inject] private HttpClient Http { get; set; } = null!;
     [Inject] private LocalizationService Localizer { get; set; } = null!;
     [Inject] private UserSettingsService UserSettingsService { get; set; } = null!;
@@ -129,7 +128,7 @@ public partial class PostDetails : ComponentBase, IPageComponent, IAsyncDisposab
         try
         {
             string apiUrl = $"{Configuration.ApiUrl}/Post/get-by-id/{Id}";
-            HttpResponseMessage response = await HttpClientService.SendRequestAsync(() => Http.GetAsync(apiUrl));
+            HttpResponseMessage response = await Http.GetAsync(apiUrl);
 
             if (response.IsSuccessStatusCode)
             {
@@ -201,8 +200,7 @@ public partial class PostDetails : ComponentBase, IPageComponent, IAsyncDisposab
         try
         {
             string attachmentsApiUrl = $"{Configuration.ApiUrl}/Post/get-attachments-by-id/{Id}";
-            HttpResponseMessage attachmentsHttpResponse =
-                await HttpClientService.SendRequestAsync(() => Http.GetAsync(attachmentsApiUrl));
+            HttpResponseMessage attachmentsHttpResponse = await Http.GetAsync(attachmentsApiUrl);
 
             if (attachmentsHttpResponse.IsSuccessStatusCode)
             {
@@ -227,7 +225,7 @@ public partial class PostDetails : ComponentBase, IPageComponent, IAsyncDisposab
                 _attachmentsData = [];
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             _attachmentsData = []; 
         }

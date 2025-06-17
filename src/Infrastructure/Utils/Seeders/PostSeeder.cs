@@ -25,7 +25,7 @@ public static class PostSeeder
             throw new Exception("Public user not found");
         }
         
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "posts.json");
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Temp/posts_ua.json");
         if (!File.Exists(filePath))
         {
             throw new FileNotFoundException("posts.json file not found at " + filePath);
@@ -41,7 +41,7 @@ public static class PostSeeder
             throw new Exception("No posts found in the JSON file");
         }
         
-        foreach (var request in requests)
+        foreach (CreatePostRequest request in requests)
         {
             await repository.AddAsync(new Post
             {
@@ -50,7 +50,7 @@ public static class PostSeeder
                 Category = Enum.Parse<PostCategory>(request.Category,
                     true),
                 UserId = publisher.Id,
-                Language = Language.En,
+                Language = Language.Ua
             });
         }
     }

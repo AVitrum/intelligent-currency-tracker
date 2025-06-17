@@ -125,6 +125,66 @@ public class RateService : IRateService
         return GetAllCurrenciesResult.SuccessResult(currencyDtos);
     }
 
+    public async Task<BaseResult> GetCrossRatesAsync(string? currency1, string? currency2, DateTime requestStart, DateTime requestEnd)
+    {
+        if (string.IsNullOrEmpty(currency1) || string.IsNullOrEmpty(currency2))
+        {
+            return BaseResult.FailureResult(["Both currency codes are required for cross rates."]);
+        }
+        
+        if (currency1 == currency2)
+        {
+            return BaseResult.FailureResult(["Both currency codes must be different for cross rates."]);
+        }
+        
+        Currency c1 = await _currencyRepository.GetByCodeAsync(currency1) ??
+                            throw new EntityNotFoundException<Currency>();
+        Currency c2 = await _currencyRepository.GetByCodeAsync(currency2) ??
+                            throw new EntityNotFoundException<Currency>();
+        
+        List<Rate> rates1 = (List<Rate>)await _rateRepository.GetRangeAsync(requestStart, requestEnd, c1);
+        List<Rate> rates2 = (List<Rate>)await _rateRepository.GetRangeAsync(requestStart, requestEnd, c2);
+     
+        if (rates1.Count == 0 || rates2.Count == 0)
+        {
+            return BaseResult.FailureResult(["No rates found for the specified currencies and date range."]);
+        }
+
+        List<CrossRateDto> crossRates = new List<CrossRateDto>();
+        Dictionary<DateTime, Rate> rates2Lookup = rates2.ToDictionary(r => r.Date.Date);
+
+        foreach (Rate rate1 in rates1)
+        {
+            if (rates2Lookup.TryGetValue(rate1.Date.Date, out Rate? rate2))
+            {
+                if (rate2.Value == 0)
+                {
+                    _logger.LogWarning("Official rate for currency {CurrencyCode} on {Date} is zero. Skipping cross rate calculation for this date.", c2.Code, rate2.Date.ToShortDateString());
+                    continue;
+                }
+                
+                var crossRateValue = rate1.Value / rate2.Value;
+                crossRates.Add(new CrossRateDto
+                {
+                    Date = rate1.Date,
+                    SourceCurrencyCode = c1.Code,
+                    TargetCurrencyCode = c2.Code,
+                    Rate = crossRateValue
+                });
+            }
+        }
+
+        if (crossRates.Count == 0)
+        {
+            _logger.LogInformation(
+                "No matching dates found for rates to calculate cross rates between {Currency1} and {Currency2} for the period {StartDate} - {EndDate}.",
+                c1.Code, c2.Code, requestStart, requestEnd);
+            return BaseResult.FailureResult(["No cross rates found for the specified currencies and date range."]);
+        }
+        
+        return GetCrossRatesResult.SuccessResult(crossRates.OrderBy(cr => cr.Date));
+    }
+
     public async Task<BaseResult> GetDetailsAsync(string currencyCode, DateTime start, DateTime end)
     {
         Currency currency = await _currencyRepository.GetByCodeAsync(currencyCode) ??

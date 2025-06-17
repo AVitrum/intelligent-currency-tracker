@@ -88,6 +88,13 @@
                     @_navTrackedCharts
                 </NavLink>
             </div>
+            
+            <div class="nav-item">
+                <NavLink class="nav-link" href="cross-rates">
+                    <span class="bi bi-chart-nav-menu" aria-hidden="true"></span>
+                    @_navCrossRates
+                </NavLink>
+            </div>
 
             <div class="nav-item">
                 <NavLink class="nav-link" href="compare-currencies">
@@ -122,6 +129,7 @@
     private string _navAuth = "";
     private string _navCreatePost = "";
     private string _navDashboard = "";
+    private string _navCrossRates = "";
     private string _navPredictiveCharts = "";
     private string _navTrackedCharts = "";
     private string _navCompareCurrencies = "";
@@ -152,6 +160,7 @@
         _navAuth = await Localizer.GetStringAsync("nav.auth");
         _navCreatePost = await Localizer.GetStringAsync("nav.create_post");
         _navDashboard = await Localizer.GetStringAsync("nav.dashboard");
+        _navCrossRates = await Localizer.GetStringAsync("nav.cross_rates");
         _navPredictiveCharts = await Localizer.GetStringAsync("nav.predictive_charts");
         _navTrackedCharts = await Localizer.GetStringAsync("nav.tracked_charts");
         _navCompareCurrencies = await Localizer.GetStringAsync("nav.compare_currencies");

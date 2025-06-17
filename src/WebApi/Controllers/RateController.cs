@@ -3,6 +3,7 @@ using Application.Rates.Results;
 using Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Payload.Requests;
+using Shared.Payload.Responses;
 using Shared.Payload.Responses.Rate;
 
 namespace WebApi.Controllers;
@@ -151,7 +152,46 @@ public class RateController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("get-cross-rates")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<BaseResponse>> GetCrossRates([FromQuery] CrossRateRequest request)
+    {
+        BaseResult result = await _rateService.GetCrossRatesAsync(
+            request.Currency,
+            request.Currency2,
+            request.Start,
+            request.End
+        );
+
+        if (result is not GetCrossRatesResult getCrossRatesResult)
+        {
+            BaseResponse response = new DefaultResponse(
+                false,
+                "Failed to retrieve cross rates.",
+                StatusCodes.Status400BadRequest,
+                result.Errors
+            );
+
+            return BadRequest(response);
+        }
+        
+        BaseResponse successResponse = new GetCrossRatesResponse(
+            true,
+            "Cross rates retrieved successfully.",
+            StatusCodes.Status200OK,
+            new List<string>(),
+            getCrossRatesResult.CrossRates
+        );
+        
+        return Ok(successResponse);
+    }
+
     [HttpGet("compare-currencies")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BaseResponse>> CompareCurrencies([FromQuery] CompareCurrenciesRequest request)
     {
         BaseResponse response;

@@ -52,6 +52,11 @@
     text-transform: capitalize;
     margin-left: 0.75rem;
     line-height: 1;
+    max-width: 150px; 
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
 }
 
 .post-content-section h2,
