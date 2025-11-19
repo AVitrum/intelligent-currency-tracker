@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain.csproj", "{DDBE932C-4A8D-4FAA-9F05-74C2DD57BE87}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Application\Application.csproj", "{7249E304-D568-4C7B-9709-708770BA78FD}"
@@ -23,6 +24,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "src\Shared\Shared
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "src\UI\UI.csproj", "{D7A13D54-031F-42AA-AFF6-0069A6CF3924}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2A278B09-6DA1-4807-9BCB-AADF3FB53D4F}"
+	ProjectSection(SolutionItems) = preProject
+		tests\README.md = tests\README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.Tests", "tests\Application.Tests\Application.Tests.csproj", "{411BE436-168B-48C6-B380-0ACBEBB4C5C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +44,7 @@ Global
 		{0D62F402-1B68-4535-91E6-8A37B86C7698} = {1FA8AC5A-6ECB-460D-BC32-FCB3030D1613}
 		{5EDCA0C8-EC7A-4695-B8A4-90A7929D5333} = {1FA8AC5A-6ECB-460D-BC32-FCB3030D1613}
 		{D7A13D54-031F-42AA-AFF6-0069A6CF3924} = {1FA8AC5A-6ECB-460D-BC32-FCB3030D1613}
+		{411BE436-168B-48C6-B380-0ACBEBB4C5C3} = {2A278B09-6DA1-4807-9BCB-AADF3FB53D4F}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{DDBE932C-4A8D-4FAA-9F05-74C2DD57BE87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -66,5 +75,9 @@ Global
 		{D7A13D54-031F-42AA-AFF6-0069A6CF3924}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7A13D54-031F-42AA-AFF6-0069A6CF3924}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7A13D54-031F-42AA-AFF6-0069A6CF3924}.Release|Any CPU.Build.0 = Release|Any CPU
+		{411BE436-168B-48C6-B380-0ACBEBB4C5C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{411BE436-168B-48C6-B380-0ACBEBB4C5C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{411BE436-168B-48C6-B380-0ACBEBB4C5C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{411BE436-168B-48C6-B380-0ACBEBB4C5C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
