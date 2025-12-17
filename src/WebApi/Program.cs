@@ -22,7 +22,7 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddCustomCorsPolicy();
 
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, CustomAuthorizationResultHandler>();
-builder.Services.AddScoped<IRateWebSocketHandler, RateWebSocketHandler>();
+// builder.Services.AddScoped<IRateWebSocketHandler, RateWebSocketHandler>();
 
 builder.Services
     .AddInfrastructure()

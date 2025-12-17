@@ -98,7 +98,13 @@ public class AlertSenderService : IHostedService
                 return;
             }
 
-            Rate lastRate = await rateRepository.GetLastByCurrencyIdAsync(e.CurrencyId);
+            Rate? lastRate = await rateRepository.GetLastByCurrencyIdAsync(e.CurrencyId);
+            if (lastRate is null)
+            {
+                _logger.LogWarning("No rates found for currency {CurrencyId}.", e.CurrencyId);
+                return;
+            }
+
             Rate previousRate = await rateRepository.GetPreviousByCurrencyIdAsync(e.CurrencyId, lastRate.Date);
 
             decimal percentDifference = previousRate.Value != 0

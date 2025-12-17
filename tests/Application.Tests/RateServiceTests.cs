@@ -54,7 +54,6 @@ public class RateServiceTests
             new CurrencyDto { R030 = 978, Code = "EUR", Name = "Euro" }
         };
 
-        // Setup mock behavior
         _mockCurrencyRepository
             .Setup(x => x.GetAllAsync())
             .ReturnsAsync(currencies);
@@ -81,7 +80,6 @@ public class RateServiceTests
         dataList.Should().Contain(c => c.Code == "USD");
         dataList.Should().Contain(c => c.Code == "EUR");
         
-        // Verify repository was called
         _mockCurrencyRepository.Verify(x => x.GetAllAsync(), Times.Once);
     }
 
@@ -129,7 +127,6 @@ public class RateServiceTests
         result.Success.Should().BeFalse();
         result.Errors.Should().Contain("No rates found for the specified currency and date range.");
         
-        // Verify mocks were called
         _mockCurrencyRepository.Verify(x => x.GetByCodeAsync("USD"), Times.Once);
         _mockRateRepository.Verify(x => x.GetRangeAsync(startDate, endDate, currency), Times.Once);
     }

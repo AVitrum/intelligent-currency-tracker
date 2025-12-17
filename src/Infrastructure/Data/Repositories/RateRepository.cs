@@ -20,16 +20,14 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Rate> GetLastByCurrencyIdAsync(Guid currencyId)
+    public async Task<Rate?> GetLastByCurrencyIdAsync(Guid currencyId)
     {
-        Rate rate = await _context.Rates
+        return await _context.Rates
             .AsNoTracking()
             .Where(x => x.CurrencyId == currencyId)
             .OrderByDescending(x => x.Date)
             .AsSplitQuery()
-            .FirstOrDefaultAsync() ?? throw new EntityNotFoundException<Rate>();
-
-        return rate;
+            .FirstOrDefaultAsync();
     }
 
     public async Task<Rate> GetPreviousByCurrencyIdAsync(Guid currencyId, DateTime lastRateDate)
@@ -130,14 +128,12 @@ public class RateRepository : BaseRepository<Rate>, IRateRepository
 
     public async Task<DateTime> GetLastDateAsync()
     {
-        try
-        {
-            return await _context.Rates.MaxAsync(x => x.Date);
-        }
-        catch (InvalidOperationException)
-        {
-            return DateTime.ParseExact("01.01.2014", DateConstants.DateFormat, CultureInfo.InvariantCulture);
-        }
+        DateTime? lastDate = await _context.Rates
+            .OrderByDescending(x => x.Date)
+            .Select(x => (DateTime?)x.Date)
+            .FirstOrDefaultAsync();
+
+        return lastDate ?? DateTime.ParseExact("01.01.2014", DateConstants.DateFormat, CultureInfo.InvariantCulture);
     }
 
     public async Task<bool> RemoveByDateAsync(DateTime date)

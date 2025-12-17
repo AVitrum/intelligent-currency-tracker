@@ -21,6 +21,7 @@ public class ExchangeRateSyncService : BackgroundService
     private readonly List<int> _r030 = [];
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly TimeSpan _updateInterval;
+    private static readonly SemaphoreSlim CurrencyLock = new(1, 1);
 
     public ExchangeRateSyncService(
         IHttpClientFactory httpClientFactory,
@@ -180,7 +181,14 @@ public class ExchangeRateSyncService : BackgroundService
     {
         foreach (Rate rate in rates)
         {
-            Rate lastRate = await rateRepository.GetLastByCurrencyIdAsync(rate.CurrencyId);
+            Rate? lastRate = await rateRepository.GetLastByCurrencyIdAsync(rate.CurrencyId);
+            
+            if (lastRate is null)
+            {
+                rate.ValueCompareToPrevious = 0;
+                continue;
+            }
+            
             rate.ValueCompareToPrevious = rate.Value - lastRate.Value;
 
             decimal percentDifference = lastRate.Value != 0
@@ -207,17 +215,32 @@ public class ExchangeRateSyncService : BackgroundService
             return currency;
         }
 
-        string currencyName = rateToken["txt"]?.Value<string>() ?? "Unknown";
-        int r030 = rateToken["r030"]?.Value<int>() ?? 0;
-
-        currency = new Currency
+        await CurrencyLock.WaitAsync();
+        try
         {
-            Code = currencyCode,
-            Name = currencyName,
-            R030 = r030
-        };
+            // Double-check after acquiring lock
+            currency = await currencyRepository.GetByCodeAsync(currencyCode);
+            if (currency is not null)
+            {
+                return currency;
+            }
 
-        await currencyRepository.AddAsync(currency);
-        return currency;
+            string currencyName = rateToken["txt"]?.Value<string>() ?? "Unknown";
+            int r030 = rateToken["r030"]?.Value<int>() ?? 0;
+
+            currency = new Currency
+            {
+                Code = currencyCode,
+                Name = currencyName,
+                R030 = r030
+            };
+
+            await currencyRepository.AddAsync(currency);
+            return currency;
+        }
+        finally
+        {
+            CurrencyLock.Release();
+        }
     }
 }

@@ -1,5 +1,4 @@
 using Domain.Entities;
-using Domain.Exceptions;
 using FluentAssertions;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
@@ -23,8 +22,7 @@ public class RateRepositoryTests : IDisposable
 
         _context = new ApplicationDbContext(options);
         _repository = new RateRepository(_context);
-
-        // Create test currency
+        
         _testCurrencyId = Guid.NewGuid();
         _testCurrency = new Currency
         {
@@ -72,14 +70,16 @@ public class RateRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetLastByCurrencyIdAsync_ShouldThrowException_WhenNoRatesExist()
+    public async Task GetLastByCurrencyIdAsync_ShouldReturnNull_WhenNoRatesExist()
     {
         // Arrange: Use a currency ID with no rates
         var nonExistentCurrencyId = Guid.NewGuid();
 
-        // Act & Assert: Verify exception is thrown
-        await Assert.ThrowsAsync<EntityNotFoundException<Rate>>(
-            async () => await _repository.GetLastByCurrencyIdAsync(nonExistentCurrencyId));
+        // Act
+        var result = await _repository.GetLastByCurrencyIdAsync(nonExistentCurrencyId);
+
+        // Assert: Verify null is returned
+        Assert.Null(result);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class RateRepositoryTests : IDisposable
         var endDate = DateTime.UtcNow.AddDays(-1);
         
         var rates = new List<Rate>();
-        for (int i = 0; i < 15; i++)
+        for (var i = 0; i < 15; i++)
         {
             rates.Add(new Rate
             {
