@@ -2,115 +2,136 @@
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    background-color: #F0F2F5;
+    background-color: var(--bg-primary);
 }
 
 .page-title {
     text-align: center;
-    color: #1D3557;
-    font-size: 2rem;
-    margin-bottom: 2rem;
-    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 2.25rem;
+    margin-bottom: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
 }
 
 .charts-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
+    gap: 1.75rem;
     justify-content: center;
 }
 
 .mini-chart-container {
-    background: #FFFFFF;
-    padding: 1rem;
-    border-radius: 10px;
-    width: 250px;
+    background: var(--bg-secondary);
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    width: 280px;
     text-align: center;
-    color: #2C3E50;
-    box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
-    border: 1px solid #E2E8F0;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-normal);
+}
+
+.mini-chart-container:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
 }
 
 .currency-label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #1D3557;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--primary-700);
+    font-size: 1.1rem;
 }
 
 .remove-chart-btn {
-    background-color: #4A5568;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--neutral-600) 0%, var(--neutral-700) 100%);
+    color: var(--text-inverse);
     border: none;
-    padding: 0.5rem;
-    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+    font-size: 0.85rem;
 }
 
 .remove-chart-btn:hover {
-    background-color: #2D3748;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--error-500) 0%, var(--error-600) 100%);
+    color: var(--text-inverse);
+    transform: translateY(-1px);
 }
 
 .mini-chart-canvas {
     width: 100%;
     height: 150px;
-    background-color: #FFFFFF;
-    border-radius: 6px;
-    border: 1px solid #E2E8F0;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
 }
 
 .no-charts-message {
     text-align: center;
-    background-color: #FFFFFF;
-    border-radius: 10px;
-    padding: 2.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
     margin: 2rem auto;
     max-width: 600px;
-    box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
-    border: 1px solid #E2E8F0;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
 }
 
 .no-charts-message p {
-    font-size: 1.2rem;
-    color: #4A5568;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
 }
 
 .go-to-charts-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     margin-top: 1rem;
-    padding: 0.8rem 1.5rem;
-    background-color: #2B6CB0;
-    color: #FFFFFF;
-    border-radius: 6px;
+    padding: 0.85rem 2rem;
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: var(--text-inverse);
+    border-radius: var(--radius-md);
     text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
 }
 
 .go-to-charts-btn:hover {
-    background-color: #2C5282;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+    color: var(--text-inverse);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
 }
 
 @media (max-width: 768px) {
     .mini-chart-container {
-        width: calc(48% - 0.75rem); 
+        width: calc(48% - 0.875rem);
     }
 
     .page-title {
-        font-size: 1.8rem;
+        font-size: 1.75rem;
     }
 }
 
 @media (max-width: 480px) {
+    .mini-charts-page {
+        padding: 1rem;
+    }
+
     .mini-chart-container {
         width: 100%;
     }
 
     .page-title {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
     }
 
     .go-to-charts-btn {

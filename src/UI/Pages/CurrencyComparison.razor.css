@@ -2,27 +2,33 @@
     padding: 2rem;
     max-width: 1000px;
     margin: 2rem auto;
-    background-color: #F0F2F5; 
-    border-radius: 12px;
-    box-shadow: rgba(0, 0, 0, 0.07) 0px 8px 16px -4px;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
 }
 
 .comparison-page-title {
     text-align: center;
-    color: #1D3557;
-    font-size: 2.2rem;
+    color: var(--text-primary);
+    font-size: 2.25rem;
     margin-bottom: 2rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.025em;
 }
 
 .card-style {
-    background: #FFFFFF;
-    padding: 1.5rem 2rem;
-    border-radius: 10px;
-    color: #2C3E50;
-    box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    background: var(--bg-secondary);
+    padding: 1.75rem 2rem;
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
     margin-bottom: 2rem;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-normal);
+}
+
+.card-style:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 .form-section-container {
@@ -43,40 +49,45 @@
 .form-group label {
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: #4A5568; 
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 .form-control {
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #CBD5E0; 
-    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
     font-size: 0.95rem;
-    background-color: #F7FAFC; 
-    color: #2D3748;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    transition: all var(--transition-fast);
 }
 
 .form-control:focus {
-    border-color: #4299E1; 
-    box-shadow: 0 0 0 0.2rem rgba(66, 153, 225, 0.25);
+    border-color: var(--primary-400);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    outline: none;
+    background: var(--bg-secondary);
 }
 
 .compare-button {
     display: block;
     width: fit-content;
-    margin: 1rem auto 0 auto;
+    margin: 1.5rem auto 0 auto;
 }
 
 .loading-message,
 .no-data-message-container {
     text-align: center;
-    padding: 2.5rem;
+    padding: 3rem;
 }
 
 .loading-message p,
 .no-data-message-container p {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     margin-bottom: 0;
-    color: #4A5568; 
+    color: var(--text-secondary);
 }
 
 .analytics-results-container {
@@ -89,15 +100,15 @@
 }
 
 .analytics-summary p {
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.875rem;
     font-size: 1rem;
-    color: #4A5568; 
+    color: var(--text-secondary);
+    line-height: 1.6;
 }
 
 .analytics-summary p strong {
-    color: #1D3557;
+    color: var(--primary-700);
 }
-
 
 .currency-details-grid {
     display: grid;
@@ -110,57 +121,63 @@
 }
 
 .card-section-title {
-    font-size: 1.6rem;
-    color: #1D3557;
+    font-size: 1.5rem;
+    color: var(--text-primary);
     margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #4299E1;
-    font-weight: 500;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid var(--primary-500);
+    font-weight: 700;
 }
 
-.sub-section-title { 
-    font-size: 1.3rem;
-    color: #2A4365; 
+.sub-section-title {
+    font-size: 1.25rem;
+    color: var(--text-primary);
     margin-top: 1.5rem;
     margin-bottom: 1rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .action-button {
-    display: inline-block;
-    padding: 0.8rem 1.8rem;
-    background-color: #2B6CB0;
-    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: var(--text-inverse);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+    transition: all var(--transition-fast);
     font-size: 1rem;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
 }
 
 .action-button:hover {
-    background-color: #2C5282;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+    color: var(--text-inverse);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
 }
 
 .action-button:disabled {
-    background-color: #A0AEC0;
-    color: #E2E8F0;
+    background: var(--neutral-300);
+    color: var(--neutral-500);
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 .action-button .spinner {
     display: inline-block;
     width: 1em;
     height: 1em;
-    border: 2px solid rgba(255, 255, 255, 0.4); 
+    border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
-    border-top-color: #FFFFFF; 
-    animation: spin 1s ease-in-out infinite;
+    border-top-color: var(--text-inverse);
+    animation: spin 0.8s ease-in-out infinite;
     margin-right: 0.5em;
     vertical-align: middle;
 }
@@ -171,16 +188,16 @@
     }
 }
 
-
 .back-button {
     display: block;
     width: fit-content;
     margin: 2.5rem auto 0 auto;
-    background-color: #4A5568;
+    background: linear-gradient(135deg, var(--neutral-600) 0%, var(--neutral-700) 100%);
+    box-shadow: 0 4px 14px rgba(71, 85, 105, 0.25);
 }
 
 .back-button:hover {
-    background-color: #2D3748;
+    background: linear-gradient(135deg, var(--neutral-700) 0%, var(--neutral-800) 100%);
 }
 
 @media (max-width: 900px) {
@@ -191,11 +208,11 @@
 
 @media (max-width: 768px) {
     .comparison-page-title {
-        font-size: 1.8rem;
+        font-size: 1.75rem;
     }
 
     .card-section-title {
-        font-size: 1.4rem;
+        font-size: 1.35rem;
     }
 
     .form-grid {
@@ -203,7 +220,7 @@
     }
 
     .analytics-card, .form-section-container, .analytics-summary {
-        padding: 1rem 1.5rem;
+        padding: 1.25rem 1.5rem;
     }
 }
 
@@ -211,16 +228,22 @@
     .comparison-page-container {
         padding: 1rem;
         margin: 1rem auto;
+        border-radius: var(--radius-lg);
     }
 
     .comparison-page-title {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
     }
-    
+
     .action-button {
-        padding: 0.7rem 1.5rem;
+        padding: 0.75rem 1.5rem;
         font-size: 0.9rem;
-        width: 100%;
-        text-align: center;
+    }
+
+    .stat-item,
+    .ma-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
     }
 }

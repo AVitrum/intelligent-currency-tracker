@@ -1,86 +1,137 @@
 .navbar-toggler {
     background-color: transparent;
     border: none;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.navbar-toggler:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .top-row {
-    min-height: 3.5rem;
-    background-color: #1D3557;
-    color: #FFFFFF;
+    min-height: 4rem;
+    background: transparent;
+    color: var(--text-inverse);
+    padding: 0 1rem;
 }
 
 .navbar-brand {
-    font-size: 1.1rem;
-    color: #FFFFFF;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-inverse);
+    letter-spacing: -0.025em;
+    transition: opacity var(--transition-fast);
+}
+
+.navbar-brand:hover {
+    opacity: 0.9;
 }
 
 .nav-item ::deep a {
-    color: #2C3E50;
-    border-radius: 4px;
-    min-height: 3rem;
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    min-height: 2.75rem;
     height: auto;
     display: flex;
     align-items: center;
     line-height: 1.4;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     text-decoration: none;
     background-color: transparent;
     white-space: normal;
     overflow-wrap: break-word;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.nav-item ::deep a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 3px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--primary-400) 0%, var(--primary-600) 100%);
+    border-radius: var(--radius-full);
+    transition: transform var(--transition-fast);
 }
 
 .nav-item ::deep a.active {
-    background-color: #2B6CB0;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: var(--text-inverse);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-.nav-item ::deep a:hover {
-    background-color: #F0F2F5;
-    color: #1D3557;
+.nav-item ::deep a.active::before {
+    transform: translateY(-50%) scaleY(1);
+    background: var(--text-inverse);
+}
+
+.nav-item ::deep a:hover:not(.active) {
+    background-color: var(--neutral-100);
+    color: var(--primary-600);
+}
+
+.nav-item ::deep a:hover:not(.active)::before {
+    transform: translateY(-50%) scaleY(1);
 }
 
 .nav-scrollable {
-    background-color: #FFFFFF;
-    color: #2C3E50;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     overflow-y: auto;
-    max-height: calc(100vh - 3.5rem);
-    border-radius: 10px;
-    padding: 1rem;
-    margin: 1rem;
-    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 3px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
-    border: 1px solid #E2E8F0;
-    transition: opacity 0.2s ease-in-out;
+    max-height: calc(100vh - 4.5rem);
+    border-radius: var(--radius-lg);
+    padding: 0.75rem;
+    margin: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
 }
 
 .nav-item {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .nav-item ::deep button {
     background-color: transparent;
     border: none;
-    color: #2C3E50;
+    color: var(--text-secondary);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
     width: 100%;
     text-align: left;
-    min-height: 3rem;
+    min-height: 2.75rem;
     height: auto;
     display: flex;
     align-items: center;
     line-height: 1.4;
-    padding: 0.5rem 0 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     white-space: normal;
     overflow-wrap: break-word;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
 }
 
 .nav-item ::deep button:hover {
-    color: #2B6CB0;
-    background-color: #F0F2F5;
+    color: var(--error-500);
+    background-color: rgba(239, 68, 68, 0.08);
 }
 
 .nav-hidden {
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease-in-out;
+    transform: translateX(-10px);
+}
+
+/* Nav Icons */
+.nav-item ::deep span[class^="bi-"] {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
 }

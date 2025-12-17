@@ -1,3 +1,16 @@
+const candlestickColors = {
+    primary: '#6366F1',
+    primaryLight: '#818CF8',
+    success: '#22C55E',
+    successLight: '#4ADE80',
+    error: '#EF4444',
+    errorLight: '#F87171',
+    background: '#FFFFFF',
+    gridLine: '#E2E8F0',
+    text: '#0F172A',
+    textSecondary: '#64748B'
+};
+
 function drawCandlestickChart(data, dates) {
     const canvas = document.getElementById('currencyChart');
     const tooltipEl = document.getElementById('chartTooltip');
@@ -26,23 +39,42 @@ function drawCandlestickChart(data, dates) {
         const min = Math.min(...values);
         const dr = max - min || 1;
         const ps = values.length > 0 ? cw / values.length : 0;
-        return {w, h, cw, ch, dr, ps, min};
+        return {w, h, cw, ch, dr, ps, min, max};
     }
 
     function drawAxes() {
         const d = getDims();
+        
+        // Draw grid lines
+        ctx.strokeStyle = candlestickColors.gridLine;
+        ctx.lineWidth = 1;
+        
+        const numGridLines = 5;
+        for (let i = 0; i <= numGridLines; i++) {
+            const y = padding + (d.ch / numGridLines) * i;
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(padding, y);
+            ctx.lineTo(d.w - padding, y);
+            ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        
+        // Axes
         ctx.beginPath();
         ctx.moveTo(padding, padding);
         ctx.lineTo(padding, d.h - padding);
         ctx.lineTo(d.w - padding, d.h - padding);
-        ctx.strokeStyle = '#1D3557';
+        ctx.strokeStyle = candlestickColors.gridLine;
         ctx.lineWidth = 2;
         ctx.stroke();
-        ctx.font = '16px Arial';
-        ctx.fillStyle = '#1D3557';
-        ctx.fillText('Date', d.w / 2 - 20, d.h - 10);
+        
+        // Labels
+        ctx.font = '600 14px Inter, sans-serif';
+        ctx.fillStyle = candlestickColors.textSecondary;
+        ctx.fillText('Date', d.w / 2 - 15, d.h - 12);
         ctx.save();
-        ctx.translate(15, d.h / 2 + 20);
+        ctx.translate(18, d.h / 2 + 20);
         ctx.rotate(-Math.PI / 2);
         ctx.fillText('Value', 0, 0);
         ctx.restore();
@@ -55,34 +87,49 @@ function drawCandlestickChart(data, dates) {
     function drawCandles() {
         const d = getDims();
         ctx.clearRect(0, 0, d.w, d.h);
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = candlestickColors.background;
         ctx.fillRect(0, 0, d.w, d.h);
 
         drawAxes();
 
-        const candleWidth = Math.max(4, d.ps * 0.6);
+        const candleWidth = Math.max(6, d.ps * 0.65);
+        const candleRadius = Math.min(3, candleWidth / 4);
 
         for (let i = 0; i < values.length; i++) {
             const x = padding + d.ps * (i + 0.5);
             const y = yForValue(values[i], d);
+            const barHeight = d.h - padding - y;
+            
+            // Determine color based on trend
+            const isPositive = i === 0 || values[i] >= values[i - 1];
+            const barColor = isPositive ? candlestickColors.success : candlestickColors.error;
+            const barColorLight = isPositive ? candlestickColors.successLight : candlestickColors.errorLight;
+            
+            // Create gradient for bar
+            const gradient = ctx.createLinearGradient(x - candleWidth / 2, 0, x + candleWidth / 2, 0);
+            gradient.addColorStop(0, barColor);
+            gradient.addColorStop(0.5, barColorLight);
+            gradient.addColorStop(1, barColor);
+            
+            // Draw rounded bar
             ctx.beginPath();
-            ctx.rect(
+            ctx.roundRect(
                 x - candleWidth / 2,
                 y,
                 candleWidth,
-                d.h - padding - y
+                barHeight,
+                [candleRadius, candleRadius, 0, 0]
             );
-            ctx.fillStyle = '#2B6CB0';
+            ctx.fillStyle = gradient;
             ctx.fill();
-
-            if (i > 0) {
-                ctx.beginPath();
-                ctx.moveTo(x - candleWidth / 2, y);
-                ctx.lineTo(x + candleWidth / 2, y);
-                ctx.strokeStyle = values[i] > values[i - 1] ? '#4CAF50' : '#D32F2F';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            }
+            
+            // Add subtle shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
         }
     }
 
@@ -91,9 +138,19 @@ function drawCandlestickChart(data, dates) {
         const x = padding + d.ps * (i + 0.5);
         const y = yForValue(values[i], d);
         const r = canvas.getBoundingClientRect();
-        tooltipEl.innerHTML = `Date: ${dates[i] || ''}<br>Value: ${values[i]}`;
+        const isPositive = i === 0 || values[i] >= values[i - 1];
+        const changeColor = isPositive ? candlestickColors.success : candlestickColors.error;
+        const changeIcon = isPositive ? '↑' : '↓';
+        
+        let changePercent = '';
+        if (i > 0) {
+            const change = ((values[i] - values[i - 1]) / values[i - 1] * 100).toFixed(2);
+            changePercent = `<br><span style="color: ${changeColor}">${changeIcon} ${change}%</span>`;
+        }
+        
+        tooltipEl.innerHTML = `<strong>${dates[i] || ''}</strong><br>Value: <span style="color: ${candlestickColors.primary}">${values[i].toFixed(4)}</span>${changePercent}`;
         tooltipEl.style.left = `${r.left + x}px`;
-        tooltipEl.style.top = `${r.top + y}px`;
+        tooltipEl.style.top = `${r.top + y - 10}px`;
         tooltipEl.style.display = 'block';
     }
 
@@ -105,24 +162,51 @@ function drawCandlestickChart(data, dates) {
         const d = getDims();
         const r = canvas.getBoundingClientRect();
         const mx = e.clientX - r.left;
-        const candleWidth = Math.max(4, d.ps * 0.6);
+        const candleWidth = Math.max(6, d.ps * 0.65);
         let found = null;
+        
         for (let i = 0; i < values.length; i++) {
             const x = padding + d.ps * (i + 0.5);
-            if (Math.abs(mx - x) < candleWidth / 2) {
+            if (Math.abs(mx - x) < candleWidth) {
                 found = i;
                 break;
             }
         }
+        
         drawCandles();
-        if (found !== null) showTooltip(found);
-        else hideTooltip();
+        
+        if (found !== null) {
+            // Highlight the bar
+            const x = padding + d.ps * (found + 0.5);
+            const y = yForValue(values[found], d);
+            const barHeight = d.h - padding - y;
+            
+            ctx.beginPath();
+            ctx.roundRect(
+                x - candleWidth / 2 - 2,
+                y - 2,
+                candleWidth + 4,
+                barHeight + 4,
+                [4, 4, 0, 0]
+            );
+            ctx.strokeStyle = candlestickColors.primary;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            showTooltip(found);
+        } else {
+            hideTooltip();
+        }
     }
 
     resizeCanvas();
     drawCandles();
 
     canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseleave', () => {
+        drawCandles();
+        hideTooltip();
+    });
     window.addEventListener('resize', () => {
         resizeCanvas();
         drawCandles();

@@ -1,10 +1,10 @@
 .settings-page {
-    max-width: 500px;
+    max-width: 520px;
     margin: 2.5rem auto;
     padding: 2rem;
-    background-color: #F0F2F5;
-    border-radius: 12px;
-    box-shadow: rgba(0, 0, 0, 0.07) 0px 8px 16px -4px;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
 }
 
 .settings-header {
@@ -13,64 +13,72 @@
 }
 
 .settings-header h2 {
-    color: #1D3557;
+    color: var(--text-primary);
     font-size: 2rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #4299E1;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid var(--primary-500);
     display: inline-block;
+    letter-spacing: -0.025em;
 }
 
 .settings-description {
-    color: #4A5568;
-    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
     margin: 0 auto 1.5rem auto;
     max-width: 400px;
-    line-height: 1.6;
+    line-height: 1.7;
 }
 
 .settings-card {
-    background: #FFFFFF;
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
-    padding: 1.5rem 2rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 1.75rem 2rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--border-light);
+    transition: box-shadow var(--transition-normal);
+}
+
+.settings-card:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 .settings-group label {
-    color: #4A5568;
+    color: var(--text-secondary);
     font-weight: 500;
     margin-bottom: 0.5rem;
     display: block;
+    font-size: 0.9rem;
 }
 
 .settings-control {
     width: 100%;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #CBD5E0;
-    border-radius: 6px;
-    background-color: #F7FAFC;
-    color: #2D3748;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
     font-size: 0.95rem;
     margin-top: 0.3rem;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    font-family: var(--font-family);
+    transition: all var(--transition-fast);
 }
 
 .settings-control:focus {
     outline: none;
-    border-color: #4299E1;
-    background-color: #FFFFFF;
-    box-shadow: 0 0 0 0.2rem rgba(66, 153, 225, 0.25);
+    border-color: var(--primary-400);
+    background-color: var(--bg-secondary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .settings-checkbox {
-    accent-color: #2B6CB0;
-    margin-right: 0.6rem;
-    transform: scale(1.2);
+    accent-color: var(--primary-600);
+    margin-right: 0.75rem;
+    transform: scale(1.25);
     vertical-align: middle;
 }
 
@@ -81,48 +89,48 @@
 }
 
 .settings-save-btn {
-    background-color: #2B6CB0;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: var(--text-inverse);
     border: none;
-    border-radius: 6px;
-    padding: 0.8rem 1.8rem;
-    font-weight: bold;
+    border-radius: var(--radius-md);
+    padding: 0.85rem 2rem;
+    font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+    transition: all var(--transition-fast);
     text-align: center;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
 }
 
 .settings-save-btn:hover,
 .settings-save-btn:focus {
-    background-color: #2C5282;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+    color: var(--text-inverse);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
 }
 
 @media (max-width: 600px) {
     .settings-page {
         padding: 1.5rem;
         margin: 1.5rem auto;
-        border-radius: 10px;
+        border-radius: var(--radius-lg);
     }
 
     .settings-card {
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
     }
 
     .settings-header h2 {
-        font-size: 1.8rem;
+        font-size: 1.75rem;
     }
 
     .settings-description {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
     .settings-save-btn {
         width: 100%;
-        padding: 0.7rem 1.5rem;
-        font-size: 0.95rem;
+        padding: 0.75rem 1.5rem;
     }
 }

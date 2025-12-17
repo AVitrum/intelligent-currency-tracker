@@ -85,7 +85,6 @@
       - ./logs:/app/logs
     depends_on:
       - db
-    #      - kafka
     networks:
       - test-network
   
@@ -111,29 +110,29 @@
   #    networks:
   #      - test-network
   
-#  ui:
-#    image: ui
-#    build:
-#      context: .
-#      dockerfile: src/UI/Dockerfile
-#    ports:
-#      - "7135:80"
-#    networks:
-#      - test-network
+  ui:
+    image: ui
+    build:
+      context: .
+      dockerfile: src/UI/Dockerfile
+    ports:
+      - "7135:80"
+    networks:
+      - test-network
   
-#  nginx:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.nginx
-#    ports:
-#      - "443:443"
-#      - "80:80"
-#    depends_on:
-#      - webapi
-#      - ui
-#    #      - devui
-#    networks:
-#      - test-network
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - webapi
+      - ui
+    #      - devui
+    networks:
+      - test-network
 
 #  zoo:
 #    image: confluentinc/cp-zookeeper:latest
