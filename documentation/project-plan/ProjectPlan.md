@@ -27,7 +27,6 @@
 ### Управління завданнями:
 - **Backlog:** Файл BACKLOG.MD у кореневій директорії репозиторію
 - **Roadmap:** Файл ROADMAP.MD для стратегічного планування
-- **GitHub Issues/Projects:** Детальне відстеження задач та багів
 - **Daily tracking:** Щоденні нотатки про прогрес та блокери
 
 ### Система контролю версій:
@@ -43,7 +42,6 @@
 ### Контроль якості:
 - **Code Review:** Self-review перед commit, використання статичних аналізаторів
 - **Testing:** Unit tests, Integration tests (цільове покриття > 80%)
-- **Continuous Integration:** Автоматичні тести при кожному push
 - **Performance monitoring:** Трекінг метрик API response time, memory usage
 
 ### Моніторинг прогресу:
@@ -80,7 +78,6 @@
 ### Backend:
 - .NET 9.0, ASP.NET Core Web API
 - Entity Framework Core, PostgreSQL
-- Kafka для обробки потоків даних
 - JWTAuthentification, Identity
 
 ### Frontend:
@@ -165,7 +162,6 @@
 ### Моніторинг прогресу:
 - Щотижневий огляд завершених задач
 - Ведення BACKLOG.MD та ROADMAP.MD
-- Tracking через GitHub Issues/Projects
 
 ### Документація:
 - README.MD - загальний опис проєкту

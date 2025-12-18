@@ -148,6 +148,7 @@
   "forecast.form.no_currencies": "Keine Währungen verfügbar.",
   "forecast.form.label_period": "Prognosezeitraum (Tage):",
   "forecast.form.generating_forecast": "Prognose wird erstellt...",
+  "forecast.form.start_forecast_button": "Prognose starten",
   "forecast.disclaimer.strong": "Haftungsausschluss:",
   "forecast.disclaimer.text": "Die dargestellten Prognosedaten werden von einem KI-Modell generiert und sollten als Schätzung betrachtet werden. Dieses Diagramm veranschaulicht mögliche Trends und ist keine Garantie für zukünftige Wechselkurse. Bitte verwenden Sie diese Informationen mit Vorsicht und verlassen Sie sich nicht ausschließlich für finanzielle Entscheidungen darauf.",
   "forecast.chart.loading_data": "Prognosedaten werden geladen...",

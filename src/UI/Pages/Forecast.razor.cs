@@ -49,6 +49,7 @@ public partial class Forecast : ComponentBase, IPageComponent, IAsyncDisposable
     private string _chartFooterTextString = "";
     private string _tableHeaderDateString = "";
     private string _tableHeaderValueString = "";
+    private string _startForecastButtonString = "";
 
     private string _toastSelectCurrencyString = "";
     private string _toastInvalidPeriodString = "";
@@ -94,10 +95,6 @@ public partial class Forecast : ComponentBase, IPageComponent, IAsyncDisposable
         await LoadLocalizedStringsAsync();
         UserSettingsService.OnSettingsChangedAsync += HandleSettingsChangedAsync;
         await LoadCurrencyListAsync();
-        if (!string.IsNullOrEmpty(SelectedCurrencyCode) && ForecastPeriods > 0)
-        {
-            await HandleForecastAsync();
-        }
         _isLoading = false;
     }
 
@@ -118,6 +115,7 @@ public partial class Forecast : ComponentBase, IPageComponent, IAsyncDisposable
         _chartFooterTextString = await Localizer.GetStringAsync("forecast.chart.footer");
         _tableHeaderDateString = await Localizer.GetStringAsync("forecast.table.header_date");
         _tableHeaderValueString = await Localizer.GetStringAsync("forecast.table.header_value");
+        _startForecastButtonString = await Localizer.GetStringAsync("forecast.form.start_forecast_button");
 
         _toastSelectCurrencyString = await Localizer.GetStringAsync("forecast.toast.select_currency");
         _toastInvalidPeriodString = await Localizer.GetStringAsync("forecast.toast.invalid_period");
@@ -228,6 +226,10 @@ public partial class Forecast : ComponentBase, IPageComponent, IAsyncDisposable
         _forecastData = [];
         _forecastDates = [];
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task StartForecastAsync()
+    {
         await HandleForecastAsync();
     }
 

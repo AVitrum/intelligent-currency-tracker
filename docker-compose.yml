@@ -49,44 +49,44 @@
     networks:
       - test-network
   
-  webapi:
-    image: webapi
-    build:
-      context: .
-      dockerfile: src/WebApi/Dockerfile
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
-      ASPNETCORE_URLS: "http://+:5001"
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: ${MINIO_BUCKET}
-      MINIO_REGION: ${MINIO_REGION}
-      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
-      JWT_KEY: ${JWT_KEY}
-      JWT_ISSUER: ${JWT_ISSUER}
-      JWT_AUDIENCE: ${JWT_AUDIENCE}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GMAIL_EMAIL: ${GMAIL_EMAIL}
-      GMAIL_PASSWORD: ${GMAIL_PASSWORD}
-      MODEL_URL: ${MODEL_URL}
-      PRIVATE_BANK_URL: ${PRIVATE_BANK_URL}
-      NBU_URL: ${NBU_URL}
-      KAFKA_HOST: ${KAFKA_HOST}
-    ports:
-      - "5001:5001"
-    volumes:
-      - ~/.aspnet/https:/https:ro
-      - ./logs:/app/logs
-    depends_on:
-      - db
-    networks:
-      - test-network
+#  webapi:
+#    image: webapi
+#    build:
+#      context: .
+#      dockerfile: src/WebApi/Dockerfile
+#    environment:
+#      ASPNETCORE_ENVIRONMENT: "Development"
+#      ASPNETCORE_URLS: "http://+:5001"
+#      DB_HOST: ${DB_HOST}
+#      DB_PORT: ${DB_PORT}
+#      DB_NAME: ${DB_NAME}
+#      DB_USER: ${DB_USER}
+#      DB_PASSWORD: ${DB_PASSWORD}
+#      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+#      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+#      MINIO_BUCKET: ${MINIO_BUCKET}
+#      MINIO_REGION: ${MINIO_REGION}
+#      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+#      JWT_KEY: ${JWT_KEY}
+#      JWT_ISSUER: ${JWT_ISSUER}
+#      JWT_AUDIENCE: ${JWT_AUDIENCE}
+#      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+#      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+#      GMAIL_EMAIL: ${GMAIL_EMAIL}
+#      GMAIL_PASSWORD: ${GMAIL_PASSWORD}
+#      MODEL_URL: ${MODEL_URL}
+#      PRIVATE_BANK_URL: ${PRIVATE_BANK_URL}
+#      NBU_URL: ${NBU_URL}
+#      KAFKA_HOST: ${KAFKA_HOST}
+#    ports:
+#      - "5001:5001"
+#    volumes:
+#      - ~/.aspnet/https:/https:ro
+#      - ./logs:/app/logs
+#    depends_on:
+#      - db
+#    networks:
+#      - test-network
   
   model:
     image: model
@@ -110,63 +110,29 @@
   #    networks:
   #      - test-network
   
-  ui:
-    image: ui
-    build:
-      context: .
-      dockerfile: src/UI/Dockerfile
-    ports:
-      - "7135:80"
-    networks:
-      - test-network
+#  ui:
+#    image: ui
+#    build:
+#      context: .
+#      dockerfile: src/UI/Dockerfile
+#    ports:
+#      - "7135:80"
+#    networks:
+#      - test-network
   
-  nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    ports:
-      - "443:443"
-      - "80:80"
-    depends_on:
-      - webapi
-      - ui
-    #      - devui
-    networks:
-      - test-network
-
-#  zoo:
-#    image: confluentinc/cp-zookeeper:latest
-#    hostname: zoo
-#    container_name: zoo
+#  nginx:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.nginx
 #    ports:
-#      - "2181:2181"
-#    environment:
-#      ZOOKEEPER_CLIENT_PORT: 2181
-#      ZOOKEEPER_SERVER_ID: 1
-#      ZOOKEEPER_SERVERS: zoo:2888:3888
-#    networks:
-#      - test-network
-#
-#  kafka:
-#    image: confluentinc/cp-kafka:latest
-#    ports:
-#      - "9092:9092"
-#      - "29092:29092"
+#      - "443:443"
+#      - "80:80"
 #    depends_on:
-#      - zoo
-#    environment:
-#      - KAFKA_ZOOKEEPER_CONNECT=zoo:2181
-#      - KAFKA_BROKERID=1
-#      - ALLOW_PLAINTEXT_LISTENER="yes"
-#      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-#      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-#      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
-#      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-#      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-#      - KAFKA_MESSAGE_MAX_BYTES=10485760
+#      - webapi
+#      - ui
+#    #      - devui
 #    networks:
 #      - test-network
-#    entrypoint: /bin/sh -c "sleep 30 && /etc/confluent/docker/run"
 
 volumes:
   pgdata:
