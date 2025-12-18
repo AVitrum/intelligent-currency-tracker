@@ -130,5 +130,70 @@ public class RateServiceTests
         _mockCurrencyRepository.Verify(x => x.GetByCodeAsync("USD"), Times.Once);
         _mockRateRepository.Verify(x => x.GetRangeAsync(startDate, endDate, currency), Times.Once);
     }
+
+    [Fact]
+    public async Task GetDetailsAsync_ShouldReturnSuccess_WhenRatesExist()
+    {
+        // Arrange: Setup currency with rates
+        var currency = new Currency 
+        { 
+            Id = Guid.NewGuid(), 
+            R030 = 840, 
+            Code = "USD", 
+            Name = "US Dollar" 
+        };
+        
+        var startDate = DateTime.UtcNow.AddDays(-7);
+        var endDate = DateTime.UtcNow;
+
+        var rates = new List<Rate>
+        {
+            new Rate 
+            { 
+                Id = Guid.NewGuid(), 
+                CurrencyId = currency.Id, 
+                Currency = currency,
+                Value = 41.0m, 
+                ValueCompareToPrevious = 0.1m, 
+                Date = startDate 
+            },
+            new Rate 
+            { 
+                Id = Guid.NewGuid(), 
+                CurrencyId = currency.Id, 
+                Currency = currency,
+                Value = 41.5m, 
+                ValueCompareToPrevious = 0.5m, 
+                Date = endDate 
+            }
+        };
+
+        _mockCurrencyRepository
+            .Setup(x => x.GetByCodeAsync("USD"))
+            .ReturnsAsync(currency);
+
+        _mockRateRepository
+            .Setup(x => x.GetRangeAsync(startDate, endDate, currency))
+            .ReturnsAsync(rates);
+
+        _mockMapper
+            .Setup(x => x.Map<RateDto>(It.IsAny<Rate>()))
+            .Returns<Rate>(r => new RateDto 
+            { 
+                Value = r.Value, 
+                Date = r.Date.ToString("dd.MM.yyyy"),
+                Currency = new CurrencyDto { R030 = 840, Code = "USD", Name = "US Dollar" }
+            });
+
+        // Act: Call the service method
+        var result = await _rateService.GetDetailsAsync("USD", startDate, endDate);
+
+        // Assert: Verify success result
+        result.Should().NotBeNull();
+        result.Success.Should().BeTrue();
+        
+        _mockCurrencyRepository.Verify(x => x.GetByCodeAsync("USD"), Times.Once);
+        _mockRateRepository.Verify(x => x.GetRangeAsync(startDate, endDate, currency), Times.Once);
+    }
 }
 

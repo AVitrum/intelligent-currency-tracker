@@ -115,6 +115,79 @@ public class RateRepositoryTests : IDisposable
         resultList.Last().Value.Should().Be(27.4m);
     }
 
+    [Fact]
+    public async Task AddRangeAsync_ShouldAddMultipleRates_WhenValidRatesProvided()
+    {
+        // Arrange: Create a list of rates to add
+        var ratesToAdd = new List<Rate>
+        {
+            new Rate
+            {
+                Id = Guid.NewGuid(),
+                CurrencyId = _testCurrencyId,
+                Value = 30.0m,
+                ValueCompareToPrevious = 0,
+                Date = DateTime.UtcNow.AddDays(-3)
+            },
+            new Rate
+            {
+                Id = Guid.NewGuid(),
+                CurrencyId = _testCurrencyId,
+                Value = 30.5m,
+                ValueCompareToPrevious = 0.5m,
+                Date = DateTime.UtcNow.AddDays(-2)
+            }
+        };
+
+        // Act: Add rates using repository
+        await _repository.AddRangeAsync(ratesToAdd);
+
+        // Assert: Verify rates were added to database
+        var allRates = await _context.Rates.ToListAsync();
+        allRates.Should().HaveCount(2);
+        allRates.Should().Contain(r => r.Value == 30.0m);
+        allRates.Should().Contain(r => r.Value == 30.5m);
+    }
+
+    [Fact]
+    public async Task RemoveByDateAsync_ShouldRemoveRates_WhenRatesExistForDate()
+    {
+        // Arrange: Add rates for a specific date
+        var targetDate = DateTime.UtcNow.Date;
+        var rateToRemove = new Rate
+        {
+            Id = Guid.NewGuid(),
+            CurrencyId = _testCurrencyId,
+            Value = 28.5m,
+            ValueCompareToPrevious = 0,
+            Date = targetDate
+        };
+        
+        await _context.Rates.AddAsync(rateToRemove);
+        await _context.SaveChangesAsync();
+
+        // Act: Remove rates by date
+        var result = await _repository.RemoveByDateAsync(targetDate);
+
+        // Assert: Verify rates were removed
+        result.Should().BeTrue();
+        var remainingRates = await _context.Rates.Where(r => r.Date.Date == targetDate).ToListAsync();
+        remainingRates.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RemoveByDateAsync_ShouldReturnFalse_WhenNoRatesExistForDate()
+    {
+        // Arrange: Use a date with no rates
+        var nonExistentDate = DateTime.UtcNow.AddYears(-10);
+
+        // Act: Try to remove rates for non-existent date
+        var result = await _repository.RemoveByDateAsync(nonExistentDate);
+
+        // Assert: Verify false is returned
+        result.Should().BeFalse();
+    }
+
     public void Dispose()
     {
         _context.Database.EnsureDeleted();

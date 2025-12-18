@@ -119,25 +119,25 @@ public class UserService : IUserService
             return BaseResult.FailureResult(new List<string> { "User not found" });
         }
 
-        string? photoKey = await _minioHelper.FindKeyWithPrefixAsync($"users/{userId}/photo/{userId}");
-        byte[] photoBytes = [];
+        // string? photoKey = await _minioHelper.FindKeyWithPrefixAsync($"users/{userId}/photo/{userId}");
+        // byte[] photoBytes = [];
+        //
+        // if (!string.IsNullOrEmpty(photoKey))
+        // {
+        //     GetObjectRequest getRequest = new GetObjectRequest
+        //     {
+        //         BucketName = _bucketName,
+        //         Key = photoKey
+        //     };
+        //
+        //     using GetObjectResponse? response = await _s3Client.GetObjectAsync(getRequest);
+        //     await using Stream? stream = response.ResponseStream;
+        //     using MemoryStream ms = new MemoryStream();
+        //     await stream.CopyToAsync(ms);
+        //     photoBytes = ms.ToArray();
+        // }
 
-        if (!string.IsNullOrEmpty(photoKey))
-        {
-            GetObjectRequest getRequest = new GetObjectRequest
-            {
-                BucketName = _bucketName,
-                Key = photoKey
-            };
-
-            using GetObjectResponse? response = await _s3Client.GetObjectAsync(getRequest);
-            await using Stream? stream = response.ResponseStream;
-            using MemoryStream ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            photoBytes = ms.ToArray();
-        }
-
-        return ProfileResult.SuccessResult(userId, user.UserName!, user.Email!, user.PhoneNumber, photoBytes);
+        return ProfileResult.SuccessResult(userId, user.UserName!, user.Email!, user.PhoneNumber, null!);
     }
 
     public async Task<BaseResult> GetEmailAsync(string userId)

@@ -94,7 +94,7 @@
       context: .
       dockerfile: src/Model/Dockerfile
     ports:
-      - "8000:8000"
+      - "8050:8050"
     networks:
       - test-network
     volumes:

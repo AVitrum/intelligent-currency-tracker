@@ -1,6 +1,6 @@
 # Product Backlog - Intelligent Currency Tracker
 
-**Загальний обсяг роботи:** 396 годин
+**Загальний обсяг роботи:** 376 годин
 **Кількість спринтів:** 5 (по 2 тижні)
 **Орієнтовна тривалість:** 10 тижнів
 
@@ -29,10 +29,10 @@
 - **I want** автоматично отримувати дані про курси з надійних джерел
 - **So that** користувачі мають доступ до актуальної інформації
 - **Acceptance Criteria:**
-    - Інтеграція з мінімум 2 джерелами даних (fallback)
+    - Інтеграція джерелами даних (fallback)
     - Обробка помилок при недоступності API
     - Логування всіх запитів
-- **Estimate:** 32 години
+- **Estimate:** 24 години
 - **Priority:** High
 
 **US-003: Історичні дані валютних курсів**
@@ -53,10 +53,9 @@
 - **I want** бачити графіки зміни курсів у часі
 - **So that** я можу візуально аналізувати тренди
 - **Acceptance Criteria:**
-    - Лінійні графіки з можливістю зуму
-    - Відображення min/max значень
-    - Можливість порівняння кількох валют
-- **Estimate:** 32 години
+    - Лінійні графіки та стовпчикові діаграми
+    - Можливість вибору періоду відображення
+- **Estimate:** 24 години
 - **Priority:** High
 
 **US-005: Dashboard з основними метриками**
@@ -64,9 +63,9 @@
 - **I want** бачити зведену інформацію на головній сторінці
 - **So that** я швидко оцінюю ключові показники
 - **Acceptance Criteria:**
-    - Топ-5 валют з найбільшою зміною
-    - Загальний тренд ринку
     - Швидкий доступ до обраних валют
+    - Відображення змін за останню добу/тиждень
+    - Показ основних новин, що впливають на ринок
 - **Estimate:** 20 годин
 - **Priority:** Medium
 
@@ -77,7 +76,7 @@
 - **I want** бачити прогноз курсу на найближчі дні
 - **So that** я можу планувати валютні операції
 - **Acceptance Criteria:**
-    - Прогноз на 1, 3, 7 днів
+    - Прогноз на 7, 14, 30 днів
     - Відображення довірчого інтервалу
     - Точність > 70% на тестових даних
 - **Estimate:** 52 години
@@ -91,7 +90,7 @@
     - Тестування мінімум 3 моделей (ARIMA, Prophet, LSTM)
     - Порівняльний аналіз результатів
     - Вибір найкращої моделі
-- **Estimate:** 52 години
+- **Estimate:** 32 години
 - **Priority:** Medium
 
 ### Epic 4: Сповіщення та алерти
@@ -107,16 +106,16 @@
 - **Estimate:** 32 години
 - **Priority:** Medium
 
-**US-009: Push-сповіщення в реальному часі**
+**US-009: Розширені можливості системи**
 - **As a** користувач
-- **I want** отримувати миттєві сповіщення про критичні зміни
-- **So that** я можу швидко реагувати
+- **I want** мати доступ до додаткових функцій системи
+- **So that** я можу використовувати повний функціонал платформи
 - **Acceptance Criteria:**
-    - WebSocket з'єднання для real-time
-    - Налаштування критичності (низька, середня, висока)
-    - Можливість відключення
-- **Estimate:** 52 години
-- **Priority:** Low
+    - OAuth авторизація через Google
+    - Завантаження та зберігання файлів
+    - Система постів та новин
+- **Estimate:** 32 години
+- **Priority:** Medium
 
 ### Epic 5: Користувацький профіль
 
@@ -149,52 +148,202 @@
 - **I want** автоматизувати процес деплою
 - **So that** прискорити випуск нових версій
 - **Acceptance Criteria:**
-    - GitHub Actions для автоматичного білду
+    - Docker контейнеризація
     - Автоматичне тестування перед деплоєм
     - Деплой на staging та production
-- **Estimate:** 32 години
+- **Estimate:** 28 годин
 - **Priority:** Medium
 
 ---
 
-## Sprint 1 Backlog (2 тижні)
+## Sprint 1 Backlog (2 тижні) - COMPLETED
 
 **Sprint Goal:** Створити базову інфраструктуру та відображення актуальних валютних курсів
 
 **Team Capacity:** 80 годин
 
-### Selected User Stories (Total: 72 години)
+### Selected User Stories (Total: 64 години)
 
 #### US-001: Відображення актуальних курсів валют (20 годин) - High Priority
 **Tasks:**
-- [ ] Створення API endpoint для курсів (6 годин)
-- [ ] Створення моделей даних (4 години)
-- [ ] Frontend компонент для відображення (6 годин)
-- [ ] Стилізація UI (2 години)
-- [ ] Інтеграція та тестування (2 години)
+- [x] Створення RateController.cs з API endpoints для курсів (6 годин)
+- [x] Створення Domain entities: Rate.cs, Currency.cs (4 години)
+- [x] Frontend компонент Dashboard.razor для відображення курсів (6 годин)
+- [x] Стилізація Dashboard.razor.css (2 години)
+- [x] Інтеграція та тестування RateServiceTests.cs (2 години)
 
-#### US-002: Інтеграція з зовнішніми API (32 години) - High Priority
+#### US-002: Інтеграція з зовнішніми API (24 години) - High Priority
 **Tasks:**
-- [ ] Дослідження та вибір API (ExchangeRate-API, Fixer.io) (8 годин)
-- [ ] Реалізація інтеграції з першим API (10 годин)
-- [ ] Fallback механізм для другого API (8 годин)
-- [ ] Обробка помилок та логування (4 години)
-- [ ] Unit та інтеграційні тести (2 години)
+- [x] Дослідження та вибір API (PrivatBank API, NBU API) (8 годин)
+- [x] Реалізація RateService.cs для інтеграції з NBU API (10 годин)
+- [x] ExchangeRateSyncService.cs - background service для синхронізації (4 години)
+- [x] Unit тести RateRepositoryTests.cs (2 години)
 
 #### US-003: Історичні дані валютних курсів (20 годин) - Medium Priority
 **Tasks:**
-- [ ] Схема БД та міграції (6 годин)
-- [ ] API для отримання історичних даних (8 годин)
-- [ ] Оптимізація запитів (3 години)
-- [ ] Інтеграція з frontend (3 години)
+- [x] ApplicationDbContext.cs та схема БД з міграціями (6 годин)
+- [x] RateController API для отримання історичних даних (8 годин)
+- [x] Оптимізація запитів через Repositories (3 години)
+- [x] CurrencyDetails.razor для відображення історії (3 години)
 
 ### Sprint Definition of Done
-- [ ] Код пройшов code review
-- [ ] Написані unit тести (coverage > 70%)
-- [ ] Документація API оновлена
-- [ ] Задеплоєно на staging середовище
-- [ ] Прийнято Product Owner
-- [ ] Немає критичних багів
+- [x] Код пройшов code review
+- [x] Написані unit тести (coverage > 70%)
+- [x] Задеплоєно на staging середовище (Docker)
+- [x] Прийнято Product Owner
+- [x] Немає критичних багів
 
+---
 
+## Sprint 2 Backlog (2 тижні) - COMPLETED
 
+**Sprint Goal:** Реалізувати візуалізацію даних та інтерактивні графіки
+
+**Team Capacity:** 80 годин
+
+### Selected User Stories (Total: 64 години)
+
+#### US-004: Інтерактивні графіки курсів валют (24 години) - High Priority
+**Tasks:**
+- [x] Компонент Chart/ для відображення графіків (10 годин)
+- [x] CurrencyComparison.razor для порівняння валют (8 годин)
+- [x] TrackedCharts.razor для відстеження обраних валют (4 години)
+- [x] Стилізація CurrencyComparison.razor.css, TrackedCharts.razor.css (2 години)
+
+#### US-005: Dashboard з основними метриками (20 годин) - Medium Priority
+**Tasks:**
+- [x] Dashboard.razor з зведеною інформацією (8 годин)
+- [x] Home.razor головна сторінка з ключовими показниками (6 годин)
+- [x] Компоненти для швидкого доступу до валют (4 години)
+- [x] Стилізація Home.razor.css, Dashboard.razor.css (2 години)
+
+#### US-010: Реєстрація та авторизація (20 годин - частина 1) - High Priority
+**Tasks:**
+- [x] ApplicationUser.cs модель користувача (4 години)
+- [x] IdentityController.cs з базовими endpoints (8 годин)
+- [x] Auth.razor сторінка авторизації (6 години)
+- [x] Auth.razor.cs логіка авторизації (2 години)
+
+### Sprint Definition of Done
+- [x] Код пройшов code review
+- [x] Написані unit тести
+- [x] Графіки працюють коректно
+- [x] Задеплоєно на staging середовище
+- [x] Прийнято Product Owner
+- [x] Немає критичних багів
+
+---
+
+## Sprint 3 Backlog (2 тижні) - COMPLETED
+
+**Sprint Goal:** Реалізувати AI-прогнозування та завершити систему авторизації
+
+**Team Capacity:** 80 годин
+
+### Selected User Stories (Total: 84 години)
+
+#### US-006: Базове прогнозування на основі LSTM (52 години) - High Priority
+**Tasks:**
+- [x] Python Model сервіс (main.py, model_controller.py) (16 годин)
+- [x] LSTM модель model_service.py для прогнозування (20 годин)
+- [x] AiModelController.cs для інтеграції з .NET API (8 годин)
+- [x] AiModelService.cs для виклику Python сервісу (4 години)
+- [x] Forecast.razor сторінка прогнозів (4 години)
+
+#### US-010: Реєстрація та авторизація (12 годин - частина 2) - High Priority
+**Tasks:**
+- [x] JWT токени (Jwt/ folder) для безпеки (4 години)
+- [x] RefreshToken.cs механізм оновлення токенів (4 години)
+- [x] ChangePassword.razor для відновлення паролю (4 години)
+
+#### US-012: CI/CD pipeline (20 годин - частина 1) - Medium Priority
+**Tasks:**
+- [x] docker-compose.yml налаштування (8 годин)
+- [x] Dockerfile для WebApi, UI, Model (8 годин)
+- [x] Налаштування PostgreSQL та MinIO (4 години)
+
+### Sprint Definition of Done
+- [x] Код пройшов code review
+- [x] ML модель тестована
+- [x] Docker контейнери працюють
+- [x] Задеплоєно на staging середовище
+- [x] Прийнято Product Owner
+- [x] Немає критичних багів
+
+---
+
+## Sprint 4 Backlog (2 тижні) - COMPLETED
+
+**Sprint Goal:** Реалізувати сповіщення, покращити ML-модель та профіль користувача
+
+**Team Capacity:** 80 годин
+
+### Selected User Stories (Total: 84 години)
+
+#### US-007: Покращення моделі прогнозування (32 години) - Medium Priority
+**Tasks:**
+- [x] Тестування моделей та збереження станів (models/*.npy, *.txt) (12 годин)
+- [x] AiModelUpdateService.cs для автоматичного оновлення (8 годин)
+- [x] Порівняльний аналіз та оптимізація (8 годин)
+- [x] Інтеграція з Forecast.razor.cs (4 години)
+
+#### US-008: Email-сповіщення про зміни курсів (32 години) - Medium Priority
+**Tasks:**
+- [x] EmailSender.cs сервіс відправки email (12 годин)
+- [x] AlertSenderService.cs для алертів про зміни курсів (10 годин)
+- [x] Налаштування GMAIL інтеграції (6 годин)
+- [x] SummarySenderService.cs для періодичних звітів (4 години)
+
+#### US-011: Персоналізовані налаштування (20 годин) - Medium Priority
+**Tasks:**
+- [x] UserSettings.cs модель налаштувань (4 години)
+- [x] Settings.razor сторінка налаштувань (6 годин)
+- [x] Profile.razor сторінка профілю (6 години)
+- [x] UserRateController.cs для обраних валют (4 години)
+
+### Sprint Definition of Done
+- [x] Код пройшов code review
+- [x] Email сповіщення працюють
+- [x] Налаштування зберігаються
+- [x] Задеплоєно на staging середовище
+- [x] Прийнято Product Owner
+- [x] Немає критичних багів
+
+---
+
+## Sprint 5 Backlog (2 тижні) - COMPLETED
+
+**Sprint Goal:** Завершити функціонал, додати додаткові можливості та фіналізувати проєкт
+
+**Team Capacity:** 80 годин
+
+### Selected User Stories (Total: 80 годин)
+
+#### US-009: Розширені можливості системи (32 години) - Medium Priority
+**Tasks:**
+- [x] GoogleAuthController.cs та GoogleAuthService.cs для OAuth (12 годин)
+- [x] MinioController.cs для роботи з файлами (8 годин)
+- [x] PostController.cs та PostService.cs для постів/новин (8 годин)
+- [x] Posts.razor, PostDetails.razor, CreatePost.razor сторінки (4 години)
+
+#### US-012: CI/CD pipeline (8 годин - частина 2) - Medium Priority
+**Tasks:**
+- [x] Dockerfile.nginx та nginx.conf для продакшн (4 години)
+- [x] Backup сервіс в docker-compose.yml (4 години)
+
+#### Додатковий функціонал (40 годин)
+**Tasks:**
+- [x] ReportController.cs та ReportService.cs для звітів (10 годин)
+- [x] Report.cs entity та Report.razor для звітності (8 годин)
+- [x] Summary/ сервіси для аналітики (8 годин)
+- [x] Contacts.razor сторінка контактів (4 години)
+- [x] CsvService.cs експорт даних (6 годин)
+- [x] Фінальне тестування та документація (4 години)
+
+### Sprint Definition of Done
+- [x] Код пройшов code review
+- [x] Всі функції працюють коректно
+- [x] Документація повна
+- [x] Задеплоєно на production середовище
+- [x] Прийнято Product Owner
+- [x] Проєкт готовий до релізу

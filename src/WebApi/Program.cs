@@ -39,6 +39,7 @@ if (args.Length == 1 && args[0].Equals("seeddata", StringComparison.CurrentCultu
     // await UserSeeder.SeedUsersAsync(app);
     // await CurrencySeeder.SeedCurrenciesAsync(app);
     // await RateSeeder.SeedRatesAsync(app);
+    await PostSeeder.SeedPostsAsync(app);
 }
 
 await app.MigrateDatabaseAsync();

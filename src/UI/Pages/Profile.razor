@@ -7,16 +7,16 @@
         <h2>@_headerTitle</h2>
     </div>
     <div class="profile-content">
-        <div class="profile-image-section">
-            @if (!string.IsNullOrEmpty(_profileImageSrc))
-            {
-                <img src="@_profileImageSrc" alt="@_profilePhotoAlt"/>
-            }
-            else
-            {
-                <p>@_noPhotoAvailable</p>
-            }
-        </div>
+        @* <div class="profile-image-section"> *@
+        @*     @if (!string.IsNullOrEmpty(_profileImageSrc)) *@
+        @*     { *@
+        @*         <img src="@_profileImageSrc" alt="@_profilePhotoAlt"/> *@
+        @*     } *@
+        @*     else *@
+        @*     { *@
+        @*         <p>@_noPhotoAvailable</p> *@
+        @*     } *@
+        @* </div> *@
         <div class="profile-info-section">
             @if (_profile is not null)
             {
